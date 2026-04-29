@@ -1,0 +1,30 @@
+CHANGELOG — Evolution Game
+==========================
+
+All modifications to this repository are recorded here in reverse chronological
+order (newest at the top). Each entry includes the date, time (UTC), who made
+the change, and a plain-language description of what changed.
+
+Format:
+  [YYYY-MM-DD HH:MM UTC | Author]
+  - change description
+
+==========================
+
+[2026-04-29 12:30 UTC | Claude]
+- Extracted evolution_game_v66_57.html from ZIP into game/ folder so the game
+  is directly accessible without unzipping
+- Removed the ZIP from git tracking (*.zip is excluded by .gitignore; the ZIP
+  was committed before the ignore rule took effect)
+- Renamed docs/p8_notes.txt → docs/patch8-short-eco-cycles.txt for readability
+- Rewrote README.md with full project description, how-to-play section, folder
+  structure guide, version table, and patch summary
+- Created CHANGELOG.txt (this file)
+
+[2026-04-29 ~12:00 UTC | GPT]
+- Initial repository setup on main branch
+- Added .gitignore (excludes debug logs, bot reports, archives, OS noise)
+- Committed evolution_game_v66_57_patch8_short_eco_cycles_package.zip as the
+  baseline build artifact
+- Created docs/p8_notes.txt with full technical notes for Patch 8
+- Wrote initial README.md stub (version info, workflow rules, build notes)
