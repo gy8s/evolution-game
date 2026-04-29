@@ -69,3 +69,13 @@ Current thread
 - Possible downside: Less detail in live updates.
 - How to check it: In future owner replies, use plain language only and keep live dialogue responses minimal unless owner asks for detail.
 - Status: Open
+
+- Author: GPT
+- Date (UTC): 2026-04-29
+- Topic: Turn update
+- What we noticed: Owner asked for write-only turn updates with no extra overhead.
+- Suggested change: Continue with direct document updates on each turn.
+- Why this helps: Keeps the process simple and fast for the owner.
+- Possible downside: Less context in live replies.
+- How to check it: Future turns should show a new entry in this file each time.
+- Status: Open
