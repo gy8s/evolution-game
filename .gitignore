@@ -1,0 +1,20 @@
+# Large generated QA/debug outputs
+*.log
+*.tmp
+*_debug_*.txt
+*_bot_*.txt
+*bot_report*.txt
+*bot_report*.json
+*debug_report*.txt
+*debug_report*.json
+
+# Local OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Package extracts / temporary archives
+*.zip
+*.7z
+*.rar
