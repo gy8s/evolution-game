@@ -11,6 +11,17 @@ Format:
 
 ==========================
 
+[2026-04-29 13:30 UTC | Claude]
+- Expanded the "Project workflow" section in README.md with full plain-English
+  rules covering: branch discipline, pull request process, George's merge sign-off,
+  PR disclosure requirements, patch focus, and CHANGELOG expectations.
+  Documentation change only. No gameplay logic, UI, or mechanics changed.
+
+[2026-04-29 13:00 UTC | Claude]
+- Housekeeping: corrected stale browser-tab title in game/evolution_game_v66_57.html
+  from "v66.52 - Ecosystem Patch 4 Habitat Bias" to "v66.57 - Patch 8 Short
+  Ecological Cycles". No gameplay logic, UI, mechanics, or other text changed.
+
 [2026-04-29 12:30 UTC | Claude]
 - Extracted evolution_game_v66_57.html from ZIP into game/ folder so the game
   is directly accessible without unzipping

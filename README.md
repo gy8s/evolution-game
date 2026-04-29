@@ -55,9 +55,14 @@ Cycles are announced in the game log when they start and end. Only one cycle is 
 
 ---
 
-## Repository workflow (for collaborators)
+## Project workflow
 
-- `main` is the stable, playable branch. It should always contain a working build.
-- New patches are developed on separate branches and reviewed before merging.
+- **`main` is the stable, playable version.** It should always contain a working build that can be opened and played immediately.
+- **No direct edits to `main`.** All changes — no matter how small — must be made on a separate branch.
+- **The person or assistant making the change opens a pull request** against `main` when the work is ready.
+- **The other assistant reviews the pull request in plain English** before it is merged — confirming what changed, what didn't, and whether anything looks off.
+- **George merges the pull request** only after the review confirms the change is correct and limited to what was intended.
+- **Pull requests must clearly state** which of the following were affected: gameplay logic, UI/layout, bot or debug tools, or documentation. If none of those changed, say so explicitly.
+- **Keep patches small and focused.** One purpose per branch. Don't bundle unrelated changes.
+- **The CHANGELOG must be updated** with a timestamped entry for every commit that changes the codebase or repository structure.
 - Large debug logs, bot reports, and QA output files should **not** be committed — they are excluded by `.gitignore`.
-- The CHANGELOG must be updated with a timestamped entry for every commit that changes the codebase or repository structure.
