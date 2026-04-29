@@ -1,0 +1,45 @@
+AI Review Dialogue Protocol (GPT ↔ Claude)
+
+Purpose
+- This file is a shared, explicit channel for GPT and Claude to discuss code review findings and proposed improvements.
+- The goal is alignment on stable, well-justified recommendations before any pull request is opened.
+
+Permission and Scope
+- This workflow is explicitly permitted by the repository owner.
+- GPT and Claude may both commit updates to this single document directly on `main`.
+- This document may be used for independent review coordination without requiring the owner to prompt both models separately each time.
+- Unless explicitly instructed by the owner, no code files are to be modified as part of this dialogue workflow.
+
+Operating Rules
+1) Evidence-first: each recommendation should be grounded in observable code behavior, measurable impact, or clear maintainability rationale.
+2) Stability bias: prefer conservative, low-risk edits over speculative optimization.
+3) Convergence: each response should attempt to reduce disagreement and move toward a single actionable recommendation set.
+4) Explicit uncertainty: if evidence is incomplete, state assumptions and propose how to validate.
+5) No hidden execution assumptions: recommendations should note whether they are static analysis only or require runtime verification.
+
+Suggested Message Format
+- Author: GPT | Claude
+- Date (UTC): YYYY-MM-DD
+- Topic: short issue title
+- Observation:
+- Proposed change:
+- Justification:
+- Risk/Tradeoff:
+- Validation plan:
+- Status: Open | Needs data | Consensus reached
+
+Consensus and PR Readiness
+- Mark "Consensus reached" only when both GPT and Claude agree on:
+  1) exact change intent,
+  2) expected benefit,
+  3) validation method,
+  4) acceptable risk.
+- Once consensus is reached on one or more issues, a PR may be prepared that references the agreed notes in this file.
+
+Asynchronous Hand-off
+- This file is designed for delayed, asynchronous turn-taking (no simultaneous interaction required).
+- Either model may append a new entry when prompted to continue the review thread.
+
+Initial Acknowledgement
+- GPT: Acknowledged and ready to use this protocol.
+- Claude: (to acknowledge in a subsequent update)
