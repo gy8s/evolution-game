@@ -1,0 +1,49 @@
+Evolution Game v66.57 — Patch 8: Short Ecological Cycles
+
+Source baseline:
+- evolution_game_v66_56_patch7_water_quality.html
+- BUILD_ID baseline: v66.56_patch7_water_quality_2026-04-29
+
+New build:
+- BUILD_ID: v66.57_patch8_short_eco_cycles_2026-04-29
+- SHA256: (see below)
+
+Patch type: Ecosystem patch — short ecological cycle events.
+
+Changes made:
+1. Added ECO_CYCLE_DEFS: seven cycle types with label, duration range, trigger chance, and cue text:
+   - fruitingPulse: forage +30%, 8-18 turns
+   - insectBloom: insects +35%, 6-14 turns
+   - drySpell: forage -22%, insects -15%, 10-20 turns
+   - wetSpell: insects +20%, forage +10%, 10-20 turns
+   - scavengerPulse: carcass +40%, 5-12 turns
+   - predatorLull: predators -28%, 6-14 turns
+   - predatorSpike: predators +28%, 5-11 turns
+2. Added ensureEcoCycleState(): initialises environment.ecoCycle if absent.
+3. Added updateEcoCycleState(): called from maybeUpdateEnvironment() each turn.
+   - Ticks down active cycle.
+   - Announces cycle end via addLog().
+   - Attempts to start a new cycle (one at a time, per-type chance per turn).
+4. Added ecoCycleEncounterModifier(template, key): returns spawn multiplier.
+   - Announces cycle to player once on first modifier use (addLog cue).
+   - Wired into spawnNearbyEntities() and rollImmediateEncounter() alongside Patch 5 modifier.
+5. Added activeEcoCycleLabel(): utility for future UI/debug use.
+6. environment.ecoCycle is included in collectDebugReport() automatically (part of environment clone).
+7. updateEcoCycleState() hooked into maybeUpdateEnvironment().
+
+Existing systems retained:
+- maybeUpdateEnvironment() storm/wildfire/wind/weather logic unchanged.
+- spawnNearbyEntities() and rollImmediateEncounter() modifier chains additive, not replacing.
+- No new weather states, no seasonal calendar, no population simulation.
+- All cycle effects are temporary and reversible.
+
+Validation:
+- node --check passed on extracted JS.
+
+Manual QA recommended:
+- Play for 30+ turns and confirm at least one cycle announces itself via log.
+- Confirm cycle end message appears.
+- Confirm forage feels more/less common during fruiting/dry spells.
+- Confirm predators feel more/less present during spike/lull.
+- Run bot across multiple cycles (200+ turns) — confirm no state errors, no infinite loops,
+  survival within threshold, debug report includes ecoCycle state.
