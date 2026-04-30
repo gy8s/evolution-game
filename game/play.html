@@ -11411,7 +11411,7 @@ function chooseIntelligentBotAction(actions) {
   // Poison/low-fitness caution — keep moving and avoid investigate/eat/attack churn
   if ((player.poison || player.fitness <= 40) && !isDangerous) {
     if (moveActions.length) return randomBotAction(moveActions);
-    const lowRisk = intelligentPickLowestRisk(actions.filter(a => !a.id.startsWith("attack") && !a.id.startsWith("queued-attack") && (urgentNeedsGround || a.id !== "descend")));
+    const lowRisk = intelligentPickLowestRisk(actions.filter(a => !a.id.startsWith("attack") && !a.id.startsWith("queued-attack")));
     if (lowRisk) return lowRisk;
   }
 
@@ -11435,6 +11435,8 @@ function chooseIntelligentBotAction(actions) {
   // If current encounter is threat-like, never linger to investigate/eat; prioritize disengaging movement
   if (enc && (isDangerous || isThreatClass) && preferredEscapeActions.length) {
     return randomBotAction(preferredEscapeActions);
+  if (enc && (isDangerous || isThreatClass) && moveActions.length) {
+    return randomBotAction(moveActions);
   }
 
   // Investigate non-dangerous encounters to expand knowledge (30% chance)
