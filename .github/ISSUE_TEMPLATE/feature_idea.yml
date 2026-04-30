@@ -1,0 +1,48 @@
+name: Feature idea
+description: Suggest a new feature or gameplay change
+labels: ["feature"]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: What should the player be able to do or experience?
+      placeholder: Describe the player-facing goal, not the technical solution
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why does this matter?
+      placeholder: What problem does it solve or what does it add to the game?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - Next patch
+        - Soon
+        - Later / park for now
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Rough scope
+      options:
+        - Small (a few lines)
+        - Medium (one system)
+        - Large (multiple systems)
+        - Unknown
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies or blockers (if known)
+      placeholder: Does this depend on another feature or fix first?
