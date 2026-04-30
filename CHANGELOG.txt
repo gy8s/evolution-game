@@ -11,6 +11,21 @@ Format:
 
 ==========================
 
+[2026-04-30 | Claude]
+- Added intelligent bot to `game/play.html` (bot/debug tools change; no gameplay logic change).
+- New "Run intelligent bot" button in the bot panel alongside the existing "Run random bot" button.
+- IntelligentBot uses a priority-based heuristic to try to survive: flees fatal/predator encounters
+  and active pursuits, manages hydration and energy by seeking water and safe food, rests when
+  injured, investigates non-dangerous encounters to learn food safety, navigates toward water when
+  thirsty, and avoids attacks when poisoned or low on fitness.
+- Both bots share the same botState, QA validation, and report infrastructure.
+- Updated botStatusText and updateBotStatus to handle the new button.
+- runRandomBot now explicitly sets botState.name = "RandomBot" so names are correct after
+  switching between bots.
+- JavaScript syntax check passed (node scripts/check_html_js_syntax.mjs).
+- Browser smoke check and bot run NOT completed by Claude — cannot open a browser in this
+  environment. These must be completed by the owner before this branch is treated as merge-ready.
+
 [2026-04-30 ~10:30 UTC | GPT]
 - Expanded `README.md` from a Patch 8-focused overview into a broader project
   overview covering vision, current gameplay systems, repository layout,
