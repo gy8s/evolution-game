@@ -11256,8 +11256,8 @@ function intelligentFindSafeEat(actions) {
     if (a.id === "eat" && currentEncounter) {
       const e = currentEncounter;
       if (e.dangerProfile === "toxic_food") continue;
-      const known = player.knownFoods[e.key];
-      if (known && (known.severity === "unsafe" || known.severity === "deadly")) continue;
+      const known = player.knownFoods[variantKeyFor(e)];
+      if (known && known.severity !== "safe") continue;
       if (["forage", "nest", "remedy", "carcass"].includes(e.kind)) return a;
     }
     if (a.id === "eat-carcass") return a;
@@ -11265,8 +11265,8 @@ function intelligentFindSafeEat(actions) {
       const idx = parseInt(a.id.replace("queued-eat-", ""), 10);
       const q = Array.isArray(tileEncounterQueue) ? tileEncounterQueue[idx] : null;
       if (q && q.dangerProfile !== "toxic_food") {
-        const known = player.knownFoods[q.key];
-        if (!known || (known.severity !== "unsafe" && known.severity !== "deadly")) return a;
+        const known = player.knownFoods[variantKeyFor(q)];
+        if (!known || known.severity === "safe") return a;
       }
     }
   }
