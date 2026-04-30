@@ -10883,8 +10883,39 @@ const botState = {
   currentRunStartTurn: 0,
   currentRunStartState: null,
   deaths: 0,
-  resets: 0
+  resets: 0,
+  memory: null
 };
+
+function newBotMemory() {
+  return {
+    recentThreats: [],    // [{name, x, y, turn, pursuitType, dangerProfile}], capped at 10
+    parasiteTurns: 0,     // consecutive turns with parasites >= 1 within this run
+    lowHydrationTurns: 0, // consecutive turns with hydration <= 45 within this run
+    currentGoal: null     // {type: string, startTurn: number} persists until satisfied or interrupted
+  };
+}
+
+function updateBotMemory() {
+  const m = botState.memory || (botState.memory = newBotMemory());
+  const enc = currentEncounter;
+  if (enc && (enc.dangerProfile === "fatal" || enc.dangerProfile === "predator" ||
+      enc.dangerProfile === "grapple" || enc.dangerProfile === "venomous_ambush")) {
+    m.recentThreats.push({name: enc.name, x: player.x, y: player.y, turn: player.turn,
+      pursuitType: enc.pursuitType || null, dangerProfile: enc.dangerProfile});
+    if (m.recentThreats.length > 10) m.recentThreats.shift();
+  }
+  if (activePursuit && activePursuit.name) {
+    const last = m.recentThreats[m.recentThreats.length - 1];
+    if (!last || last.name !== activePursuit.name || last.turn !== player.turn) {
+      m.recentThreats.push({name: activePursuit.name, x: player.x, y: player.y, turn: player.turn,
+        pursuitType: activePursuit.pursuitType || null, dangerProfile: "pursuit"});
+      if (m.recentThreats.length > 10) m.recentThreats.shift();
+    }
+  }
+  m.parasiteTurns = (player.parasites || 0) >= 1 ? m.parasiteTurns + 1 : 0;
+  m.lowHydrationTurns = player.hydration <= 45 ? m.lowHydrationTurns + 1 : 0;
+}
 
 function addQAIssue(code, severity = "warning", detail = {}) {
   const issue = {
@@ -11075,6 +11106,16 @@ function botValidateStep(step) {
 
 function summariseCurrentBotRun(reason) {
   const runSteps = botState.steps.filter(step => step.runIndex === botState.runIndex);
+  const terminalTrace = runSteps.slice(-5).map(s => ({
+    botStep: s.botStep,
+    action: s.actionId,
+    layer: s.before ? s.before.layer : null,
+    F: s.before ? s.before.fitness : null,
+    E: s.before ? s.before.energy : null,
+    H: s.before ? s.before.hydration : null,
+    enc: s.before && s.before.encounter ? s.before.encounter.name : null,
+    pursuit: s.before ? !!s.before.activePursuit : null
+  }));
   const run = {
     runIndex: botState.runIndex,
     reason,
@@ -11086,7 +11127,8 @@ function summariseCurrentBotRun(reason) {
     startState: cloneDebug(botState.currentRunStartState),
     finalState: botActionSnapshot(),
     issues: cloneDebug(botState.issues.filter(issue => issue.runIndex === botState.runIndex)),
-    death: player.dead ? {turn: player.turn, state: botActionSnapshot()} : null
+    death: player.dead ? {turn: player.turn, state: botActionSnapshot()} : null,
+    terminalTrace
   };
   botState.runs.push(run);
   if (player.dead) botState.deaths += 1;
@@ -11168,6 +11210,7 @@ function resetGameForBot(reason = "bot auto-reset") {
   botState.currentRunStartStep = botState.steps.length + 1;
   botState.currentRunStartTurn = player.turn;
   botState.currentRunStartState = botActionSnapshot();
+  botState.memory = newBotMemory();
   addLog(`Random bot reset/new game: ${reason}.`, "minor");
   addDebugTrace("bot-game-reset", {reason, runIndex: botState.runIndex, totalBotSteps: botState.steps.length});
   render();
@@ -11200,10 +11243,6 @@ function stepRandomBot() {
   botState.steps.push(step);
   botValidateStep(step);
   if (error) { stopRandomBot("action error"); render(); return; }
-  if (player.dead) {
-    summariseCurrentBotRun("player died");
-    if (botState.steps.length >= botState.maxTurns) { stopRandomBot("turn limit reached after death"); return; }
-  }
   updateBotStatus();
 }
 
@@ -11251,11 +11290,27 @@ function stopRandomBot(reason = "stopped by user") {
 // Intelligent bot — survival-oriented heuristic agent
 // ---------------------------------------------------------------------------
 
+const FORAGE_BLACKLIST = new Set([
+  "ant trail", "termite mound", "ant swarm", "giant ant swarm", "millipede",
+  "large centipede", "wasp nest", "hornet nest"
+]);
+
+function intelligentForageBlocked(e) {
+  if (!e) return true;
+  if (e.dangerProfile === "toxic_food") return true;
+  if (FORAGE_BLACKLIST.has(String(e.name || "").toLowerCase())) return true;
+  // Block any forage whose encounter object already exposes a moderate-or-worse poison
+  if (e.poison && e.poison.rank >= 2) return true;
+  // Block anything with a guardian spawn mechanic
+  if (e.guardianKey || e.guardianChance) return true;
+  return false;
+}
+
 function intelligentFindSafeEat(actions) {
   for (const a of actions) {
     if (a.id === "eat" && currentEncounter) {
       const e = currentEncounter;
-      if (e.dangerProfile === "toxic_food") continue;
+      if (intelligentForageBlocked(e)) continue;
       const known = player.knownFoods[variantKeyFor(e)];
       if (known && known.severity !== "safe") continue;
       if (["forage", "nest", "remedy", "carcass"].includes(e.kind)) return a;
@@ -11264,7 +11319,7 @@ function intelligentFindSafeEat(actions) {
     if (a.id.startsWith("queued-eat-")) {
       const idx = parseInt(a.id.replace("queued-eat-", ""), 10);
       const q = Array.isArray(tileEncounterQueue) ? tileEncounterQueue[idx] : null;
-      if (q && q.dangerProfile !== "toxic_food") {
+      if (q && !intelligentForageBlocked(q)) {
         const known = player.knownFoods[variantKeyFor(q)];
         if (!known || known.severity === "safe") return a;
       }
@@ -11276,15 +11331,31 @@ function intelligentFindSafeEat(actions) {
 function intelligentMoveTowardWater(actions) {
   let bestDist = Infinity;
   let bestDx = 0, bestDy = 0;
+  // Prefer land tiles adjacent to water — safe drinking position with no drowning risk
   for (let dy = -8; dy <= 8; dy++) {
     for (let dx = -8; dx <= 8; dx++) {
       if (dx === 0 && dy === 0) continue;
       const tx = player.x + dx;
       const ty = player.y + dy;
       if (tx < 0 || ty < 0 || tx >= WORLD_SIZE || ty >= WORLD_SIZE) continue;
-      if (terrainAt(tx, ty) === "water") {
+      if (terrainAt(tx, ty) !== "water" && isNearWater(tx, ty)) {
         const dist = Math.abs(dx) + Math.abs(dy);
         if (dist < bestDist) { bestDist = dist; bestDx = dx; bestDy = dy; }
+      }
+    }
+  }
+  // Fall back to water tiles only if no land-adjacent tile found within range
+  if (bestDist === Infinity) {
+    for (let dy = -8; dy <= 8; dy++) {
+      for (let dx = -8; dx <= 8; dx++) {
+        if (dx === 0 && dy === 0) continue;
+        const tx = player.x + dx;
+        const ty = player.y + dy;
+        if (tx < 0 || ty < 0 || tx >= WORLD_SIZE || ty >= WORLD_SIZE) continue;
+        if (terrainAt(tx, ty) === "water") {
+          const dist = Math.abs(dx) + Math.abs(dy);
+          if (dist < bestDist) { bestDist = dist; bestDx = dx; bestDy = dy; }
+        }
       }
     }
   }
@@ -11348,123 +11419,160 @@ function intelligentEscapeWater(actions) {
   return randomBotAction(landMoves);
 }
 
+function classifyThreat(enc) {
+  if (!enc) return {isFatal: false, isPredatorDanger: false, isThreatClass: false, isHunter: false, isPursuitHunter: false, isSwarm: false, isDangerous: false, isMildDanger: false, isGrapple: false, isAerial: false, isWaterEdge: false};
+  const dp = enc.dangerProfile || null;
+  const className = String(enc.className || '').toLowerCase();
+  const temperament = String(enc.temperament || '').toLowerCase();
+  const pursuitType = String(enc.pursuitType || '').toLowerCase();
+  const isFatal = dp === "fatal";
+  const isGrapple = dp === "grapple";
+  const isPredatorDanger = dp === "predator" || dp === "venomous_ambush" || isGrapple;
+  const isThreatClass = className === 'threat' || className === 'predator';
+  const isHunter = temperament === 'hunter' || temperament === 'ambush' || temperament === 'dominant';
+  const isPursuitHunter = pursuitType === 'ground' || pursuitType === 'wateredge' || pursuitType === 'climber';
+  const isSwarm = (isPredatorDanger || isThreatClass) && temperament === "swarm";
+  const isDangerous = isFatal || isPredatorDanger || (isThreatClass && (isHunter || isPursuitHunter));
+  const isMildDanger = dp && ["bite", "sting", "claw", "tail", "pinch", "rival"].includes(dp);
+  const isAerial = pursuitType === 'air' || pursuitType === 'climber';
+  const isWaterEdge = pursuitType === 'wateredge';
+  return {isFatal, isPredatorDanger, isThreatClass, isHunter, isPursuitHunter, isSwarm, isDangerous, isMildDanger, isGrapple, isAerial, isWaterEdge};
+}
+
+function threatAwareEscape(actions, threat) {
+  const byId = Object.fromEntries(actions.map(a => [a.id, a]));
+  const moveActions = actions.filter(a => a.id.startsWith("move-"));
+  const climbAction = byId["climb"] || null;
+  const descendAction = byId["descend"] || null;
+
+  // Arboreal/grapple threats: bot should not climb into them — descend or move laterally
+  if (threat.isGrapple || threat.isAerial) {
+    if (descendAction && player.z > 0) return descendAction;
+    return moveActions.length ? randomBotAction(moveActions) : null;
+  }
+  // Water-edge threats: leave water/bank first
+  if (threat.isWaterEdge) {
+    const landEscape = intelligentEscapeWater(actions);
+    if (landEscape) return landEscape;
+    return moveActions.length ? randomBotAction(moveActions) : null;
+  }
+  // Ground threats: climb to escape
+  if (climbAction && player.z < 3) return climbAction;
+  return moveActions.length ? randomBotAction(moveActions) : null;
+}
+
+function waterAreaRecentlyDangerous() {
+  const m = botState.memory;
+  if (!m || !m.recentThreats.length) return false;
+  const now = player.turn;
+  return m.recentThreats.some(t => (now - t.turn) <= 15 && (t.pursuitType === 'wateredge' || t.dangerProfile === 'predator' || t.dangerProfile === 'fatal'));
+}
+
+function determineIntelligentBotMode(threat) {
+  if (threat.isFatal || activePursuit || threat.isPredatorDanger) return "EMERGENCY_ESCAPE";
+  if (player.poison || player.fitness <= 45 || (player.parasites || 0) >= 1) return "RECOVER";
+  if (player.hydration <= 50) return "WATER_PLAN";
+  if (player.energy <= 60) return "SAFE_FORAGE";
+  return "EXPLORE";
+}
+
 function chooseIntelligentBotAction(actions) {
   const byId = Object.fromEntries(actions.map(a => [a.id, a]));
   const moveActions = actions.filter(a => a.id.startsWith("move-"));
   const climbAction = byId["climb"] || null;
-  const preferredEscapeActions = climbAction ? [climbAction, ...moveActions] : moveActions.slice();
+  const descendAction = byId["descend"] || null;
   const urgentNeedsGround = player.hydration <= 30 || player.energy <= 25;
 
   const enc = currentEncounter;
-  const dp = enc ? enc.dangerProfile : null;
-  const className = enc ? String(enc.className || '').toLowerCase() : '';
-  const temperament = enc ? String(enc.temperament || '').toLowerCase() : '';
-  const pursuitType = enc ? String(enc.pursuitType || '').toLowerCase() : '';
-  const isFatal = dp === "fatal";
-  const isPredatorDanger = dp === "predator" || dp === "venomous_ambush" || dp === "grapple";
-  const isThreatClass = className === 'threat' || className === 'predator';
-  const isHunter = temperament === 'hunter' || temperament === 'ambush' || temperament === 'dominant';
-  const isPursuitHunter = pursuitType === 'ground' || pursuitType === 'wateredge' || pursuitType === 'climber';
-  const isSwarm = (isPredatorDanger || isThreatClass) && enc && temperament === "swarm";
-  const isDangerous = isFatal || isPredatorDanger || (isThreatClass && (isHunter || isPursuitHunter));
-  const isMildDanger = dp && ["bite", "sting", "claw", "tail", "pinch", "rival"].includes(dp);
+  const threat = classifyThreat(enc);
+  const pursuitThreat = activePursuit ? classifyThreat(activePursuit) : null;
+  const activeThreat = pursuitThreat || (threat.isDangerous ? threat : null);
 
-  // Drowning prevention: if standing in water, immediately move to adjacent land when possible
+  // Drowning: escape water before anything else
   if (waterState && waterState.inWater && moveActions.length) {
     const landEscape = intelligentEscapeWater(actions);
     if (landEscape) return landEscape;
   }
 
-  // Flee fatal encounters immediately
-  if (isFatal && preferredEscapeActions.length) return randomBotAction(preferredEscapeActions);
+  const mode = determineIntelligentBotMode(threat);
 
-  // Flee active pursuit — keep moving
-  if (activePursuit && preferredEscapeActions.length) return randomBotAction(preferredEscapeActions);
-
-  // Flee predator/venomous encounters
-  if ((isPredatorDanger || isSwarm) && preferredEscapeActions.length) return randomBotAction(preferredEscapeActions);
-
-  // Critical hydration — drink now
-  if (player.hydration <= 20 && byId["drink-water"]) return byId["drink-water"];
-
-  // Critical energy — eat safe food if available, otherwise prioritise movement over risky foraging
-  if (player.energy <= 20) {
-    const eat = intelligentFindSafeEat(actions);
-    if (eat) return eat;
+  if (mode === "EMERGENCY_ESCAPE") {
+    const escapeThreat = activeThreat || threat;
+    const escape = threatAwareEscape(actions, escapeThreat);
+    if (escape) return escape;
     if (moveActions.length) return randomBotAction(moveActions);
   }
 
-  // Low hydration — drink
-  if (player.hydration <= 40 && byId["drink-water"]) return byId["drink-water"];
-
-  // When stable and not currently pressured, spend occasional turns looking for threat cues
-  if (!enc && !activePursuit && byId["look"] && player.turn % 6 === 0 && player.fitness >= 55 && player.energy >= 45 && player.hydration >= 45) {
-    return byId["look"];
+  if (mode === "RECOVER") {
+    // Groom immediately if parasites — do not wait for load to build
+    if ((player.parasites || 0) >= 1 && byId["groom"]) return byId["groom"];
+    // Critical hydration — drink now even in recovery
+    if (player.hydration <= 20 && byId["drink-water"]) return byId["drink-water"];
+    // Move away from poison/injury — no optional interactions
+    if (player.poison || player.fitness <= 45) {
+      const safe = actions.filter(a => !a.id.startsWith("attack") && !a.id.startsWith("queued-attack") && a.id !== "investigate" && !a.id.startsWith("queued-investigate"));
+      if (safe.length) return randomBotAction(safe.filter(a => a.id !== "descend" || urgentNeedsGround) .length ? safe.filter(a => a.id !== "descend" || urgentNeedsGround) : safe);
+    }
+    // Rest if stable and off the ground
+    if (player.fitness <= 35 && !activePursuit && !waterState.inWater && byId["wait"] && player.z > 0) return byId["wait"];
+    // Low hydration: navigate toward water
+    if (player.hydration <= 40 && byId["drink-water"]) return byId["drink-water"];
+    if (player.hydration <= 50 && !byId["drink-water"]) {
+      const waterMove = intelligentMoveTowardWater(actions);
+      if (waterMove) return waterMove;
+    }
+    // Safe eating only
+    if (player.energy <= 30) {
+      const eat = intelligentFindSafeEat(actions);
+      if (eat) return eat;
+    }
+    if (moveActions.length) return randomBotAction(moveActions.filter(a => {
+      const dir = a.id.replace("move-", "");
+      const deltas = {"northwest":[-1,-1],"north":[0,-1],"northeast":[1,-1],"west":[-1,0],"east":[1,0],"southwest":[-1,1],"south":[0,1],"southeast":[1,1]};
+      const d = deltas[dir]; if (!d) return true;
+      const nx = player.x + d[0], ny = player.y + d[1];
+      return terrainAt(nx, ny) !== "water";
+    }).length ? moveActions.filter(a => {
+      const dir = a.id.replace("move-", "");
+      const deltas = {"northwest":[-1,-1],"north":[0,-1],"northeast":[1,-1],"west":[-1,0],"east":[1,0],"southwest":[-1,1],"south":[0,1],"southeast":[1,1]};
+      const d = deltas[dir]; if (!d) return true;
+      const nx = player.x + d[0], ny = player.y + d[1];
+      return terrainAt(nx, ny) !== "water";
+    }) : moveActions);
   }
 
-  // Low energy — eat safe food
-  if (player.energy <= 55) {
-    const eat = intelligentFindSafeEat(actions);
-    if (eat) return eat;
-  }
-
-  // Poison/low-fitness caution — keep moving and avoid investigate/eat/attack churn
-  if ((player.poison || player.fitness <= 40) && !isDangerous) {
-    if (moveActions.length) return randomBotAction(moveActions);
-    const lowRisk = intelligentPickLowestRisk(actions.filter(a => !a.id.startsWith("attack") && !a.id.startsWith("queued-attack")));
-    if (lowRisk) return lowRisk;
-  }
-
-  // Injured — rest only when stable and not at water risk
-  if (player.fitness <= 35 && !activePursuit && !isDangerous && !waterState.inWater && byId["wait"]) return byId["wait"];
-
-  // Parasite mitigation: when safe, groom early to prevent recurring passive fitness drain
-  if ((player.parasites || 0) >= 2 && !isDangerous && !activePursuit && byId["groom"]) {
-    return byId["groom"];
-  }
-
-  // Moderate energy — eat if safe food is available
-  if (player.energy <= 70) {
-    const eat = intelligentFindSafeEat(actions);
-    if (eat) return eat;
-  }
-
-  // Comfortable hydration top-up
-  if (player.hydration <= 60 && byId["drink-water"]) return byId["drink-water"];
-
-  // If current encounter is threat-like, never linger to investigate/eat; prioritize disengaging movement
-  if (enc && (isDangerous || isThreatClass) && preferredEscapeActions.length) {
-    return randomBotAction(preferredEscapeActions);
-  }
-
-  // Investigate non-dangerous encounters to expand knowledge (30% chance)
-  if (enc && enc.canInvestigate && !isDangerous && byId["investigate"] && Math.random() < 0.30) {
-    return byId["investigate"];
-  }
-
-  // Flee mildly dangerous encounters when already hurt
-  if (isMildDanger && player.fitness < 55 && moveActions.length) {
-    return randomBotAction(moveActions);
-  }
-
-  // Navigate toward water when somewhat thirsty and can't drink here
-  if (player.hydration <= 55 && !byId["drink-water"]) {
+  if (mode === "WATER_PLAN") {
+    if (byId["drink-water"]) return byId["drink-water"];
+    // Climb before approaching water if ground predators were recently nearby
+    if (waterAreaRecentlyDangerous() && climbAction && player.z < 2) return climbAction;
     const waterMove = intelligentMoveTowardWater(actions);
     if (waterMove) return waterMove;
+    if (climbAction && player.z < 2) return climbAction;
+    if (moveActions.length) return randomBotAction(moveActions);
   }
 
-  // Stay cautious when poisoned or low fitness — skip attacks
-  if ((player.poison || player.fitness <= 50) && !isDangerous) {
-    const safe = actions.filter(a => !a.id.startsWith("attack") && !a.id.startsWith("queued-attack") && (urgentNeedsGround || a.id !== "descend"));
-    if (safe.length) return randomBotAction(safe);
+  if (mode === "SAFE_FORAGE") {
+    // Occasional look to expand threat awareness
+    if (!enc && !activePursuit && byId["look"] && player.turn % 6 === 0 && player.hydration >= 45) return byId["look"];
+    if (player.energy <= 70) {
+      const eat = intelligentFindSafeEat(actions);
+      if (eat) return eat;
+    }
+    if (player.hydration <= 60 && byId["drink-water"]) return byId["drink-water"];
+    if (enc && enc.canInvestigate && !threat.isDangerous && byId["investigate"] && Math.random() < 0.30) return byId["investigate"];
+    if (threat.isMildDanger && player.fitness < 55 && moveActions.length) return randomBotAction(moveActions);
+    if (player.hydration <= 55 && !byId["drink-water"]) {
+      const waterMove = intelligentMoveTowardWater(actions);
+      if (waterMove) return waterMove;
+    }
   }
 
-  // Prefer staying off ground when descending is optional
-  if (!urgentNeedsGround && byId["climb"] && byId["descend"]) {
-    return byId["climb"];
+  // EXPLORE (and fallthrough from SAFE_FORAGE when no action found)
+  if (!enc && !activePursuit && byId["look"] && player.turn % 6 === 0 && player.fitness >= 55 && player.energy >= 45 && player.hydration >= 45) return byId["look"];
+  if (enc && (threat.isDangerous || threat.isThreatClass) && moveActions.length) {
+    return threatAwareEscape(actions, threat) || randomBotAction(moveActions);
   }
-
-  // Default: avoid unnecessary attacks and unnecessary descents
+  if (!urgentNeedsGround && climbAction && descendAction) return climbAction;
   const nonAttack = actions.filter(a => !a.id.startsWith("attack") && !a.id.startsWith("queued-attack") && (urgentNeedsGround || a.id !== "descend"));
   if (nonAttack.length) return randomBotAction(nonAttack);
   return randomBotAction(actions);
@@ -11479,6 +11587,8 @@ function stepIntelligentBot() {
     if (botState.steps.length >= botState.maxTurns) { stopRandomBot("turn limit reached after death"); return; }
     resetGameForBot("previous run ended in death");
   }
+
+  updateBotMemory();
 
   const actions = getRandomBotActions();
   if (!actions.length) { addQAIssue("ERR_NO_VALID_ACTIONS", "error", {state: botActionSnapshot()}); stopRandomBot("no valid actions available"); return; }
@@ -11497,10 +11607,6 @@ function stepIntelligentBot() {
   botState.steps.push(step);
   botValidateStep(step);
   if (error) { stopRandomBot("action error"); render(); return; }
-  if (player.dead) {
-    summariseCurrentBotRun("player died");
-    if (botState.steps.length >= botState.maxTurns) { stopRandomBot("turn limit reached after death"); return; }
-  }
   updateBotStatus();
 }
 
@@ -11521,6 +11627,7 @@ function runIntelligentBot() {
   botState.currentRunStartState = botActionSnapshot();
   botState.deaths = 0;
   botState.resets = 0;
+  botState.memory = newBotMemory();
   botState.startedAt = new Date().toISOString();
   botState.endedAt = null;
   botState.stopReason = "running";
@@ -12189,16 +12296,25 @@ function compactIssueLine(issue) {
 function compactRunLine(run) {
   const finalState = run.finalState || {};
   const deathContext = finalState.deathContext || (run.death && run.death.state && run.death.state.deathContext) || null;
-  return `Run ${run.runIndex}: reason=${run.reason}; steps=${run.steps}; botSteps=${run.startBotStep}->${run.endBotStep}; turns=${run.startTurn}->${run.endTurn}; dead=${finalState.dead}; F=${finalState.fitness}; E=${finalState.energy}; H=${finalState.hydration}; issues=${run.issues ? run.issues.length : 0}; deathContext=${deathContext ? compactSafeString(deathContext, 500) : "none"}`;
+  const traceStr = Array.isArray(run.terminalTrace) && run.terminalTrace.length
+    ? run.terminalTrace.map(t => `[${t.botStep}:${t.action}|${t.layer}|F${t.F}/E${t.E}/H${t.H}${t.enc ? '|enc:'+t.enc : ''}${t.pursuit ? '|PURSUIT' : ''}]`).join(' ')
+    : null;
+  return `Run ${run.runIndex}: reason=${run.reason}; steps=${run.steps}; botSteps=${run.startBotStep}->${run.endBotStep}; turns=${run.startTurn}->${run.endTurn}; dead=${finalState.dead}; F=${finalState.fitness}; E=${finalState.energy}; H=${finalState.hydration}; issues=${run.issues ? run.issues.length : 0}; deathContext=${deathContext ? compactSafeString(deathContext, 500) : "none"}${traceStr ? '\n  terminalTrace: ' + traceStr : ''}`;
 }
 
 function botDeathCauseFromRun(run) {
   const finalState = run && run.finalState ? run.finalState : {};
   const deathContext = finalState.deathContext || (run && run.death && run.death.state && run.death.state.deathContext) || {};
+  const context = deathContext.context || {};
+  // Prefer specific source over encounter name — encounter is often just what was visible, not what killed
+  const specificSources = ["parasites", "dehydration", "starvation", "drowning", "critical-poison-timer", "critical-poison-duration", "poison", "ground predator contact", "world-registry-water"];
+  if (context.source && specificSources.includes(String(context.source).toLowerCase())) {
+    if (context.predator) return String(context.predator);
+    return String(context.source);
+  }
+  if (context.predator) return String(context.predator);
   const encounterName = deathContext && deathContext.encounterAtDeath && deathContext.encounterAtDeath.name;
   if (encounterName) return String(encounterName);
-  const context = deathContext.context || {};
-  if (context.predator) return String(context.predator);
   if (context.source && String(context.source).toLowerCase() !== "unknown") return String(context.source);
   const message = [deathContext.message, context.message, finalState.deathReason, run && run.reason].filter(Boolean).join(" ").toLowerCase();
   if (message.includes("drown")) return "drowning";
