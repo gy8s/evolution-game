@@ -11,6 +11,21 @@ Format:
 
 ==========================
 
+[2026-04-30 ~10:30 UTC | GPT]
+- Expanded `README.md` from a Patch 8-focused overview into a broader project
+  overview covering vision, current gameplay systems, repository layout,
+  planning documents, bot QA evidence, bug guardrails, workflow, smoke checks,
+  changelog policy, and notes for GPT/Claude.
+- Added `docs/project-plan.md` as a non-code project plan and idea log for design
+  direction, priorities, futureproofing notes, open questions, and ideas raised
+  in conversation.
+- Seeded the project plan with current priorities and future ideas including
+  ecology richness, player awareness/perception, group/social behaviour,
+  immersive images, optional soundscape, water systems, food/poison learning,
+  batch bot testing, and raw-log retention principles.
+- Documentation/planning change only. No gameplay logic, UI/layout, bot/debug
+  behaviour, app-loading behaviour, or playable build code changed.
+
 [2026-04-30 ~10:15 UTC | GPT]
 - Added `docs/bug-guardrails.md` to capture serious bugs/coding errors as
   reusable lessons learned with future prevention checks.
