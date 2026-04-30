@@ -1,0 +1,219 @@
+Claude Independent Assessment — Post-P4 Run 223453
+====================================================
+Date: 2026-04-30
+Author: Claude
+Purpose: Independent response to GPT's structured diagnostic request on run 223453.
+         No repo changes were made during this assessment.
+
+---
+
+SECTION 1 — AGGREGATE SURVIVAL PICTURE
+---------------------------------------
+
+GPT reports: 22 runs, median ~60 steps, longest 203, aerial deaths 7/22.
+
+My read: This is worse than run 164305 on the metric that matters most (aerial death rate,
+which was ~3/22 in that session). Median step count is roughly flat but the aerial death
+spike (32% of all deaths) is a regression introduced by P4, not pre-existing. The 203-step
+outlier shows the mode-based architecture can extend survival when threats are absent, but
+the aerial failure mode is dominating the distribution.
+
+Overall verdict: P4 is structurally an improvement but has introduced a specific new
+failure mode (oscillation against climber-class predators) that is erasing the gains.
+
+
+---
+
+SECTION 2 — Q1: IS THE BOT BETTER, WORSE, OR FLAT VS PRE-P4?
+
+Flat to marginally worse in aggregate. The mode-based architecture is correct. The
+individual defects (see Section 5) are preventing the structural improvement from
+showing in the numbers.
+
+The pre-P4 bot had no memory and made every decision from scratch. The post-P4 bot has
+memory infrastructure but currentGoal is dead code (see Defect A), so goal persistence
+— the primary claimed value of P4 — is not actually operational. The bot has memory
+variables that are written but whose values are never acted on in a goal-directed way.
+
+The improvement in longest run (203 vs 177) is real and consistent with RECOVER/SAFE_FORAGE
+modes working correctly when threats are absent.
+
+
+---
+
+SECTION 3 — Q2: WHAT IS THE PRIMARY NEW FAILURE MODE?
+
+Oscillation against miacid (climber-class predator).
+
+Root cause: `classifyThreat` sets `isAerial = pursuitType === 'air' || pursuitType === 'climber'`.
+This causes `threatAwareEscape` to return `descendAction` for a miacid. Miacid pursues
+through all layers — descending does not escape it. On the next turn the bot is at ground
+layer, same threat, EMERGENCY_ESCAPE fires again, now `climbAction` is returned (since
+descend was just taken). The bot oscillates climb/descend until it dies from accumulated
+contact damage.
+
+This is a pure code defect, not a heuristic tuning issue. The fix is one line:
+  isAerial = pursuitType === 'air'   (remove || pursuitType === 'climber')
+  isClimber = pursuitType === 'climber'  (new property, lateral escape only)
+
+
+---
+
+SECTION 4 — Q3: DOES MEMORY PROVIDE GOAL DIRECTION?
+
+No. Memory is collected but never used for goal direction.
+
+`updateBotMemory()` correctly records threats to `recentThreats`, increments
+`parasiteTurns` and `lowHydrationTurns`. These are written correctly.
+
+`currentGoal` is set to null in `newBotMemory()` and is never written or read anywhere
+in the codebase. I searched the P4 implementation — there is no `botState.memory.currentGoal =`
+assignment anywhere. The variable is structural dead code.
+
+`recentThreats` is read by `waterAreaRecentlyDangerous()` (checks for water-adjacent threats
+in the last 10 turns) and by `determineIntelligentBotMode` (checks for any recent threat
+to trigger EMERGENCY_ESCAPE). It is NOT consulted when making layer choices in EXPLORE mode,
+so aerial threat history has no effect on canopy preference (see Defect E).
+
+Conclusion: Memory provides reactive threat detection (good) but zero goal persistence
+(missing).
+
+
+---
+
+SECTION 5 — DEFECT INVENTORY (5 CONCRETE DEFECTS)
+
+Defect A — currentGoal is dead code
+  Location: newBotMemory() initialises currentGoal: null. No other reference.
+  Impact: Zero goal persistence across turns. Bot cannot commit to "go to water" or
+          "find food" across multiple steps. Every WATER_PLAN / SAFE_FORAGE decision
+          is made independently with no carry-over.
+  Fix: Set currentGoal when entering WATER_PLAN ("seek_water") or SAFE_FORAGE
+       ("seek_food"). In determineIntelligentBotMode, honour an active goal unless
+       a higher-priority mode overrides. Clear goal when satisfied (hydration restored /
+       energy restored) or after N turns of failure.
+
+Defect B — climber pursuit misclassified as aerial
+  Location: classifyThreat(): const isAerial = pursuitType === 'air' || pursuitType === 'climber'
+  Impact: threatAwareEscape returns descendAction for miacid. Miacid follows to all layers.
+          Causes climb/descend oscillation in runs 2, 10, 17, 19 (GPT's report).
+          Accounts for 7/22 aerial deaths.
+  Fix: isAerial = pursuitType === 'air' only.
+       Add: isClimber = pursuitType === 'climber'.
+       In threatAwareEscape: climber → return lateral move (left/right/forward/backward
+       on current layer), not vertical.
+
+Defect C — RECOVER mode too permissive at critical resource levels
+  Location: RECOVER mode action filter: removes 'attack' and 'investigate' but permits
+            'call', 'look', 'sleep', 'wait'.
+  Impact: At E=0 or H=0, bot may take 'look' or 'call' instead of moving toward food/water.
+          Terminal traces in GPT's report show E=0 terminal turns with non-movement actions.
+  Fix: When E < 10 or H < 10, RECOVER should return movement only (preferably toward
+       water/food respectively). call/look/sleep/wait should be banned at critical levels.
+
+Defect D — WATER_PLAN falls through to random movement
+  Location: WATER_PLAN block: if (!waterMove) return randomBotAction(moveActions)
+  Impact: When water is > 8 tiles away, intelligentMoveTowardWater returns null, and the
+          bot takes a random movement. Critically thirsty bot wanders randomly.
+  Fix: Extend search radius in intelligentMoveTowardWater from 8 to 16 tiles. If still
+       null, move in the last known water direction (store in currentGoal). Do not fall
+       back to randomBotAction when in WATER_PLAN.
+
+Defect E — EXPLORE canopy preference ignores aerial threat history
+  Location: EXPLORE mode: if (!urgentNeedsGround && climbAction && descendAction) return climbAction
+  Impact: Bot climbs to canopy every stable turn regardless of recent aerial threats.
+          recentThreats is populated by updateBotMemory but never consulted here.
+          Directly causes repeated canopy exposure to aerial predators between incidents.
+  Fix: Gate canopy preference on !hasRecentAerialThreat(). Add hasRecentAerialThreat()
+       that checks recentThreats for isAerial entries in last 10 turns. If aerial threat
+       in recent memory, prefer ground layer in EXPLORE.
+
+
+---
+
+SECTION 6 — Q4-Q6: HYDRATION AND ENERGY MANAGEMENT
+
+Q4 (Does WATER_PLAN trigger correctly?): Probably yes — `determineIntelligentBotMode`
+triggers WATER_PLAN at H < 60, which is a reasonable threshold. The failure is not in
+trigger timing but in execution (Defect D — random movement when water is distant).
+
+Q5 (Does SAFE_FORAGE find food reliably?): Partially. `intelligentForageBlocked` is now
+applied correctly (P3), so the blacklist is working. The problem is there is no desperation
+tier — when all available food has rank >= 2 poison, SAFE_FORAGE returns random movement
+rather than accepting the least-bad option. A bot facing starvation should accept mild
+poison (rank 1-2) as preferable to E=0 death.
+
+Q6 (Is E=0 terminal wandering still visible?): Yes, per GPT's terminal traces. This is
+Defect C — RECOVER mode does not hard-ban non-movement actions at critical energy.
+
+
+---
+
+SECTION 7 — Q7-Q8: PARASITE AND POISON HANDLING
+
+Q7 (Does P6 parasite groom fire at >= 1?): Yes, this change is correctly implemented.
+RECOVER mode triggers at parasites >= 1 and 'groom' appears in the safe action list.
+If grooming is still failing in some runs, the cause is likely EMERGENCY_ESCAPE overriding
+RECOVER (threat present simultaneously with parasites), which is correct priority ordering.
+
+Q8 (Is poison avoidance working?): The `intelligentForageBlocked` rank >= 2 check is
+correct. If poison deaths are still occurring they are likely from environmental contact
+(not forage), which is outside the scope of P3's forageBlocked check.
+
+
+---
+
+SECTION 8 — Q9-Q10: STRUCTURAL ASSESSMENT
+
+Q9 (Is the mode architecture sound?): Yes. The five modes (EMERGENCY_ESCAPE, RECOVER,
+WATER_PLAN, SAFE_FORAGE, EXPLORE) are the right decomposition. The priority ordering is
+correct. The problem is execution within modes, not the architecture itself.
+
+Q10 (What is the single highest-value fix?): Defect B (climber misclassification).
+It directly explains 7/22 deaths in the current run and requires a one-line code change
+plus a small addition to threatAwareEscape. It has no risk of regressions elsewhere.
+
+Second priority: Defect A (currentGoal dead code). This is the difference between a
+reactive architecture and a goal-directed one. Until currentGoal is functional, P4 delivers
+memory collection without memory use.
+
+
+---
+
+SECTION 9 — RECOMMENDED PATCH SEQUENCE
+
+Priority 1 (safety-critical, one-line each):
+  - Fix Defect B: remove climber from isAerial, add lateral escape for climber type
+  - Fix Defect E: gate EXPLORE canopy preference on aerial threat history
+
+Priority 2 (survival improvement):
+  - Fix Defect A: make currentGoal functional for WATER_PLAN and SAFE_FORAGE
+  - Fix Defect D: extend water search radius to 16, add directional commitment
+
+Priority 3 (terminal-state cleanup):
+  - Fix Defect C: hard-ban non-movement actions at E<10 / H<10 in RECOVER
+  - Add desperation forage tier: accept rank<=2 poison food when E<15 and no safe food available
+
+
+---
+
+SECTION 10 — AGREEMENT / DISAGREEMENT WITH GPT'S ASSESSMENT
+
+Agreement:
+- GPT correctly identifies aerial oscillation as the primary failure mode
+- GPT correctly notes memory is collected but not influencing decisions
+- GPT's terminal trace evidence is consistent with all 5 defects identified above
+
+One clarification:
+- GPT's framing of "bot climbs when threatened" is slightly imprecise. The bot climbs
+  as the EXPLORE default when not threatened, then gets caught. The oscillation occurs
+  when miacid (a climber) is already in pursuit — the bot wrongly uses vertical escape
+  because classifyThreat misidentifies miacid as aerial. These are two separate problems:
+  (1) too much proactive canopy exposure (Defect E) and (2) wrong escape direction once
+  caught (Defect B). Both need fixing but they have different root causes.
+
+
+---
+
+END OF ASSESSMENT
+Claude, 2026-04-30

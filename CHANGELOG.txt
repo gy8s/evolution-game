@@ -1,3 +1,16 @@
+[2026-04-30 patch10 | Claude]
+IntelligentBot stabilisation patch — 8 fixes from post-P4 log analysis (runs 223453/224611).
+- Fix 1 (CRITICAL): groom added to getRandomBotActions(). groom was absent from the bot action list so byId["groom"] was always null. Bot could never groom regardless of parasite load. This was the root cause of all parasite deaths.
+- Fix 2 (CRITICAL): Split isClimber from isAerial in classifyThreat(). pursuitType='climber' (miacid) was misclassified as aerial, triggering descend escape — miacid pursues all layers so descend never helps, causing climb/descend oscillation. Climber now uses lateral-only escape. Added hasRecentAerialThreat() to support Fix 4.
+- Fix 3: Hard critical-state action gating in RECOVER. At E<=10 or H<=10 only movement/drink/eat/groom permitted; call/look/sleep/wait blocked. Addresses terminal traces showing E=0/H=0 with call/look/sleep actions.
+- Fix 4: EXPLORE canopy preference now gated on hasRecentAerialThreat(). Bot does not climb to canopy if aerial threat appeared in last 20 turns.
+- Fix 5: intelligentForageBlocked() now applied in RECOVER safe filter and EXPLORE nonAttack filter, not only in intelligentFindSafeEat(). Closes the bypass path that allowed ant trail and other blacklisted encounters to be eaten via these action paths.
+- Fix 6: Death cause aggregation fixed. Resource sources (dehydration, parasites, starvation, drowning, poison) no longer overridden by a nearby predator name. Added 'parasite' and 'resource collapse' message-based fallback patterns.
+- Fix 7: intelligentMoveTowardWater search radius extended from 8 to 16 tiles. WATER_PLAN no longer falls to randomBotAction when water not found — descends to ground and continues moving purposefully.
+- Fix 8: currentGoal made functional for WATER_PLAN. Records last known water direction; bot resumes that heading for up to 8 turns when scan returns null mid-journey. Goal cleared on successful drink.
+- Note: game/evolution_game_v66_57.html NOT updated — changes are IntelligentBot-only and that file is the archived reference version.
+- Syntax check: PASS. Browser smoke check not performed by Claude — must be verified before merging.
+
 [2026-04-30 patch9 | Claude]
 IntelligentBot structural patch — P2/P3/P4/P5/P6/P7/P8 from consolidated report 20260430-001.
 - P2: intelligentMoveTowardWater now targets land-adjacent-to-water tiles first; water tiles used only as fallback. Eliminates navigation-induced drowning risk.
