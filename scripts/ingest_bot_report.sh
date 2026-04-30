@@ -71,6 +71,9 @@ if [ -d "$RUN_DIR" ]; then
   RUN_DIR="${RUN_DIR}_dup$(date +%S)"
 fi
 
+# Derive the effective ID from the actual folder name (may include _dup suffix)
+EFFECTIVE_RUN_ID="$(basename "$RUN_DIR")"
+
 mkdir -p "$RUN_DIR"
 
 cp "$COMPACT_FILE" "$RUN_DIR/compact.txt"
@@ -80,7 +83,7 @@ fi
 
 cat > "$RUN_DIR/meta.json" <<EOF
 {
-  "runId": "${RUN_ID}",
+  "runId": "${EFFECTIVE_RUN_ID}",
   "gameVersion": "${GAME_VERSION}",
   "shortVersion": "${SHORT_VERSION}",
   "startedAt": "${STARTED}",
@@ -101,12 +104,10 @@ echo "  meta.json"
 
 if [ "$AUTO_COMMIT" -eq 1 ]; then
   cd "$REPO_ROOT"
-  git add "logs/bot-runs/${RUN_ID##*/logs/bot-runs/}"
-  # Use path relative to repo root
-  REL_DIR="logs/bot-runs/$(basename "$RUN_DIR")"
+  REL_DIR="logs/bot-runs/${EFFECTIVE_RUN_ID}"
   git add "$REL_DIR"
   git commit -m "$(cat <<COMMITMSG
-Add bot run logs ${RUN_ID} (${SHORT_VERSION})
+Add bot run logs ${EFFECTIVE_RUN_ID} (${SHORT_VERSION})
 
 Started: ${STARTED}
 Runs: ${RUNS}, Deaths: ${DEATHS}, Stop: ${STOP_REASON}
