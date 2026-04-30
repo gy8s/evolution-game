@@ -11352,6 +11352,7 @@ function chooseIntelligentBotAction(actions) {
   const byId = Object.fromEntries(actions.map(a => [a.id, a]));
   const moveActions = actions.filter(a => a.id.startsWith("move-"));
   const climbAction = byId["climb"] || null;
+  const descendAction = byId["descend"] || null;
   const preferredEscapeActions = climbAction ? [climbAction, ...moveActions] : moveActions.slice();
 
   const enc = currentEncounter;
@@ -11434,6 +11435,8 @@ function chooseIntelligentBotAction(actions) {
   // If current encounter is threat-like, never linger to investigate/eat; prioritize disengaging movement
   if (enc && (isDangerous || isThreatClass) && preferredEscapeActions.length) {
     return randomBotAction(preferredEscapeActions);
+  if (enc && (isDangerous || isThreatClass) && moveActions.length) {
+    return randomBotAction(moveActions);
   }
 
   // Investigate non-dangerous encounters to expand knowledge (30% chance)
