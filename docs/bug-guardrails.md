@@ -86,6 +86,37 @@ Do not describe a PR as ready to merge unless `CHANGELOG.txt` status is explicit
 
 ---
 
+## BG-003 — Bot compact death-cause summaries must use meaningful source fields and dedupe runs
+
+**Status:** Active guardrail
+
+**Observed failure:**
+Compact bot summaries reported deaths mostly as `unknown` and could over-count deaths because duplicate run summaries for the same `runIndex` were both counted.
+
+**Player/tester symptom:**
+QA evidence in compact exports became misleading: detailed run lines showed meaningful encounter/predator context, while the top-level death-cause rollup hid that context and inflated totals.
+
+**Root cause:**
+Death-cause aggregation used shallow fallback fields (`cause/type`) and did not deduplicate repeated per-run terminal summaries before counting.
+
+**Known affected area:**
+- `game/play.html`
+- `game/evolution_game_v66_57.html`
+- bot compact report/export functions (`compactDeathStats`, related helpers)
+
+**Future guardrail:**
+Compact report summaries must derive death causes from the richest available death context and must deduplicate by `runIndex` before aggregate counting.
+
+**Required PR check:**
+- Verify compact death-cause output contains meaningful encounter/context labels when present.
+- Verify duplicate terminal summaries for one `runIndex` do not increase death totals.
+- Run `node scripts/check_html_js_syntax.mjs` after HTML script edits.
+
+**Reviewer instruction:**
+If a compact report still shows mostly `unknown` while run-level context is present, or if duplicate run records inflate counts, block merge until fixed.
+
+---
+
 ## Entry template for future bugs
 
 ```md
