@@ -1,7 +1,7 @@
 {
   "name": "Evolution Game",
   "short_name": "Evolution",
-  "start_url": ".",
+  "start_url": "game/play.html",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#0a0a0a",
