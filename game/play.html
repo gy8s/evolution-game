@@ -11397,6 +11397,11 @@ function chooseIntelligentBotAction(actions) {
   // Low hydration — drink
   if (player.hydration <= 40 && byId["drink-water"]) return byId["drink-water"];
 
+  // When stable and not currently pressured, spend occasional turns looking for threat cues
+  if (!enc && !activePursuit && byId["look"] && player.turn % 6 === 0 && player.fitness >= 55 && player.energy >= 45 && player.hydration >= 45) {
+    return byId["look"];
+  }
+
   // Low energy — eat safe food
   if (player.energy <= 55) {
     const eat = intelligentFindSafeEat(actions);
@@ -11413,6 +11418,11 @@ function chooseIntelligentBotAction(actions) {
   // Injured — rest only when stable and not at water risk
   if (player.fitness <= 35 && !activePursuit && !isDangerous && !waterState.inWater && byId["wait"]) return byId["wait"];
 
+  // Parasite mitigation: when safe, groom early to prevent recurring passive fitness drain
+  if ((player.parasites || 0) >= 2 && !isDangerous && !activePursuit && byId["groom"]) {
+    return byId["groom"];
+  }
+
   // Moderate energy — eat if safe food is available
   if (player.energy <= 70) {
     const eat = intelligentFindSafeEat(actions);
@@ -11423,6 +11433,8 @@ function chooseIntelligentBotAction(actions) {
   if (player.hydration <= 60 && byId["drink-water"]) return byId["drink-water"];
 
   // If current encounter is threat-like, never linger to investigate/eat; prioritize disengaging movement
+  if (enc && (isDangerous || isThreatClass) && preferredEscapeActions.length) {
+    return randomBotAction(preferredEscapeActions);
   if (enc && (isDangerous || isThreatClass) && moveActions.length) {
     return randomBotAction(moveActions);
   }
