@@ -252,6 +252,14 @@ button:disabled { opacity: 0.35; cursor: not-allowed; }
 .botButton { background: #354414; border-color: #d9c747; }
 .botStopButton { background: #5c2525; border-color: #af5050; }
 .botReportButton { background: #173c4d; border-color: #65a7c4; }
+.botRepoConfig { margin-top: 8px; font-size: 12px; color: var(--muted); }
+.botRepoFields { display: grid; grid-template-columns: 1fr 1fr auto; gap: 6px; margin-top: 5px; }
+.botRepoFields input { background: #030703; color: #e7f1d2; border: 1px solid var(--border); border-radius: 6px; padding: 0 8px; height: 28px; font-size: 12px; min-width: 0; }
+.botRepoFields button { height: 28px; font-size: 12px; background: #2a3a1a; border-color: #7ab05a; font-weight: bold; }
+.botSaveStatus { margin-top: 4px; min-height: 14px; font-size: 11px; color: var(--muted); }
+.botSaveStatus.ok { color: #7ab05a; }
+.botSaveStatus.error { color: #e07070; }
+.botSaveStatus.warn { color: #c0a040; }
 .compassTitle::after { content: "  — keyboard: arrows/WASD + QEZC"; color: var(--muted); font-weight: normal; text-transform: none; letter-spacing: 0; }
 .compassTitle { display: block; color: #9bea72; text-transform: uppercase; font-weight: bold; margin-bottom: 4px; font-size: 11px; }
 .actionBox .controls { max-width: 300px; }
@@ -665,6 +673,15 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
             <button id="downloadBotCompact" class="botReportButton" type="button" disabled>Download compact bot report</button>
           </div>
           <div id="botStatus" class="botStatus">Idle. Random bot chooses uniformly from all currently valid actions and auto-resets after death.</div>
+          <div class="botRepoConfig">
+            <label><input type="checkbox" id="botAutoSave" /> Auto-save to GitHub repo when bot stops</label>
+            <div id="botRepoFields" class="botRepoFields" style="display:none">
+              <input type="password" id="botGitHubPAT" placeholder="GitHub PAT (contents: write)" autocomplete="off" />
+              <input type="text" id="botGitHubBranch" placeholder="Branch (e.g. main)" />
+              <button id="botSaveNow" type="button" disabled>Save now</button>
+            </div>
+            <div id="botSaveStatus" class="botSaveStatus"></div>
+          </div>
         </div>
       </div>
     </details>
@@ -10911,8 +10928,11 @@ function updateBotStatus() {
   const limitInput = document.getElementById("botTurnLimit");
   if (runButton) runButton.disabled = botState.running;
   if (stopButton) stopButton.disabled = !botState.running;
-  if (reportButton) reportButton.disabled = !botState.steps.length && !botState.issues.length;
-  if (compactReportButton) compactReportButton.disabled = !botState.steps.length && !botState.issues.length;
+  const hasData = !!(botState.steps.length || botState.issues.length);
+  if (reportButton) reportButton.disabled = !hasData;
+  if (compactReportButton) compactReportButton.disabled = !hasData;
+  const saveNowButton = document.getElementById("botSaveNow");
+  if (saveNowButton) saveNowButton.disabled = !hasData || botState.running;
   if (limitInput) limitInput.disabled = botState.running;
 }
 
@@ -11220,6 +11240,7 @@ function stopRandomBot(reason = "stopped by user") {
   botState.stopReason = reason;
   addDebugTrace("bot-run-ended", collectBotReport(false));
   updateBotStatus();
+  if (localStorage.getItem("botAutoSave") === "1") pushBotRunToGitHub();
 }
 
 function collectBotReport(includeDebugReport = true) {
@@ -11255,13 +11276,12 @@ function botFileShortVersion() {
   return GAME_VERSION.split("_")[0];
 }
 
-function downloadBotReport() {
-  const report = collectBotReport(true);
+function buildBotFullText(report) {
   const actionText = report.actions.map(step => `#${step.botStep} run ${step.runIndex} ${step.actionLabel} | turn ${step.before.turn} -> ${step.after.turn} | pos X${step.before.x},Y${step.before.y},Z${step.before.z} -> X${step.after.x},Y${step.after.y},Z${step.after.z} | fitness ${step.before.fitness}->${step.after.fitness} | energy ${step.before.energy}->${step.after.energy} | hydration ${step.before.hydration}->${step.after.hydration}${step.error ? " | ERROR" : ""}`).join("\n") || "No actions recorded.";
   const issueText = report.issues.length ? report.issues.map(issue => `${issue.severity.toUpperCase()} ${issue.code} | run ${issue.runIndex} step ${issue.botStep} turn ${issue.turn} X${issue.x},Y${issue.y},Z${issue.z} | ${JSON.stringify(issue.detail).slice(0, 500)}`).join("\n") : "No QA issues flagged.";
   const runText = report.runs.length ? report.runs.map(run => `Run ${run.runIndex}: ${run.reason}; steps ${run.steps}; turns ${run.startTurn}->${run.endTurn}; final dead=${run.finalState.dead}, fitness=${run.finalState.fitness}, energy=${run.finalState.energy}, hydration=${run.finalState.hydration}; issues=${run.issues.length}`).join("\n") : "No run summaries recorded.";
   const issueCountText = Object.entries(report.issueCounts).sort((a,b) => b[1]-a[1]).map(([code, count]) => `${code}: ${count}`).join("\n") || "No issue codes.";
-  const lines = [
+  return [
     "EVOLUTION GAME BOT QA REPORT",
     `Game version: ${GAME_VERSION}`,
     `Bot: ${report.botName}`,
@@ -11290,7 +11310,11 @@ function downloadBotReport() {
     "--- JSON BOT DATA ---",
     JSON.stringify(report, null, 2)
   ].join("\n");
-  const blob = new Blob([lines], {type: "text/plain;charset=utf-8"});
+}
+
+function downloadBotReport() {
+  const report = collectBotReport(true);
+  const blob = new Blob([buildBotFullText(report)], {type: "text/plain;charset=utf-8"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -11909,16 +11933,14 @@ function compactDeathStats(runs) {
   ].join("\n");
 }
 
-// @fn downloadBotReportCompact
-function downloadBotReportCompact() {
-  const report = collectBotReport(false);
+function buildBotCompactLines(report) {
   const issueCountText = Object.entries(report.issueCounts || {}).sort((a,b) => b[1]-a[1]).map(([code, count]) => `${code}: ${count}`).join("\n") || "No issue codes.";
   const issueText = compactListBlock(report.issues || [], compactIssueLine, "No QA issues flagged.", 250, "recorded order");
   const runText = compactListBlock(report.runs || [], compactRunLine, "No run summaries recorded.", 250, "recorded order");
   const errors = (report.issues || []).filter(issue => issue && issue.severity === "error");
   const warnings = (report.issues || []).filter(issue => issue && issue.severity !== "error");
   const final = report.finalState || {};
-  const lines = [
+  return [
     "EVOLUTION GAME BOT QA COMPACT",
     `Game version: ${GAME_VERSION}`,
     `Bot: ${report.botName}`,
@@ -11953,10 +11975,139 @@ function downloadBotReportCompact() {
     "",
     "Compact export intentionally omits per-step before/after snapshots, availableActionsBefore arrays, actions[], and embedded collectDebugReport() JSON. Use the full bot report only for targeted deep dives."
   ];
+}
 
-  compactDownloadText(`evolution_bot_compact_${botFileShortVersion()}_${botFileTimestamp(report.startedAt)}.txt`, lines);
+// @fn downloadBotReportCompact
+function downloadBotReportCompact() {
+  const report = collectBotReport(false);
+  compactDownloadText(`evolution_bot_compact_${botFileShortVersion()}_${botFileTimestamp(report.startedAt)}.txt`, buildBotCompactLines(report));
 }
 // PATCH_COMPACT_LOG_EXPORTS_END
+
+// ---------------------------------------------------------------------------
+// @target [BOT] GitHub auto-save
+
+function buildBotMetaJson(runId, shortVersion, report) {
+  return JSON.stringify({
+    runId,
+    gameVersion: GAME_VERSION,
+    shortVersion,
+    startedAt: report.startedAt || "",
+    endedAt: report.endedAt || "",
+    stopReason: report.stopReason || "",
+    botActions: `${report.stepsRun}/${report.maxSteps}`,
+    runsRecorded: String(report.runsCompletedOrRecorded),
+    deaths: String(report.deaths),
+    hasFullReport: true,
+    savedAt: new Date().toISOString()
+  }, null, 2);
+}
+
+function botSaveStatus(msg, level) {
+  const el = document.getElementById("botSaveStatus");
+  if (!el) return;
+  el.textContent = msg;
+  el.className = "botSaveStatus" + (level ? " " + level : "");
+}
+
+async function pushBotRunToGitHub() {
+  const pat = (localStorage.getItem("botGitHubPAT") || "").trim();
+  const branch = (localStorage.getItem("botGitHubBranch") || "main").trim();
+  if (!pat) { botSaveStatus("No PAT set — enter one in the config fields below.", "warn"); return; }
+
+  botSaveStatus("Saving to repo…");
+
+  const report = collectBotReport(true);
+  const runId = botFileTimestamp(report.startedAt);
+  const shortVersion = botFileShortVersion();
+  const prefix = `logs/bot-runs/${runId}`;
+
+  const files = [
+    { path: `${prefix}/meta.json`,   content: buildBotMetaJson(runId, shortVersion, report) },
+    { path: `${prefix}/compact.txt`, content: buildBotCompactLines(report).join("\n") },
+    { path: `${prefix}/full.txt`,    content: buildBotFullText(report) }
+  ];
+
+  const base = "https://api.github.com/repos/gy8s/evolution-game";
+  const headers = {
+    "Authorization": `Bearer ${pat}`,
+    "Content-Type": "application/json",
+    "Accept": "application/vnd.github+json"
+  };
+
+  try {
+    const refRes = await fetch(`${base}/git/ref/heads/${branch}`, { headers });
+    if (!refRes.ok) throw new Error(`Branch '${branch}' not found (${refRes.status})`);
+    const latestCommitSha = (await refRes.json()).object.sha;
+
+    const commitRes = await fetch(`${base}/git/commits/${latestCommitSha}`, { headers });
+    if (!commitRes.ok) throw new Error(`Commit fetch failed (${commitRes.status})`);
+    const baseTreeSha = (await commitRes.json()).tree.sha;
+
+    const blobShas = await Promise.all(files.map(async f => {
+      const res = await fetch(`${base}/git/blobs`, {
+        method: "POST", headers,
+        body: JSON.stringify({ content: btoa(unescape(encodeURIComponent(f.content))), encoding: "base64" })
+      });
+      if (!res.ok) throw new Error(`Blob failed for ${f.path} (${res.status})`);
+      return (await res.json()).sha;
+    }));
+
+    const treeRes = await fetch(`${base}/git/trees`, {
+      method: "POST", headers,
+      body: JSON.stringify({
+        base_tree: baseTreeSha,
+        tree: files.map((f, i) => ({ path: f.path, mode: "100644", type: "blob", sha: blobShas[i] }))
+      })
+    });
+    if (!treeRes.ok) throw new Error(`Tree create failed (${treeRes.status})`);
+    const newTreeSha = (await treeRes.json()).sha;
+
+    const newCommitRes = await fetch(`${base}/git/commits`, {
+      method: "POST", headers,
+      body: JSON.stringify({
+        message: `Add bot run ${runId} (${shortVersion})\n\nStarted: ${report.startedAt || "unknown"}\nRuns: ${report.runsCompletedOrRecorded}, Deaths: ${report.deaths}, Stop: ${report.stopReason}`,
+        tree: newTreeSha,
+        parents: [latestCommitSha]
+      })
+    });
+    if (!newCommitRes.ok) throw new Error(`Commit create failed (${newCommitRes.status})`);
+    const newCommitSha = (await newCommitRes.json()).sha;
+
+    const updateRes = await fetch(`${base}/git/refs/heads/${branch}`, {
+      method: "PATCH", headers,
+      body: JSON.stringify({ sha: newCommitSha })
+    });
+    if (!updateRes.ok) throw new Error(`Ref update failed (${updateRes.status})`);
+
+    botSaveStatus(`Saved: logs/bot-runs/${runId}/`, "ok");
+  } catch (err) {
+    botSaveStatus(`Save failed: ${err.message}`, "error");
+  }
+}
+
+function initBotRepoConfig() {
+  const autoSave   = document.getElementById("botAutoSave");
+  const fields     = document.getElementById("botRepoFields");
+  const patInput   = document.getElementById("botGitHubPAT");
+  const branchInput = document.getElementById("botGitHubBranch");
+  if (!autoSave) return;
+
+  autoSave.checked   = localStorage.getItem("botAutoSave") === "1";
+  patInput.value     = localStorage.getItem("botGitHubPAT") || "";
+  branchInput.value  = localStorage.getItem("botGitHubBranch") || "main";
+  fields.style.display = autoSave.checked ? "" : "none";
+
+  autoSave.addEventListener("change", () => {
+    localStorage.setItem("botAutoSave", autoSave.checked ? "1" : "0");
+    fields.style.display = autoSave.checked ? "" : "none";
+  });
+  patInput.addEventListener("change", () => localStorage.setItem("botGitHubPAT", patInput.value));
+  branchInput.addEventListener("change", () => localStorage.setItem("botGitHubBranch", branchInput.value));
+
+  const saveNow = document.getElementById("botSaveNow");
+  if (saveNow) saveNow.addEventListener("click", () => pushBotRunToGitHub());
+}
 
 // ---------------------------------------------------------------------------
 
@@ -13257,6 +13408,7 @@ const downloadBotReportButton = document.getElementById("downloadBotReport");
 if (downloadBotReportButton) downloadBotReportButton.addEventListener("click", downloadBotReport);
 const downloadBotCompactButton = document.getElementById("downloadBotCompact");
 if (downloadBotCompactButton) downloadBotCompactButton.addEventListener("click", downloadBotReportCompact);
+initBotRepoConfig();
 document.getElementById("leaveGroup").addEventListener("click", leaveGroup);
 const groomButton = document.getElementById("groom");
 if (groomButton) groomButton.addEventListener("click", groom);
