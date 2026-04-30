@@ -1,3 +1,9 @@
+[2026-04-30 16:36 UTC | GPT]
+- Analysed latest saved IntelligentBot compact run (`logs/bot-runs/20260430-154900/compact.txt`) and targeted avoidable strategy failures (threat lingering and risky actions near ambush predators).
+- IntelligentBot now treats `grapple` danger and threat/predator-class ambush/hunter contexts as dangerous and disengages immediately via movement instead of lingering.
+- Added a guard to avoid investigate/eat-style lingering when current encounter context is threat-like, reducing avoidable "careless action near predator" style deaths.
+- Synced behavior updates in both playable HTML files.
+
 [2026-04-30 16:22 UTC | GPT]
 - IntelligentBot survival behavior tuned using saved death patterns: added explicit drowning escape (leave water tiles to adjacent land immediately when possible).
 - Added poison/low-fitness caution mode to prefer movement and lowest-risk actions over investigate/eat/attack churn when avoidable.

@@ -11354,10 +11354,16 @@ function chooseIntelligentBotAction(actions) {
 
   const enc = currentEncounter;
   const dp = enc ? enc.dangerProfile : null;
+  const className = enc ? String(enc.className || '').toLowerCase() : '';
+  const temperament = enc ? String(enc.temperament || '').toLowerCase() : '';
+  const pursuitType = enc ? String(enc.pursuitType || '').toLowerCase() : '';
   const isFatal = dp === "fatal";
-  const isPredatorDanger = dp === "predator" || dp === "venomous_ambush";
-  const isSwarm = isPredatorDanger && enc && enc.temperament === "swarm";
-  const isDangerous = isFatal || isPredatorDanger;
+  const isPredatorDanger = dp === "predator" || dp === "venomous_ambush" || dp === "grapple";
+  const isThreatClass = className === 'threat' || className === 'predator';
+  const isHunter = temperament === 'hunter' || temperament === 'ambush' || temperament === 'dominant';
+  const isPursuitHunter = pursuitType === 'ground' || pursuitType === 'wateredge' || pursuitType === 'climber';
+  const isSwarm = (isPredatorDanger || isThreatClass) && enc && temperament === "swarm";
+  const isDangerous = isFatal || isPredatorDanger || (isThreatClass && (isHunter || isPursuitHunter));
   const isMildDanger = dp && ["bite", "sting", "claw", "tail", "pinch", "rival"].includes(dp);
 
   // Drowning prevention: if standing in water, immediately move to adjacent land when possible
@@ -11412,6 +11418,11 @@ function chooseIntelligentBotAction(actions) {
 
   // Comfortable hydration top-up
   if (player.hydration <= 60 && byId["drink-water"]) return byId["drink-water"];
+
+  // If current encounter is threat-like, never linger to investigate/eat; prioritize disengaging movement
+  if (enc && (isDangerous || isThreatClass) && moveActions.length) {
+    return randomBotAction(moveActions);
+  }
 
   // Investigate non-dangerous encounters to expand knowledge (30% chance)
   if (enc && enc.canInvestigate && !isDangerous && byId["investigate"] && Math.random() < 0.30) {
