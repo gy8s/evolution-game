@@ -11462,8 +11462,8 @@ function threatAwareEscape(actions, threat) {
     if (landEscape) return landEscape;
     return moveActions.length ? randomBotAction(moveActions) : null;
   }
-  // Ground threats: climb to escape
-  if (climbAction && player.z < 3) return climbAction;
+  // Ground threats: climb to escape — no layer cap, climbAction absent when already at top
+  if (climbAction) return climbAction;
   return moveActions.length ? randomBotAction(moveActions) : null;
 }
 
@@ -11617,13 +11617,13 @@ function chooseIntelligentBotAction(actions) {
   }
 
   if (mode === "SAFE_FORAGE") {
-    // Occasional look to expand threat awareness
-    if (!enc && !activePursuit && byId["look"] && player.turn % 6 === 0 && player.hydration >= 45) return byId["look"];
     if (player.energy <= 70) {
       const eat = intelligentFindSafeEat(actions);
       if (eat) return eat;
     }
     if (player.hydration <= 60 && byId["drink-water"]) return byId["drink-water"];
+    // Look only when resources are not critical — eat/drink always takes priority above
+    if (!enc && !activePursuit && byId["look"] && player.turn % 6 === 0 && player.energy >= 25 && player.hydration >= 45) return byId["look"];
     if (enc && enc.canInvestigate && !threat.isDangerous && byId["investigate"] && Math.random() < 0.30) return byId["investigate"];
     if (threat.isMildDanger && player.fitness < 55 && moveActions.length) return randomBotAction(moveActions);
     if (player.hydration <= 55 && !byId["drink-water"]) {
