@@ -13,6 +13,17 @@ Tick every area touched by this PR:
 - [ ] Documentation / workflow only
 - [ ] Other: <!-- describe -->
 
+## Known bug guardrails
+
+Before marking this PR ready, check `docs/bug-guardrails.md` for any previously documented failure mode that may apply.
+
+- [ ] Reviewed `docs/bug-guardrails.md`
+- [ ] Any applicable guardrail checks have been completed
+- [ ] If this PR fixes a bug/coding error, a new guardrail entry was added or an existing one was updated
+- [ ] If no guardrail applies, state why here: <!-- reason -->
+
+**GPT/Claude instruction:** If a patch introduces or fixes a serious bug, do not treat it as fully resolved until the lesson learned is captured in `docs/bug-guardrails.md` or there is a clear reason not to add one.
+
 ## Mandatory syntax/render safety check
 
 Required for any PR touching `game/*.html`, `index.html`, `manifest.json`, bot/debug tooling, or app-loading behaviour.
@@ -45,6 +56,11 @@ If this check was not run, state clearly here:
 <!-- List what was actually checked. Do not claim tests were run if they were not. -->
 
 ## Reviewer confirmation
+
+Reviewer must explicitly state one of:
+
+- `Bug guardrails reviewed; applicable checks passed.`
+- `Bug guardrails not reviewed.`
 
 Reviewer must explicitly state one of:
 
