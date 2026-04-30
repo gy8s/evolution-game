@@ -11,6 +11,105 @@ Format:
 
 ==========================
 
+[2026-04-30 ~09:30 UTC | GPT]
+- Retrospectively completed missing CHANGELOG entries for merged PRs that had
+  not been recorded after 2026-04-29 13:30 UTC.
+- This retrospective update was made after repo review showed the changelog had
+  fallen behind the actual merged PR history.
+- Documentation change only. No gameplay logic, UI/layout, bot/debug behaviour,
+  or playable build code changed.
+
+[2026-04-30 08:28 UTC | Claude]
+- Hotfix: removed an accidental bare `try {` wrapper from `pushBotRunToGitHub()`
+  in both `game/evolution_game_v66_57.html` and `game/play.html`.
+- The stray `try` had no matching `catch` or `finally`, causing a JavaScript
+  SyntaxError that prevented the game script from parsing; symptom was the game
+  loading with no map and no creatures.
+- Gameplay design was not intentionally changed; this restored the intended
+  playable build after the syntax break.
+
+[2026-04-30 08:10 UTC | Claude]
+- Added `game/play.html` as a stable-named copy of the current playable build.
+- Updated `index.html` so the root GitHub Pages URL redirects to `game/play.html`
+  instead of a version-specific filename.
+- Updated `manifest.json` so Android/PWA home-screen shortcuts also open
+  `game/play.html`.
+- Purpose: future version bumps can replace `game/play.html` while the public
+  play link and phone shortcut stay the same.
+
+[2026-04-30 07:29 UTC | Claude]
+- Added browser-side bot auto-save support so completed bot runs can be pushed
+  directly to the GitHub repo via the GitHub API when configured with a suitable
+  personal access token and target branch.
+- Added raw bot-run storage structure under `logs/bot-runs/`, with each run able
+  to save `compact.txt`, `full.txt`, and `meta.json` into a timestamped folder.
+- Added `logs/consolidated/` for later AI-reviewed reports and retained the
+  consolidated report template.
+- Added/updated support for manual ingestion via `scripts/ingest_bot_report.sh`.
+- Added consistent bot report download filenames including build version and
+  timestamp.
+- Included Codex review fixes so the effective run ID is derived from the actual
+  created folder name after duplicate detection, avoiding broken `git add` paths
+  and mismatched `runId` values in `meta.json`.
+- Affected bot/debug tooling and repository traceability. Gameplay logic was not
+  intentionally changed.
+
+[2026-04-30 07:01 UTC | Claude]
+- Added the first automated bot-log ingestion and report structure.
+- Bot report download filenames now include build version and timestamp.
+- Full bot report now includes the game version header.
+- Added helper functions for bot report filename timestamps and short version
+  labels.
+- Added `logs/bot-runs/` for raw simulation outputs and `logs/consolidated/` for
+  AI-reviewed consolidated reports.
+- Added `logs/consolidated/TEMPLATE.md` to standardise future GPT/Claude review
+  reports.
+- Added `scripts/ingest_bot_report.sh` to place downloaded bot logs into a
+  timestamped run folder with `compact.txt`, `full.txt`, and `meta.json`, with an
+  optional commit mode.
+- Updated `.gitignore` so intended files under `logs/` can be committed.
+
+[2026-04-30 06:08 UTC | Claude]
+- Fixed PWA icon sizing and attached install metadata to the actual game page.
+- Added manifest, favicon, apple-touch-icon, and theme-colour metadata to
+  `game/evolution_game_v66_57.html`, because Chrome reads install metadata from
+  the page it lands on after redirect.
+- Generated correctly sized `icon-192.png` and `icon-512.png` from the original
+  icon asset.
+- Updated `manifest.json` to reference those correctly sized icons.
+- No gameplay code was changed.
+
+[2026-04-30 05:59 UTC | Claude]
+- Added app icon and initial PWA support.
+- Added `icon.png` to the repository root.
+- Added `manifest.json` with minimal PWA metadata.
+- Updated `index.html` with favicon, apple-touch-icon, theme-colour, and manifest
+  links.
+- No gameplay code was changed.
+
+[2026-04-29 20:54 UTC | GPT]
+- Added a root `index.html` entry point for GitHub Pages.
+- The root page redirects to the playable HTML so the game can be opened from a
+  simple public Pages URL.
+- No gameplay code was changed.
+
+[2026-04-29 15:39 UTC | GPT]
+- Added/refined `AI_REVIEW_DIALOGUE.txt` as the shared GPT/Claude review workflow
+  document.
+- The file defines how both assistants should record evidence, suggestions,
+  risks, validation plans, and consensus before preparing implementation PRs.
+- Added explicit rules that this dialogue workflow should not modify code files
+  unless the repository owner clearly asks for it.
+- Documentation/workflow change only. No gameplay logic changed.
+
+[2026-04-29 14:36 UTC | GPT]
+- Added initial `AI_REVIEW_DIALOGUE.txt` protocol for GPT ↔ Claude code-review
+  coordination.
+- Documented purpose, scope, operating rules, consensus criteria, and the rule
+  that code files should not be modified through the dialogue unless explicitly
+  instructed by the owner.
+- Documentation/workflow change only.
+
 [2026-04-29 13:30 UTC | Claude]
 - Expanded the "Project workflow" section in README.md with full plain-English
   rules covering: branch discipline, pull request process, George's merge sign-off,
