@@ -253,7 +253,7 @@ button:disabled { opacity: 0.35; cursor: not-allowed; }
 .botStopButton { background: #5c2525; border-color: #af5050; }
 .botReportButton { background: #173c4d; border-color: #65a7c4; }
 .botRepoConfig { margin-top: 8px; font-size: 12px; color: var(--muted); }
-.botRepoFields { display: grid; grid-template-columns: 1fr 1fr auto; gap: 6px; margin-top: 5px; }
+.botRepoFields { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 6px; margin-top: 5px; }
 .botRepoFields input { background: #030703; color: #e7f1d2; border: 1px solid var(--border); border-radius: 6px; padding: 0 8px; height: 28px; font-size: 12px; min-width: 0; }
 .botRepoFields button { height: 28px; font-size: 12px; background: #2a3a1a; border-color: #7ab05a; font-weight: bold; }
 .botSaveStatus { margin-top: 4px; min-height: 14px; font-size: 11px; color: var(--muted); }
@@ -678,6 +678,7 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
             <div id="botRepoFields" class="botRepoFields" style="display:none">
               <input type="password" id="botGitHubPAT" placeholder="GitHub PAT (contents: write — clears on tab close)" autocomplete="off" />
               <input type="text" id="botGitHubBranch" placeholder="Branch (e.g. main)" />
+              <button id="botTestPAT" type="button">Test</button>
               <button id="botSaveNow" type="button" disabled>Save now</button>
             </div>
             <div id="botSaveStatus" class="botSaveStatus"></div>
@@ -12086,9 +12087,30 @@ async function pushBotRunToGitHub() {
 
     botSaveStatus(`Saved: logs/bot-runs/${runId}/`, "ok");
   } catch (err) {
-    botSaveStatus(`Save failed: ${err.message}`, "error");
+    const msg = err.message === "Failed to fetch"
+      ? "Cannot reach GitHub — check network, then re-enter PAT (clears on tab close)"
+      : `Save failed: ${err.message}`;
+    botSaveStatus(msg, "error");
   } finally {
     botSaveInFlight = false;
+  }
+}
+
+async function testGitHubPAT() {
+  const pat = (sessionStorage.getItem("botGitHubPAT") || "").trim();
+  if (!pat) { botSaveStatus("No PAT entered — paste it in the field first.", "warn"); return; }
+  botSaveStatus("Testing connection…");
+  try {
+    const res = await fetch("https://api.github.com/repos/gy8s/evolution-game", {
+      headers: { "Authorization": `Bearer ${pat}`, "Accept": "application/vnd.github+json" }
+    });
+    if (res.status === 401) { botSaveStatus("PAT rejected (401) — re-enter it, it may have expired.", "error"); return; }
+    if (res.status === 403) { botSaveStatus("PAT forbidden (403) — ensure it has Contents: write permission.", "error"); return; }
+    if (res.status === 404) { botSaveStatus("Repo not found (404) — check PAT has access to this repo.", "error"); return; }
+    if (!res.ok)            { botSaveStatus(`API error ${res.status} — check PAT permissions.`, "error"); return; }
+    botSaveStatus("PAT OK — connection working.", "ok");
+  } catch (err) {
+    botSaveStatus("Cannot reach GitHub API — check your network connection.", "error");
   }
 }
 
@@ -12108,9 +12130,11 @@ function initBotRepoConfig() {
     localStorage.setItem("botAutoSave", autoSave.checked ? "1" : "0");
     fields.style.display = autoSave.checked ? "" : "none";
   });
-  patInput.addEventListener("change", () => sessionStorage.setItem("botGitHubPAT", patInput.value));
-  branchInput.addEventListener("change", () => localStorage.setItem("botGitHubBranch", branchInput.value));
+  patInput.addEventListener("input", () => sessionStorage.setItem("botGitHubPAT", patInput.value));
+  branchInput.addEventListener("input", () => localStorage.setItem("botGitHubBranch", branchInput.value));
 
+  const testPAT = document.getElementById("botTestPAT");
+  if (testPAT) testPAT.addEventListener("click", () => testGitHubPAT());
   const saveNow = document.getElementById("botSaveNow");
   if (saveNow) saveNow.addEventListener("click", () => pushBotRunToGitHub());
 }
