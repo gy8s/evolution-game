@@ -676,7 +676,7 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
           <div class="botRepoConfig">
             <label><input type="checkbox" id="botAutoSave" /> Auto-save to GitHub repo when bot stops</label>
             <div id="botRepoFields" class="botRepoFields" style="display:none">
-              <input type="password" id="botGitHubPAT" placeholder="GitHub PAT (contents: write)" autocomplete="off" />
+              <input type="password" id="botGitHubPAT" placeholder="GitHub PAT (contents: write — clears on tab close)" autocomplete="off" />
               <input type="text" id="botGitHubBranch" placeholder="Branch (e.g. main)" />
               <button id="botSaveNow" type="button" disabled>Save now</button>
             </div>
@@ -12010,12 +12010,17 @@ function botSaveStatus(msg, level) {
   el.className = "botSaveStatus" + (level ? " " + level : "");
 }
 
+let botSaveInFlight = false;
+
 async function pushBotRunToGitHub() {
-  const pat = (localStorage.getItem("botGitHubPAT") || "").trim();
+  if (botSaveInFlight) { botSaveStatus("Save already in progress — please wait.", "warn"); return; }
+  const pat = (sessionStorage.getItem("botGitHubPAT") || "").trim();
   const branch = (localStorage.getItem("botGitHubBranch") || "main").trim();
   if (!pat) { botSaveStatus("No PAT set — enter one in the config fields below.", "warn"); return; }
 
+  botSaveInFlight = true;
   botSaveStatus("Saving to repo…");
+  try {
 
   const report = collectBotReport(true);
   const runId = botFileTimestamp(report.startedAt);
@@ -12083,6 +12088,8 @@ async function pushBotRunToGitHub() {
     botSaveStatus(`Saved: logs/bot-runs/${runId}/`, "ok");
   } catch (err) {
     botSaveStatus(`Save failed: ${err.message}`, "error");
+  } finally {
+    botSaveInFlight = false;
   }
 }
 
@@ -12094,7 +12101,7 @@ function initBotRepoConfig() {
   if (!autoSave) return;
 
   autoSave.checked   = localStorage.getItem("botAutoSave") === "1";
-  patInput.value     = localStorage.getItem("botGitHubPAT") || "";
+  patInput.value     = sessionStorage.getItem("botGitHubPAT") || "";
   branchInput.value  = localStorage.getItem("botGitHubBranch") || "main";
   fields.style.display = autoSave.checked ? "" : "none";
 
@@ -12102,7 +12109,7 @@ function initBotRepoConfig() {
     localStorage.setItem("botAutoSave", autoSave.checked ? "1" : "0");
     fields.style.display = autoSave.checked ? "" : "none";
   });
-  patInput.addEventListener("change", () => localStorage.setItem("botGitHubPAT", patInput.value));
+  patInput.addEventListener("change", () => sessionStorage.setItem("botGitHubPAT", patInput.value));
   branchInput.addEventListener("change", () => localStorage.setItem("botGitHubBranch", branchInput.value));
 
   const saveNow = document.getElementById("botSaveNow");
