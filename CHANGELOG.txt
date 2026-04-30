@@ -11,6 +11,18 @@ Format:
 
 ==========================
 
+[2026-04-30 ~10:05 UTC | GPT]
+- Added `.github/pull_request_template.md` so every future PR opens with a
+  mandatory checklist.
+- The template includes scope checkboxes, syntax/render safety checks for game
+  HTML/app-loading changes, explicit reviewer confirmation wording, and a
+  mandatory CHANGELOG reminder.
+- The CHANGELOG section requires a timestamped plain-English entry, author, and
+  a clear statement of whether gameplay logic, UI/layout, bot/debug tools,
+  app-loading behaviour, or documentation changed.
+- Documentation/workflow change only. No gameplay logic, UI/layout, bot/debug
+  behaviour, app-loading behaviour, or playable build code changed.
+
 [2026-04-30 ~09:30 UTC | GPT]
 - Retrospectively completed missing CHANGELOG entries for merged PRs that had
   not been recorded after 2026-04-29 13:30 UTC.
