@@ -1,0 +1,64 @@
+name: Bot run review
+description: Record findings from reviewing a set of bot run logs
+labels: ["bot-review"]
+body:
+  - type: input
+    id: build_version
+    attributes:
+      label: Build version
+      placeholder: "e.g. v66.57_patch8"
+    validations:
+      required: true
+
+  - type: textarea
+    id: runs
+    attributes:
+      label: Run IDs reviewed
+      placeholder: "20260430-101214\n20260430-143022"
+    validations:
+      required: true
+
+  - type: input
+    id: compact_log_path
+    attributes:
+      label: Compact log path(s)
+      placeholder: "logs/bot-runs/20260430-101214/compact.txt"
+    validations:
+      required: true
+
+  - type: input
+    id: full_log_path
+    attributes:
+      label: Full log path(s) (if used)
+      placeholder: "logs/bot-runs/20260430-101214/full.txt"
+
+  - type: dropdown
+    id: patch_gate
+    attributes:
+      label: Patch gate result
+      options:
+        - PASS — no errors, warnings within normal range
+        - REVIEW — warnings present, needs discussion
+        - FAIL — errors present, blocking
+    validations:
+      required: true
+
+  - type: textarea
+    id: headline
+    attributes:
+      label: Headline result
+      placeholder: Brief summary of what the runs showed
+    validations:
+      required: true
+
+  - type: textarea
+    id: bugs
+    attributes:
+      label: Suspected bugs or issues found
+      placeholder: "List any QA codes or behaviours that need attention"
+
+  - type: textarea
+    id: recommendation
+    attributes:
+      label: Patch recommendation
+      placeholder: "What should the next patch address based on these runs?"

@@ -1,0 +1,19 @@
+name: Smoke check
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  syntax-and-structure:
+    name: HTML/JS syntax and app structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run syntax and structure checks
+        run: node scripts/check_html_js_syntax.mjs

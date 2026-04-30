@@ -51,6 +51,10 @@ If this check was not run, state clearly here:
 
 **GPT/Claude instruction:** Do not describe a PR as complete, safe, or ready to merge unless the changelog status is explicitly addressed.
 
+## Commit message check
+
+- [ ] No `claude.ai/code/session_...` URLs in any commit message on this PR (repo is public)
+
 ## Testing / review notes
 
 <!-- List what was actually checked. Do not claim tests were run if they were not. -->
