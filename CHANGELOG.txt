@@ -1,3 +1,21 @@
+[2026-04-30 16:36 UTC | GPT]
+- Analysed latest saved IntelligentBot compact run (`logs/bot-runs/20260430-154900/compact.txt`) and targeted avoidable strategy failures (threat lingering and risky actions near ambush predators).
+- IntelligentBot now treats `grapple` danger and threat/predator-class ambush/hunter contexts as dangerous and disengages immediately via movement instead of lingering.
+- Added a guard to avoid investigate/eat-style lingering when current encounter context is threat-like, reducing avoidable "careless action near predator" style deaths.
+- Synced behavior updates in both playable HTML files.
+
+[2026-04-30 16:22 UTC | GPT]
+- IntelligentBot survival behavior tuned using saved death patterns: added explicit drowning escape (leave water tiles to adjacent land immediately when possible).
+- Added poison/low-fitness caution mode to prefer movement and lowest-risk actions over investigate/eat/attack churn when avoidable.
+- Critical-energy fallback now prefers movement if no known-safe food is available, reducing avoidable deaths from risky interactions.
+- Updated both playable HTML files (`game/play.html` and `game/evolution_game_v66_57.html`) to keep bot behavior aligned.
+
+[2026-04-30 16:05 UTC | GPT]
+- Improved compact bot run deduplication behavior: duplicate `runIndex` summaries now keep the richest terminal record (dead state and strongest death context) instead of always keeping the first record.
+- This avoids death-cause rollups regressing to weaker/unknown labels when duplicate run-end summaries disagree in detail.
+- Updated both playable HTML files (`game/play.html` and `game/evolution_game_v66_57.html`) to keep bot export logic aligned.
+- No gameplay logic, UI/layout, app-loading behaviour, or playable mechanics changed.
+
 [2026-04-30 13:15 UTC | GPT]
 - Added consolidated IntelligentBot saved-log review (`logs/consolidated/20260430-002-intelligentbot-review.md`).
 - Documented comparative survival outcomes (RandomBot vs IntelligentBot) from saved compact logs and proposed a focused follow-up behaviour patch list.
