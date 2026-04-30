@@ -1,3 +1,15 @@
+[2026-04-30 patch9 | Claude]
+IntelligentBot structural patch — P2/P3/P4/P5/P6/P7/P8 from consolidated report 20260430-001.
+- P2: intelligentMoveTowardWater now targets land-adjacent-to-water tiles first; water tiles used only as fallback. Eliminates navigation-induced drowning risk.
+- P3: New intelligentForageBlocked() function. Adds FORAGE_BLACKLIST (ant trail, termite mound, ant swarm, giant ant swarm, millipede, large centipede, wasp/hornet nest). Also blocks forage whose encounter object exposes moderate+ poison (rank >= 2) or a guardian spawn mechanic. Applied to both eat and queued-eat actions.
+- P4 (structural): Added botState.memory (recentThreats, parasiteTurns, lowHydrationTurns, currentGoal) with per-run reset. Added updateBotMemory() called each step. Added classifyThreat(), threatAwareEscape(), waterAreaRecentlyDangerous(), determineIntelligentBotMode(). Replaced monolithic chooseIntelligentBotAction with mode-based routing: EMERGENCY_ESCAPE (threat-type-aware escape — grapple/aerial descend, ground climb, water-edge exit water), RECOVER (immediate groom at parasites >= 1, no optional interactions when poisoned/injured, water navigation), WATER_PLAN (drink or navigate, avoid area if recently dangerous), SAFE_FORAGE (safe eat, top-up hydration, low-risk investigate), EXPLORE (canopy preference, periodic look). Bot now has persistent cross-turn state and goal-directed behaviour rather than a single priority-ordered rule list.
+- P5: Removed duplicate summariseCurrentBotRun("player died") call from end-of-step in both stepRandomBot and stepIntelligentBot. Deaths recorded once only (at start of next step).
+- P6: Parasite groom threshold lowered from >= 2 to >= 1 in RECOVER mode. Groom fires as soon as any parasite load is detected.
+- P7: botDeathCauseFromRun now prefers context.source for specific causes (parasites, dehydration, poison, ground predator contact, drowning etc.) over encounterAtDeath.name. Encounter name used only as fallback when context.source is absent or "unknown".
+- P8: summariseCurrentBotRun now captures terminalTrace (last 5 actions per run: botStep, action, layer, F/E/H, encounter, pursuit flag). compactRunLine renders terminalTrace inline in compact log output.
+- Note: game/evolution_game_v66_57.html NOT updated — changes are IntelligentBot-only and that file is the archived reference version.
+- Syntax check: PASS. Browser smoke check not performed by Claude — must be verified before merging.
+
 [2026-04-30 16:36 UTC | GPT]
 - Analysed latest saved IntelligentBot compact run (`logs/bot-runs/20260430-154900/compact.txt`) and targeted avoidable strategy failures (threat lingering and risky actions near ambush predators).
 - IntelligentBot now treats `grapple` danger and threat/predator-class ambush/hunter contexts as dangerous and disengages immediately via movement instead of lingering.
