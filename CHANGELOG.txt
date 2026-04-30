@@ -1,3 +1,9 @@
+[2026-04-30 10:40 UTC | GPT]
+- Bot/debug/QA tooling fix: compact bot report death-cause aggregation now prefers encounter names and meaningful death context before falling back to `unknown`.
+- Compact death-cause summary now deduplicates run summaries by `runIndex` before counting to avoid duplicate death totals from repeated run-end records.
+- Updated both playable HTML files (`game/play.html` and `game/evolution_game_v66_57.html`) to keep bot export logic aligned.
+- No gameplay logic, UI/layout, app-loading behaviour, or playable mechanics changed.
+
 CHANGELOG — Evolution Game
 ==========================
 

@@ -11902,8 +11902,42 @@ function compactRunLine(run) {
   return `Run ${run.runIndex}: reason=${run.reason}; steps=${run.steps}; botSteps=${run.startBotStep}->${run.endBotStep}; turns=${run.startTurn}->${run.endTurn}; dead=${finalState.dead}; F=${finalState.fitness}; E=${finalState.energy}; H=${finalState.hydration}; issues=${run.issues ? run.issues.length : 0}; deathContext=${deathContext ? compactSafeString(deathContext, 500) : "none"}`;
 }
 
+function botDeathCauseFromRun(run) {
+  const finalState = run && run.finalState ? run.finalState : {};
+  const deathContext = finalState.deathContext || (run && run.death && run.death.state && run.death.state.deathContext) || {};
+  const encounterName = deathContext && deathContext.encounterAtDeath && deathContext.encounterAtDeath.name;
+  if (encounterName) return String(encounterName);
+  const context = deathContext.context || {};
+  if (context.predator) return String(context.predator);
+  if (context.source && String(context.source).toLowerCase() !== "unknown") return String(context.source);
+  const message = [deathContext.message, context.message, finalState.deathReason, run && run.reason].filter(Boolean).join(" ").toLowerCase();
+  if (message.includes("drown")) return "drowning";
+  if (message.includes("dehydration")) return "dehydration";
+  if (message.includes("starvation") || message.includes("starve")) return "starvation";
+  if (message.includes("poison") || message.includes("venom")) return "poison/venom";
+  return "unknown";
+}
+
+function dedupeBotRunsByRunIndex(runs) {
+  const input = Array.isArray(runs) ? runs : [];
+  const seen = new Set();
+  const deduped = [];
+  input.forEach(run => {
+    if (!run) return;
+    const key = run.runIndex;
+    if (key === null || key === undefined) {
+      deduped.push(run);
+      return;
+    }
+    if (seen.has(key)) return;
+    seen.add(key);
+    deduped.push(run);
+  });
+  return deduped;
+}
+
 function compactDeathStats(runs) {
-  const completed = Array.isArray(runs) ? runs : [];
+  const completed = dedupeBotRunsByRunIndex(runs);
   const deathRuns = completed.filter(run => run && run.finalState && run.finalState.dead);
   const durations = deathRuns.map(run => Math.max(0, (run.endTurn || 0) - (run.startTurn || 0))).sort((a,b) => a-b);
   const mean = durations.length ? Math.round(durations.reduce((a,b) => a + b, 0) / durations.length) : "n/a";
@@ -11918,8 +11952,7 @@ function compactDeathStats(runs) {
   });
   const causes = {};
   deathRuns.forEach(run => {
-    const ctx = (run.finalState && run.finalState.deathContext) || (run.death && run.death.state && run.death.state.deathContext) || {};
-    const cause = ctx.cause || ctx.type || "unknown";
+    const cause = botDeathCauseFromRun(run);
     causes[cause] = (causes[cause] || 0) + 1;
   });
   const longest = completed.length ? Math.max(...completed.map(run => Math.max(0, (run.endTurn || 0) - (run.startTurn || 0)))) : 0;
@@ -11932,7 +11965,6 @@ function compactDeathStats(runs) {
     `Death causes: ${Object.entries(causes).sort((a,b)=>b[1]-a[1]).map(([k,v]) => `${k}: ${v}`).join(" | ") || "not recorded"}`
   ].join("\n");
 }
-
 function buildBotCompactLines(report) {
   const issueCountText = Object.entries(report.issueCounts || {}).sort((a,b) => b[1]-a[1]).map(([code, count]) => `${code}: ${count}`).join("\n") || "No issue codes.";
   const issueText = compactListBlock(report.issues || [], compactIssueLine, "No QA issues flagged.", 250, "recorded order");
