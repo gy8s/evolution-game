@@ -664,15 +664,16 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
         </div>
 
         <div class="botPanel">
-          <strong>Random bot test mode</strong>
+          <strong>Bot test mode</strong>
           <div class="botControls">
             <input id="botTurnLimit" type="number" min="1" max="10000" value="1000" title="Maximum bot actions across auto-reset runs" />
             <button id="runRandomBot" class="botButton" type="button">Run random bot</button>
+            <button id="runIntelligentBot" class="botButton" type="button">Run intelligent bot</button>
             <button id="stopRandomBot" class="botStopButton" type="button" disabled>Stop bot</button>
             <button id="downloadBotReport" class="botReportButton" type="button" disabled>Download bot report</button>
             <button id="downloadBotCompact" class="botReportButton" type="button" disabled>Download compact bot report</button>
           </div>
-          <div id="botStatus" class="botStatus">Idle. Random bot chooses uniformly from all currently valid actions and auto-resets after death.</div>
+          <div id="botStatus" class="botStatus">Idle. Choose a bot to run: random picks uniformly from valid actions; intelligent bot tries to survive. Both auto-reset on death and QA-test game invariants.</div>
           <div class="botRepoConfig">
             <label><input type="checkbox" id="botAutoSave" /> Auto-save to GitHub repo when bot stops</label>
             <div id="botRepoFields" class="botRepoFields" style="display:none">
@@ -10912,7 +10913,7 @@ function qaIssueCounts() {
 }
 
 function botStatusText() {
-  if (!botState.running && !botState.steps.length) return "Idle. Random bot chooses uniformly from all currently valid actions and auto-resets after death.";
+  if (!botState.running && !botState.steps.length) return "Idle. Choose a bot to run: random picks uniformly from valid actions; intelligent bot tries to survive. Both auto-reset on death and QA-test game invariants.";
   const progress = `${botState.steps.length}/${botState.maxTurns}`;
   const state = botState.running ? "Running" : "Stopped";
   return `${state}: ${botState.name}, ${progress} actions, runs ${botState.runs.length + (botState.running ? 1 : 0)}, deaths ${botState.deaths}, QA issues ${botState.issues.length}. Last: ${botState.stopReason}.`;
@@ -10922,11 +10923,13 @@ function updateBotStatus() {
   const status = document.getElementById("botStatus");
   if (status) status.textContent = botStatusText();
   const runButton = document.getElementById("runRandomBot");
+  const runIntelligentButton = document.getElementById("runIntelligentBot");
   const stopButton = document.getElementById("stopRandomBot");
   const reportButton = document.getElementById("downloadBotReport");
   const compactReportButton = document.getElementById("downloadBotCompact");
   const limitInput = document.getElementById("botTurnLimit");
   if (runButton) runButton.disabled = botState.running;
+  if (runIntelligentButton) runIntelligentButton.disabled = botState.running;
   if (stopButton) stopButton.disabled = !botState.running;
   const hasData = !!(botState.steps.length || botState.issues.length);
   if (reportButton) reportButton.disabled = !hasData;
@@ -11209,6 +11212,7 @@ function runRandomBot() {
   const limitInput = document.getElementById("botTurnLimit");
   const requested = limitInput ? parseInt(limitInput.value, 10) : 1000;
   botState.running = true;
+  botState.name = "RandomBot";
   botState.maxTurns = clamp(Number.isFinite(requested) ? requested : 1000, 1, 10000);
   botState.startTurn = player.turn;
   botState.steps = [];
@@ -11242,6 +11246,209 @@ function stopRandomBot(reason = "stopped by user") {
   updateBotStatus();
   if (localStorage.getItem("botAutoSave") === "1") pushBotRunToGitHub();
 }
+
+// ---------------------------------------------------------------------------
+// Intelligent bot — survival-oriented heuristic agent
+// ---------------------------------------------------------------------------
+
+function intelligentFindSafeEat(actions) {
+  for (const a of actions) {
+    if (a.id === "eat" && currentEncounter) {
+      const e = currentEncounter;
+      if (e.dangerProfile === "toxic_food") continue;
+      const known = player.knownFoods[e.key];
+      if (known && (known.severity === "unsafe" || known.severity === "deadly")) continue;
+      if (["forage", "nest", "remedy", "carcass"].includes(e.kind)) return a;
+    }
+    if (a.id === "eat-carcass") return a;
+    if (a.id.startsWith("queued-eat-")) {
+      const idx = parseInt(a.id.replace("queued-eat-", ""), 10);
+      const q = Array.isArray(tileEncounterQueue) ? tileEncounterQueue[idx] : null;
+      if (q && q.dangerProfile !== "toxic_food") {
+        const known = player.knownFoods[q.key];
+        if (!known || (known.severity !== "unsafe" && known.severity !== "deadly")) return a;
+      }
+    }
+  }
+  return null;
+}
+
+function intelligentMoveTowardWater(actions) {
+  let bestDist = Infinity;
+  let bestDx = 0, bestDy = 0;
+  for (let dy = -8; dy <= 8; dy++) {
+    for (let dx = -8; dx <= 8; dx++) {
+      if (dx === 0 && dy === 0) continue;
+      const tx = player.x + dx;
+      const ty = player.y + dy;
+      if (tx < 0 || ty < 0 || tx >= WORLD_SIZE || ty >= WORLD_SIZE) continue;
+      if (terrainAt(tx, ty) === "water") {
+        const dist = Math.abs(dx) + Math.abs(dy);
+        if (dist < bestDist) { bestDist = dist; bestDx = dx; bestDy = dy; }
+      }
+    }
+  }
+  if (bestDist === Infinity) return null;
+  const sdx = Math.sign(bestDx);
+  const sdy = Math.sign(bestDy);
+  const dirNames = {
+    "-1,-1": "northwest", "0,-1": "north", "1,-1": "northeast",
+    "-1,0": "west", "1,0": "east",
+    "-1,1": "southwest", "0,1": "south", "1,1": "southeast"
+  };
+  const byId = Object.fromEntries(actions.map(a => [a.id, a]));
+  const candidates = [];
+  if (sdx !== 0 || sdy !== 0) {
+    const name = dirNames[`${sdx},${sdy}`];
+    if (name) candidates.push(`move-${name}`);
+  }
+  if (sdx !== 0) candidates.push(`move-${dirNames[`${sdx},0`]}`);
+  if (sdy !== 0) candidates.push(`move-${dirNames[`0,${sdy}`]}`);
+  for (const id of candidates) { if (byId[id]) return byId[id]; }
+  return null;
+}
+
+function chooseIntelligentBotAction(actions) {
+  const byId = Object.fromEntries(actions.map(a => [a.id, a]));
+  const moveActions = actions.filter(a => a.id.startsWith("move-"));
+
+  const enc = currentEncounter;
+  const dp = enc ? enc.dangerProfile : null;
+  const isFatal = dp === "fatal";
+  const isPredatorDanger = dp === "predator" || dp === "venomous_ambush";
+  const isSwarm = isPredatorDanger && enc && enc.temperament === "swarm";
+  const isDangerous = isFatal || isPredatorDanger;
+  const isMildDanger = dp && ["bite", "sting", "claw", "tail", "pinch", "rival"].includes(dp);
+
+  // Flee fatal encounters immediately
+  if (isFatal && moveActions.length) return randomBotAction(moveActions);
+
+  // Flee active pursuit — keep moving
+  if (activePursuit && moveActions.length) return randomBotAction(moveActions);
+
+  // Flee predator/venomous encounters
+  if ((isPredatorDanger || isSwarm) && moveActions.length) return randomBotAction(moveActions);
+
+  // Critical hydration — drink now
+  if (player.hydration <= 20 && byId["drink-water"]) return byId["drink-water"];
+
+  // Critical energy — eat the first safe option
+  if (player.energy <= 20) {
+    const eat = intelligentFindSafeEat(actions);
+    if (eat) return eat;
+  }
+
+  // Low hydration — drink
+  if (player.hydration <= 40 && byId["drink-water"]) return byId["drink-water"];
+
+  // Low energy — eat safe food
+  if (player.energy <= 55) {
+    const eat = intelligentFindSafeEat(actions);
+    if (eat) return eat;
+  }
+
+  // Injured — rest if no threat
+  if (player.fitness <= 35 && !activePursuit && !isDangerous && byId["wait"]) return byId["wait"];
+
+  // Moderate energy — eat if safe food is available
+  if (player.energy <= 70) {
+    const eat = intelligentFindSafeEat(actions);
+    if (eat) return eat;
+  }
+
+  // Comfortable hydration top-up
+  if (player.hydration <= 60 && byId["drink-water"]) return byId["drink-water"];
+
+  // Investigate non-dangerous encounters to expand knowledge (30% chance)
+  if (enc && enc.canInvestigate && !isDangerous && byId["investigate"] && Math.random() < 0.30) {
+    return byId["investigate"];
+  }
+
+  // Flee mildly dangerous encounters when already hurt
+  if (isMildDanger && player.fitness < 55 && moveActions.length) {
+    return randomBotAction(moveActions);
+  }
+
+  // Navigate toward water when somewhat thirsty and can't drink here
+  if (player.hydration <= 55 && !byId["drink-water"]) {
+    const waterMove = intelligentMoveTowardWater(actions);
+    if (waterMove) return waterMove;
+  }
+
+  // Stay cautious when poisoned or low fitness — skip attacks
+  if ((player.poison || player.fitness <= 50) && !isDangerous) {
+    const safe = actions.filter(a => !a.id.startsWith("attack") && !a.id.startsWith("queued-attack"));
+    if (safe.length) return randomBotAction(safe);
+  }
+
+  // Default: avoid unnecessary attacks
+  const nonAttack = actions.filter(a => !a.id.startsWith("attack") && !a.id.startsWith("queued-attack"));
+  if (nonAttack.length) return randomBotAction(nonAttack);
+  return randomBotAction(actions);
+}
+
+function stepIntelligentBot() {
+  if (!botState.running) return;
+  if (botState.steps.length >= botState.maxTurns) { stopRandomBot("turn limit reached"); return; }
+
+  if (player.dead) {
+    summariseCurrentBotRun("player died before next action");
+    if (botState.steps.length >= botState.maxTurns) { stopRandomBot("turn limit reached after death"); return; }
+    resetGameForBot("previous run ended in death");
+  }
+
+  const actions = getRandomBotActions();
+  if (!actions.length) { addQAIssue("ERR_NO_VALID_ACTIONS", "error", {state: botActionSnapshot()}); stopRandomBot("no valid actions available"); return; }
+  const before = botActionSnapshot();
+  const actionList = actions.map(a => ({id: a.id, label: a.label, category: a.category}));
+  const action = chooseIntelligentBotAction(actions);
+  let error = null;
+  try { action.execute(); }
+  catch (err) {
+    error = err && err.stack ? err.stack : String(err);
+    addQAIssue("ERR_ACTION_EXCEPTION", "error", {action: action.id, label: action.label, error});
+    addDebugFlag("Intelligent bot action threw an error", {action: action.id, error});
+  }
+  const after = botActionSnapshot();
+  const step = {botStep: botState.steps.length + 1, runIndex: botState.runIndex, actionId: action.id, actionLabel: action.label, actionCategory: action.category, availableActionsBefore: actionList, before, after, error};
+  botState.steps.push(step);
+  botValidateStep(step);
+  if (error) { stopRandomBot("action error"); render(); return; }
+  if (player.dead) {
+    summariseCurrentBotRun("player died");
+    if (botState.steps.length >= botState.maxTurns) { stopRandomBot("turn limit reached after death"); return; }
+  }
+  updateBotStatus();
+}
+
+function runIntelligentBot() {
+  if (botState.running) return;
+  const limitInput = document.getElementById("botTurnLimit");
+  const requested = limitInput ? parseInt(limitInput.value, 10) : 1000;
+  botState.running = true;
+  botState.name = "IntelligentBot";
+  botState.maxTurns = clamp(Number.isFinite(requested) ? requested : 1000, 1, 10000);
+  botState.startTurn = player.turn;
+  botState.steps = [];
+  botState.runs = [];
+  botState.issues = [];
+  botState.runIndex = 1;
+  botState.currentRunStartStep = 1;
+  botState.currentRunStartTurn = player.turn;
+  botState.currentRunStartState = botActionSnapshot();
+  botState.deaths = 0;
+  botState.resets = 0;
+  botState.startedAt = new Date().toISOString();
+  botState.endedAt = null;
+  botState.stopReason = "running";
+  if (player.dead) resetGameForBot("run started while previous game was dead");
+  addLog(`Intelligent bot started for up to ${botState.maxTurns} actions across auto-reset runs.`, "minor");
+  addDebugTrace("bot-run-started", {maxTurns: botState.maxTurns, startState: botActionSnapshot()});
+  updateBotStatus();
+  botState.timer = window.setInterval(stepIntelligentBot, 80);
+}
+
+// ---------------------------------------------------------------------------
 
 function collectBotReport(includeDebugReport = true) {
   return {
@@ -13408,6 +13615,8 @@ const downloadDebugCompactButton = document.getElementById("downloadDebugCompact
 if (downloadDebugCompactButton) downloadDebugCompactButton.addEventListener("click", downloadDebugCompact);
 const runRandomBotButton = document.getElementById("runRandomBot");
 if (runRandomBotButton) runRandomBotButton.addEventListener("click", runRandomBot);
+const runIntelligentBotButton = document.getElementById("runIntelligentBot");
+if (runIntelligentBotButton) runIntelligentBotButton.addEventListener("click", runIntelligentBot);
 const stopRandomBotButton = document.getElementById("stopRandomBot");
 if (stopRandomBotButton) stopRandomBotButton.addEventListener("click", () => stopRandomBot("stopped by user"));
 const downloadBotReportButton = document.getElementById("downloadBotReport");
@@ -13476,6 +13685,8 @@ window.collectDebugReport = collectDebugReport;
 window.runRandomBot = runRandomBot;
 window.stopRandomBot = stopRandomBot;
 window.stepRandomBot = stepRandomBot;
+window.runIntelligentBot = runIntelligentBot;
+window.stepIntelligentBot = stepIntelligentBot;
 window.collectBotReport = collectBotReport;
 window.downloadBotReportCompact = downloadBotReportCompact;
 window.resetGameForPlayer = resetGameForPlayer;
