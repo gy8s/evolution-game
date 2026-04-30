@@ -1,4 +1,4 @@
-# Large generated QA/debug outputs
+# Large generated QA/debug outputs (outside logs/ folder)
 *.log
 *.tmp
 *_debug_*.txt
@@ -7,6 +7,10 @@
 *bot_report*.json
 *debug_report*.txt
 *debug_report*.json
+
+# Allow committed bot logs in the designated folder
+!logs/
+!logs/**
 
 # Local OS/editor noise
 .DS_Store
