@@ -11920,8 +11920,24 @@ function botDeathCauseFromRun(run) {
 
 function dedupeBotRunsByRunIndex(runs) {
   const input = Array.isArray(runs) ? runs : [];
-  const seen = new Set();
   const deduped = [];
+  const byRunIndex = new Map();
+
+  function botRunQualityScore(run) {
+    if (!run) return -1;
+    const finalState = run.finalState || {};
+    const deathContext = finalState.deathContext || (run.death && run.death.state && run.death.state.deathContext) || {};
+    const context = deathContext.context || {};
+    let score = 0;
+    if (finalState.dead) score += 50;
+    if (deathContext.encounterAtDeath && deathContext.encounterAtDeath.name) score += 40;
+    if (context.predator) score += 20;
+    if (context.source && String(context.source).toLowerCase() !== 'unknown') score += 10;
+    if (deathContext.message) score += 5;
+    if (typeof run.endTurn === 'number' && typeof run.startTurn === 'number') score += 2;
+    return score;
+  }
+
   input.forEach(run => {
     if (!run) return;
     const key = run.runIndex;
@@ -11929,10 +11945,20 @@ function dedupeBotRunsByRunIndex(runs) {
       deduped.push(run);
       return;
     }
-    if (seen.has(key)) return;
-    seen.add(key);
-    deduped.push(run);
+    const existingIndex = byRunIndex.get(key);
+    if (existingIndex === undefined) {
+      byRunIndex.set(key, deduped.length);
+      deduped.push(run);
+      return;
+    }
+    const existing = deduped[existingIndex];
+    const existingScore = botRunQualityScore(existing);
+    const nextScore = botRunQualityScore(run);
+    if (nextScore > existingScore) {
+      deduped[existingIndex] = run;
+    }
   });
+
   return deduped;
 }
 

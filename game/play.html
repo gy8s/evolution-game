@@ -11308,6 +11308,46 @@ function intelligentMoveTowardWater(actions) {
   return null;
 }
 
+
+function intelligentActionRiskScore(action) {
+  if (!action || !action.id) return 0;
+  const id = String(action.id);
+  if (id.startsWith("attack") || id.startsWith("queued-attack")) return 6;
+  if (id === "investigate") return 5;
+  if (id.startsWith("queued-investigate-")) return 5;
+  if (id === "eat" || id === "eat-carcass" || id.startsWith("queued-eat-")) return 4;
+  if (id === "wait") return 3;
+  return 0;
+}
+
+function intelligentPickLowestRisk(actions) {
+  if (!Array.isArray(actions) || !actions.length) return null;
+  const sorted = actions.slice().sort((a, b) => intelligentActionRiskScore(a) - intelligentActionRiskScore(b));
+  const safestScore = intelligentActionRiskScore(sorted[0]);
+  const safest = sorted.filter(a => intelligentActionRiskScore(a) === safestScore);
+  return randomBotAction(safest);
+}
+
+function intelligentEscapeWater(actions) {
+  const byId = Object.fromEntries(actions.map(a => [a.id, a]));
+  const dir = {
+    "move-northwest": [-1, -1], "move-north": [0, -1], "move-northeast": [1, -1],
+    "move-west": [-1, 0], "move-east": [1, 0],
+    "move-southwest": [-1, 1], "move-south": [0, 1], "move-southeast": [1, 1]
+  };
+  const landMoves = [];
+  for (const [id, delta] of Object.entries(dir)) {
+    const a = byId[id];
+    if (!a) continue;
+    const nx = player.x + delta[0];
+    const ny = player.y + delta[1];
+    if (nx < 0 || ny < 0 || nx >= WORLD_SIZE || ny >= WORLD_SIZE) continue;
+    if (terrainAt(nx, ny) !== 'water') landMoves.push(a);
+  }
+  if (!landMoves.length) return null;
+  return randomBotAction(landMoves);
+}
+
 function chooseIntelligentBotAction(actions) {
   const byId = Object.fromEntries(actions.map(a => [a.id, a]));
   const moveActions = actions.filter(a => a.id.startsWith("move-"));
@@ -11319,6 +11359,12 @@ function chooseIntelligentBotAction(actions) {
   const isSwarm = isPredatorDanger && enc && enc.temperament === "swarm";
   const isDangerous = isFatal || isPredatorDanger;
   const isMildDanger = dp && ["bite", "sting", "claw", "tail", "pinch", "rival"].includes(dp);
+
+  // Drowning prevention: if standing in water, immediately move to adjacent land when possible
+  if (waterState && waterState.inWater && moveActions.length) {
+    const landEscape = intelligentEscapeWater(actions);
+    if (landEscape) return landEscape;
+  }
 
   // Flee fatal encounters immediately
   if (isFatal && moveActions.length) return randomBotAction(moveActions);
@@ -11332,10 +11378,11 @@ function chooseIntelligentBotAction(actions) {
   // Critical hydration — drink now
   if (player.hydration <= 20 && byId["drink-water"]) return byId["drink-water"];
 
-  // Critical energy — eat the first safe option
+  // Critical energy — eat safe food if available, otherwise prioritise movement over risky foraging
   if (player.energy <= 20) {
     const eat = intelligentFindSafeEat(actions);
     if (eat) return eat;
+    if (moveActions.length) return randomBotAction(moveActions);
   }
 
   // Low hydration — drink
@@ -11347,8 +11394,15 @@ function chooseIntelligentBotAction(actions) {
     if (eat) return eat;
   }
 
-  // Injured — rest if no threat
-  if (player.fitness <= 35 && !activePursuit && !isDangerous && byId["wait"]) return byId["wait"];
+  // Poison/low-fitness caution — keep moving and avoid investigate/eat/attack churn
+  if ((player.poison || player.fitness <= 40) && !isDangerous) {
+    if (moveActions.length) return randomBotAction(moveActions);
+    const lowRisk = intelligentPickLowestRisk(actions.filter(a => !a.id.startsWith("attack") && !a.id.startsWith("queued-attack")));
+    if (lowRisk) return lowRisk;
+  }
+
+  // Injured — rest only when stable and not at water risk
+  if (player.fitness <= 35 && !activePursuit && !isDangerous && !waterState.inWater && byId["wait"]) return byId["wait"];
 
   // Moderate energy — eat if safe food is available
   if (player.energy <= 70) {
@@ -12127,8 +12181,24 @@ function botDeathCauseFromRun(run) {
 
 function dedupeBotRunsByRunIndex(runs) {
   const input = Array.isArray(runs) ? runs : [];
-  const seen = new Set();
   const deduped = [];
+  const byRunIndex = new Map();
+
+  function botRunQualityScore(run) {
+    if (!run) return -1;
+    const finalState = run.finalState || {};
+    const deathContext = finalState.deathContext || (run.death && run.death.state && run.death.state.deathContext) || {};
+    const context = deathContext.context || {};
+    let score = 0;
+    if (finalState.dead) score += 50;
+    if (deathContext.encounterAtDeath && deathContext.encounterAtDeath.name) score += 40;
+    if (context.predator) score += 20;
+    if (context.source && String(context.source).toLowerCase() !== 'unknown') score += 10;
+    if (deathContext.message) score += 5;
+    if (typeof run.endTurn === 'number' && typeof run.startTurn === 'number') score += 2;
+    return score;
+  }
+
   input.forEach(run => {
     if (!run) return;
     const key = run.runIndex;
@@ -12136,10 +12206,20 @@ function dedupeBotRunsByRunIndex(runs) {
       deduped.push(run);
       return;
     }
-    if (seen.has(key)) return;
-    seen.add(key);
-    deduped.push(run);
+    const existingIndex = byRunIndex.get(key);
+    if (existingIndex === undefined) {
+      byRunIndex.set(key, deduped.length);
+      deduped.push(run);
+      return;
+    }
+    const existing = deduped[existingIndex];
+    const existingScore = botRunQualityScore(existing);
+    const nextScore = botRunQualityScore(run);
+    if (nextScore > existingScore) {
+      deduped[existingIndex] = run;
+    }
   });
+
   return deduped;
 }
 
