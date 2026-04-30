@@ -11245,6 +11245,16 @@ function collectBotReport(includeDebugReport = true) {
   };
 }
 
+function botFileTimestamp(isoString) {
+  const d = isoString ? new Date(isoString) : new Date();
+  const pad = n => String(n).padStart(2, "0");
+  return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+}
+
+function botFileShortVersion() {
+  return GAME_VERSION.split("_")[0];
+}
+
 function downloadBotReport() {
   const report = collectBotReport(true);
   const actionText = report.actions.map(step => `#${step.botStep} run ${step.runIndex} ${step.actionLabel} | turn ${step.before.turn} -> ${step.after.turn} | pos X${step.before.x},Y${step.before.y},Z${step.before.z} -> X${step.after.x},Y${step.after.y},Z${step.after.z} | fitness ${step.before.fitness}->${step.after.fitness} | energy ${step.before.energy}->${step.after.energy} | hydration ${step.before.hydration}->${step.after.hydration}${step.error ? " | ERROR" : ""}`).join("\n") || "No actions recorded.";
@@ -11253,6 +11263,7 @@ function downloadBotReport() {
   const issueCountText = Object.entries(report.issueCounts).sort((a,b) => b[1]-a[1]).map(([code, count]) => `${code}: ${count}`).join("\n") || "No issue codes.";
   const lines = [
     "EVOLUTION GAME BOT QA REPORT",
+    `Game version: ${GAME_VERSION}`,
     `Bot: ${report.botName}`,
     `Started: ${report.startedAt || "not recorded"}`,
     `Ended: ${report.endedAt}`,
@@ -11282,9 +11293,8 @@ function downloadBotReport() {
   const blob = new Blob([lines], {type: "text/plain;charset=utf-8"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  const safeStep = String(report.stepsRun).padStart(4, "0");
   a.href = url;
-  a.download = `evolution_random_bot_qa_steps_${safeStep}_runs_${report.runsCompletedOrRecorded}.txt`;
+  a.download = `evolution_bot_full_${botFileShortVersion()}_${botFileTimestamp(report.startedAt)}.txt`;
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -11944,8 +11954,7 @@ function downloadBotReportCompact() {
     "Compact export intentionally omits per-step before/after snapshots, availableActionsBefore arrays, actions[], and embedded collectDebugReport() JSON. Use the full bot report only for targeted deep dives."
   ];
 
-  const safeStep = String(report.stepsRun).padStart(4, "0");
-  compactDownloadText(`evolution_bot_compact_steps_${safeStep}_runs_${report.runsCompletedOrRecorded}.txt`, lines);
+  compactDownloadText(`evolution_bot_compact_${botFileShortVersion()}_${botFileTimestamp(report.startedAt)}.txt`, lines);
 }
 // PATCH_COMPACT_LOG_EXPORTS_END
 
