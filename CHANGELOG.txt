@@ -11,6 +11,17 @@ Format:
 
 ==========================
 
+[2026-04-30 ~10:15 UTC | GPT]
+- Added `docs/bug-guardrails.md` to capture serious bugs/coding errors as
+  reusable lessons learned with future prevention checks.
+- Seeded the document with active guardrails for JavaScript syntax errors that
+  prevent game initialisation and missed CHANGELOG entries.
+- Updated `.github/pull_request_template.md` so every future PR must review the
+  bug guardrails document, confirm applicable checks, and add/update a guardrail
+  when a serious bug is fixed.
+- Documentation/workflow change only. No gameplay logic, UI/layout, bot/debug
+  behaviour, app-loading behaviour, or playable build code changed.
+
 [2026-04-30 ~10:05 UTC | GPT]
 - Added `.github/pull_request_template.md` so every future PR opens with a
   mandatory checklist.
