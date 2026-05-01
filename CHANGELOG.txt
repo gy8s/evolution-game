@@ -1,3 +1,13 @@
+[2026-05-01 patch19 | GPT]
+- Added `CONSENSUS_DIALOGUE_PLAN.txt` comparing four dialogue solution variants (v1-v4) and defining a consensus implementation plan.
+- Includes variant strengths/weaknesses, reject list, root-cause-oriented recommended approach, exact target functions/files, acceptance checks, and staged-PR recommendation.
+- Documentation/planning change only; no gameplay mechanics, spawn rates, bot logic, map generation, or survival-balance changes.
+
+[2026-05-01 patch18 | GPT]
+- Added `PLAYER_FACING_DIALOGUE_AUDIT.txt` as a full audit of player-facing dialogue sources.
+- Audit covers combat/damage, feeding/drinking, poison/alcohol/status, growth, perception/look/senses, encounter-card/multi-encounter UI text, group behaviour, raw debug/code leak risks, anti-pattern inventory, and a structural fix plan.
+- Documentation/audit change only; no gameplay mechanics, spawn rates, bot logic, map generation, or survival balance changes.
+
 [2026-05-01 patch17 | GPT]
 - Centralised/cleaned player-facing narrative output through shared sanitisation and narration text guards.
 - Removed raw debug/code leak and hardened object interpolation handling for narration/cue/log text.

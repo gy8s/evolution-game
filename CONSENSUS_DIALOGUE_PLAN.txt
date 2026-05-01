@@ -1,0 +1,140 @@
+CONSENSUS DIALOGUE PLAN
+Repo: gy8s/evolution-game
+Date: 2026-05-01 UTC
+Task: Compare four dialogue-audit/fix variants (v1-v4) and define consensus implementation plan.
+Status: Review/synthesis only. No merge or implementation in this step.
+
+Assumptions and evidence basis
+- The repository currently contains one finalized comparison/audit branch and one prior implementation branch.
+- "v1-v4" are treated as four sequential solution variants from recent iterations (text-narration pass, dedup/sensory polish, encounter narration logic cleanup, central sanitize/audit pass).
+- This synthesis uses the currently available code state + prior variant summaries.
+
+====================================================================
+COMPARISON TABLE
+====================================================================
+
+| Variant | Files changed (typical) | Scope | Strengths | Weaknesses | Missed requirements | Break risk | Root-cause vs surface | Gameplay-change risk |
+|---|---|---|---|---|---|---|---|---|
+| v1 (initial narration pass) | `game/play.html`, `CHANGELOG.txt` | Text wording + drink labels + look prose | Fast tone improvement; introduced context drink labels; started look prose helper | Mostly surface text edits; duplication + stale-warning architecture still present | Multi-channel dedupe, certainty tiers, central output control | Low-Med (many string touches) | Mostly surface | Low |
+| v2 (dedup/sensory polish) | `game/play.html`, `CHANGELOG.txt` | Cue/card split; sensory variants; investigation prose improvements | Better cue/card separation; reduced robotic repetition; improved uncertainty prose | Still many direct emitters (`addLog`/`setNarration`) across systems; no unified turn-output model | Full anti-pattern elimination, stack sequencing, single event channel | Medium | Mixed (partial root cause) | Low |
+| v3 (encounter logic cleanup) | `game/play.html`, `CHANGELOG.txt` | Encounter presentation noise reduction, focus removal, plausibility guard, wasp/constrictor lines | Tackled systemic presentation noise (`Focus`, "same tile", stack text); fixed implausible feeding class | Outcome sequencing still fragmented; several number-first and generic combat lines remained | Centralized controller, full status/combat/feed normalization | Medium | Mixed | Low-Med (touches encounter flow presentation) |
+| v4 (sanitization + audit pass) | `game/play.html`, `PLAYER_FACING_DIALOGUE_AUDIT.txt`, `CHANGELOG.txt` | Added sanitization guard; broad inventory of bad templates; removed code leak class | Best root-cause direction: safety gate + explicit full audit + architectural plan | Not full implementation of central narrative controller yet; still many direct legacy templates | Unified event model + builder pipeline | Medium (broad hooks in output path) | Most root-cause aligned | Low (if bounded to presentation only) |
+
+====================================================================
+BEST IDEAS TO KEEP
+====================================================================
+
+1) Best from v1
+- Context-safe drink labels and water-source wording discipline.
+- Initial look narration helper insertion and tone guard comment.
+
+2) Best from v2
+- Separation model: short sensory cue vs encounter card detail vs investigation interpretation.
+- Sensory variation pools for non-repetitive perception.
+
+3) Best from v3
+- Remove player-facing queue/focus/system-noise labels.
+- Plausibility guard pattern for impossible feeding pairings.
+- Better threat-specific narration (e.g., constrictor/wasp handling paths).
+
+4) Best from v4
+- `sanitizeNarrativeText()` as output safety gate.
+- Full audit inventory (`PLAYER_FACING_DIALOGUE_AUDIT.txt`) with anti-pattern map and function-level hotspots.
+- Clear root-cause framing: many independent text emitters need central orchestration.
+
+====================================================================
+THINGS TO REJECT BY VARIANT
+====================================================================
+
+Reject from v1
+- One-off string replacement approach without architecture changes.
+
+Reject from v2
+- Treating duplication mainly as wording problem rather than channel ownership problem.
+
+Reject from v3
+- Ad-hoc narrative cleanup in many isolated functions without common event/output contract.
+
+Reject from v4
+- Expanding sanitization usage without completing event-assembly architecture can hide but not solve all coherence issues.
+
+====================================================================
+FINAL RECOMMENDED APPROACH
+====================================================================
+
+Adopt v4 as base, then execute staged architecture refactor:
+A) Build a single turn-output controller (presentation layer only).
+B) Convert major systems to emit structured events, not direct prose.
+C) Generate channels once per turn:
+   - primary event box
+   - scene continuity
+   - sense lines
+   - encounter card detail
+D) Keep numbers in stats/debug channels, not primary prose.
+E) Maintain uncertainty tiers for perception/threat warnings.
+
+====================================================================
+EXACT FILES/FUNCTIONS TO CHANGE (NEXT IMPLEMENTATION PATCH)
+====================================================================
+
+Primary target
+- `game/play.html`
+
+Phase 1 (output boundary + channel ownership)
+- `addLog()`
+- `setNarration()`
+- `renderSenses()`
+- `renderLogPanel()` / outcome panel helpers
+- `formatCueText()`
+
+Phase 2 (event emitters to structured events)
+- Combat: `attack()`, `exposeCarelessActionToThreat()`, predator reaction functions
+- Feeding: `eat()`, `eatCarcass()`, `drinkWater()`, swarm handlers
+- Conditions: `tickPoison()`, `tickAlcohol()`, `applyPoison()`, growth block in turn progression
+- Group: `changeGroupCohesion()`, `stressGroupForRisk()`
+- Perception: `lookAround()`, remote-sense builders (`makeClue`, ambient cue generators)
+- Encounter stack/UI: `setTileEncounterStack()`, queued card render helpers
+
+Phase 3 (new helpers to add)
+- `buildTurnNarrative(events, state)`
+- `buildCombatNarrative(event, state)`
+- `buildFeedingNarrative(event, state)`
+- `buildConditionNarrative(event, state)`
+- `buildGrowthNarrative(event, state)`
+- `buildGroupNarrative(event, state)`
+- `buildSenseLines(state, events)`
+- `suppressDuplicateNarration(lines)`
+
+Documentation support
+- `PLAYER_FACING_DIALOGUE_AUDIT.txt` (keep updated as checklist)
+- `CHANGELOG.txt` entry per patch stage
+
+====================================================================
+SPECIFIC ACCEPTANCE CHECKS (FOR IMPLEMENTATION PRs)
+====================================================================
+
+1. No raw JS/debug leaks in UI text.
+2. No `[object Object]` in any player-facing channel.
+3. No non-water "Drink from water" labels on food resources.
+4. No player-facing system labels: "Encounter:", "Main threat/opportunity", "Also in this tile", "same tile:".
+5. Look output appears once per turn action (no scene/sense replay dump).
+6. No number-first primary narration for damage/energy/hydration/poison/alcohol/growth/cohesion.
+7. Damage narration includes physical mechanism.
+8. Group hunting/injury narration differs from solo where applicable.
+9. Threat language certainty scales with visibility/actionability.
+10. Syntax check passes (`node scripts/check_html_js_syntax.mjs`).
+11. Browser smoke check verifies map/status/actions/cards render.
+
+====================================================================
+ONE PATCH OR STAGED?
+====================================================================
+
+Recommendation: STAGED PRs (3 stages)
+- Stage 1: Output channel ownership + dedupe guardrails (lowest risk)
+- Stage 2: Structured event emitters for combat/feed/conditions/group
+- Stage 3: Perception certainty + multi-outcome sequencing polish
+
+Why staged
+- Safer rollback and reviewability.
+- Reduces regression risk in a large monolithic HTML script.
+- Aligns with repo policy favoring focused patches.
