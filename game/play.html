@@ -11115,7 +11115,8 @@ function summariseCurrentBotRun(reason) {
     E: s.before ? s.before.energy : null,
     H: s.before ? s.before.hydration : null,
     enc: s.before && s.before.encounter ? s.before.encounter.name : null,
-    pursuit: s.before ? !!s.before.activePursuit : null
+    pursuit: s.before ? !!s.before.activePursuit : null,
+    mode: s.mode || null
   }));
   const run = {
     runIndex: botState.runIndex,
@@ -11302,6 +11303,8 @@ function intelligentForageBlocked(e) {
   if (FORAGE_BLACKLIST.has(String(e.name || "").toLowerCase())) return true;
   // Block any forage whose encounter object already exposes a moderate-or-worse poison
   if (e.poison && e.poison.rank >= 2) return true;
+  // Any poison is dangerous when fitness is critically low — mild poison can be fatal at F<=15
+  if (e.poison && e.poison.rank >= 1 && (player.fitness || 0) <= 15) return true;
   // Block anything with a guardian spawn mechanic
   if (e.guardianKey || e.guardianChance) return true;
   return false;
@@ -11473,14 +11476,16 @@ function hasRecentAerialThreat() {
   const m = botState.memory;
   if (!m || !m.recentThreats.length) return false;
   const now = player.turn;
-  return m.recentThreats.some(t => (now - t.turn) <= 20 && t.pursuitType === 'air');
+  // t.turn <= now guards against cross-run false positives when player.turn resets to 0
+  return m.recentThreats.some(t => t.turn <= now && (now - t.turn) <= 20 && t.pursuitType === 'air');
 }
 
 function hasRecentGroundThreat() {
   const m = botState.memory;
   if (!m || !m.recentThreats.length) return false;
   const now = player.turn;
-  return m.recentThreats.some(t => (now - t.turn) <= 15 &&
+  // t.turn <= now guards against cross-run false positives when player.turn resets to 0
+  return m.recentThreats.some(t => t.turn <= now && (now - t.turn) <= 15 &&
     (t.dangerProfile === 'fatal' || t.pursuitType === 'ground' || t.pursuitType === 'climber'));
 }
 
@@ -11511,6 +11516,7 @@ function chooseIntelligentBotAction(actions) {
   }
 
   const mode = determineIntelligentBotMode(threat);
+  botState._lastMode = mode;
 
   if (mode === "EMERGENCY_ESCAPE") {
     const escapeThreat = activeThreat || threat;
@@ -11532,8 +11538,8 @@ function chooseIntelligentBotAction(actions) {
     if ((player.parasites || 0) >= 1 && byId["groom"]) return byId["groom"];
     // Critical hydration — drink immediately
     if (player.hydration <= 20 && byId["drink-water"]) return byId["drink-water"];
-    // Critical energy — eat safe food immediately before doing anything else
-    if (player.energy <= 10) {
+    // Critical energy — eat safe food before water-seeking or movement (resource-anchor)
+    if (player.energy <= 20) {
       const eat = intelligentFindSafeEat(actions);
       if (eat) return eat;
     }
@@ -11592,11 +11598,20 @@ function chooseIntelligentBotAction(actions) {
     if (landMoves.length) return randomBotAction(landMoves);
     if (moveActions.length) return randomBotAction(moveActions);
     // Hard fallback: at E=0 or H=0 never fall through to EXPLORE
+    // Guardian-risk and poison food must remain blocked even in desperation
     if (player.energy <= 0 || player.hydration <= 0) {
-      const survival = actions.filter(a =>
-        !a.id.startsWith("attack") && !a.id.startsWith("queued-attack") &&
-        !["look", "call", "sleep", "wait", "investigate"].includes(a.id) &&
-        !a.id.startsWith("queued-investigate"));
+      const survival = actions.filter(a => {
+        if (a.id.startsWith("attack") || a.id.startsWith("queued-attack")) return false;
+        if (["look", "call", "sleep", "wait", "investigate"].includes(a.id)) return false;
+        if (a.id.startsWith("queued-investigate")) return false;
+        if (a.id === "eat" && currentEncounter && intelligentForageBlocked(currentEncounter)) return false;
+        if (a.id.startsWith("queued-eat-")) {
+          const idx = parseInt(a.id.replace("queued-eat-", ""), 10);
+          const q = Array.isArray(tileEncounterQueue) ? tileEncounterQueue[idx] : null;
+          if (intelligentForageBlocked(q)) return false;
+        }
+        return true;
+      });
       return randomBotAction(survival.length ? survival : actions);
     }
   }
@@ -11668,7 +11683,9 @@ function chooseIntelligentBotAction(actions) {
   if (!urgentNeedsGround && !hasRecentAerialThreat() && climbAction) return climbAction;
   const nonAttack = actions.filter(a => {
     if (a.id.startsWith("attack") || a.id.startsWith("queued-attack")) return false;
-    if (!urgentNeedsGround && a.id === "descend") return false;
+    // Only descend when thirsty; WATER_PLAN owns descent for water access, so in EXPLORE/SAFE_FORAGE
+    // fallthrough (H always >50 here) descent is almost never justified and risks ground predators
+    if (a.id === "descend" && player.hydration > 50) return false;
     // Block blacklisted forage in explore too — prevents ant trail eat via nonAttack path
     if (a.id === "eat" && currentEncounter && intelligentForageBlocked(currentEncounter)) return false;
     if (a.id.startsWith("queued-eat-")) {
@@ -11707,7 +11724,7 @@ function stepIntelligentBot() {
     addDebugFlag("Intelligent bot action threw an error", {action: action.id, error});
   }
   const after = botActionSnapshot();
-  const step = {botStep: botState.steps.length + 1, runIndex: botState.runIndex, actionId: action.id, actionLabel: action.label, actionCategory: action.category, availableActionsBefore: actionList, before, after, error};
+  const step = {botStep: botState.steps.length + 1, runIndex: botState.runIndex, actionId: action.id, actionLabel: action.label, actionCategory: action.category, availableActionsBefore: actionList, before, after, error, mode: botState._lastMode || null};
   botState.steps.push(step);
   botValidateStep(step);
   if (error) { stopRandomBot("action error"); render(); return; }
@@ -12401,7 +12418,7 @@ function compactRunLine(run) {
   const finalState = run.finalState || {};
   const deathContext = finalState.deathContext || (run.death && run.death.state && run.death.state.deathContext) || null;
   const traceStr = Array.isArray(run.terminalTrace) && run.terminalTrace.length
-    ? run.terminalTrace.map(t => `[${t.botStep}:${t.action}|${t.layer}|F${t.F}/E${t.E}/H${t.H}${t.enc ? '|enc:'+t.enc : ''}${t.pursuit ? '|PURSUIT' : ''}]`).join(' ')
+    ? run.terminalTrace.map(t => `[${t.botStep}:${t.action}|${t.layer}|F${t.F}/E${t.E}/H${t.H}${t.enc ? '|enc:'+t.enc : ''}${t.pursuit ? '|PURSUIT' : ''}${t.mode ? '|'+t.mode : ''}]`).join(' ')
     : null;
   return `Run ${run.runIndex}: reason=${run.reason}; steps=${run.steps}; botSteps=${run.startBotStep}->${run.endBotStep}; turns=${run.startTurn}->${run.endTurn}; dead=${finalState.dead}; F=${finalState.fitness}; E=${finalState.energy}; H=${finalState.hydration}; issues=${run.issues ? run.issues.length : 0}; deathContext=${deathContext ? compactSafeString(deathContext, 500) : "none"}${traceStr ? '\n  terminalTrace: ' + traceStr : ''}`;
 }

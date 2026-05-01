@@ -169,4 +169,34 @@ You do not deviate from this flow.
 
 ---
 
+## 11. BOT LOG LOCATION AND REVIEW PROCESS
+
+Committed bot logs live in:
+
+`logs/bot-runs/<RUN_ID>/`
+
+Each run folder normally contains:
+- `compact.txt` — primary review file
+- `meta.json` — run metadata
+- `full.txt` — only when retained; often intentionally pruned
+
+To find the latest bot log:
+1. Fetch/pull latest `main`.
+2. List `logs/bot-runs/`.
+3. Choose the newest timestamped folder.
+4. Read `compact.txt`.
+5. Compare against previous relevant run folders.
+
+Do not say a log is unavailable just because it is not in the local checkout.
+First update from `main` or check the remote repo.
+
+Current important recent logs:
+- `logs/bot-runs/20260430-224611/compact.txt` — pre-Patch10 baseline
+- `logs/bot-runs/20260430-235932/compact.txt` — post-Patch10 regression
+- `logs/bot-runs/20260501-082425/compact.txt` — post-Patch11 improvement
+
+Analysis should usually be returned in chat, not written into `logs/consolidated`, unless George explicitly authorises a repo report.
+
+---
+
 END
