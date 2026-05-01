@@ -1,3 +1,10 @@
+[2026-05-01 patch12b | Claude]
+IntelligentBot mode telemetry fix — Codex P2 from PR #30.
+- Fixed stale mode in terminalTrace on drowning-escape turns. chooseIntelligentBotAction() now clears botState._lastMode to null at function entry so no early return can leave a previous turn's mode in the step record. The drowning fast-path explicitly sets _lastMode = "EMERGENCY_ESCAPE" before returning the land-escape action.
+- Bot/debug tools change only. Gameplay logic, UI/layout, and app-loading behaviour not changed.
+- game/evolution_game_v66_57.html NOT updated — archived reference version only.
+- Syntax check: PASS. Browser smoke check not performed by Claude — must be verified before merging.
+
 [2026-05-01 00:20 UTC | GPT-5.3-Codex]
 - Verified deployment entrypoint: `index.html` meta-refresh serves `game/play.html` for GitHub Pages root.
 - Performed repository-wide tracked-file searches for bleed literals and confirmed runtime logic occurrences remain only inside intended script code (plus audit documentation text), with no out-of-script HTML leak fragment.

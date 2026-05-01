@@ -11572,6 +11572,8 @@ function chooseIntelligentBotAction(actions) {
   const descendAction = byId["descend"] || null;
   const urgentNeedsGround = player.hydration <= 30 || player.energy <= 25;
 
+  botState._lastMode = null; // clear stale mode before any early return
+
   const enc = currentEncounter;
   const threat = classifyThreat(enc);
   const pursuitThreat = activePursuit ? classifyThreat(activePursuit) : null;
@@ -11580,7 +11582,7 @@ function chooseIntelligentBotAction(actions) {
   // Drowning: escape water before anything else
   if (waterState && waterState.inWater && moveActions.length) {
     const landEscape = intelligentEscapeWater(actions);
-    if (landEscape) return landEscape;
+    if (landEscape) { botState._lastMode = "EMERGENCY_ESCAPE"; return landEscape; }
   }
 
   const mode = determineIntelligentBotMode(threat);
