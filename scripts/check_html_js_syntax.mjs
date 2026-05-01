@@ -38,6 +38,43 @@ function extractMetaRefreshUrl(html) {
   return m ? m[1] : null;
 }
 
+
+function stripNonVisibleBlocks(html) {
+  return html
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<!--([\s\S]*?)-->/g, ' ');
+}
+
+function htmlToVisibleText(html) {
+  const stripped = stripNonVisibleBlocks(html);
+  return stripped
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function assertNoBleedVisibleText(file, html) {
+  const visible = htmlToVisibleText(html);
+  const forbidden = [
+    /actorSize/i,
+    /victimSize/i,
+    /const\s+actorSize/i,
+    /needle-billed\|hummingbird\|orchid bee/i
+  ];
+
+  for (const pattern of forbidden) {
+    if (pattern.test(visible)) {
+      console.error(`ERROR: ${file} visible HTML contains forbidden bleed text matching ${pattern}`);
+      return false;
+    }
+  }
+
+  return true;
+}
+
 let hasError = false;
 
 // --- Check index.html meta-refresh points to game/play.html ---
@@ -76,6 +113,9 @@ for (const file of getGameHtmlFiles()) {
   }
 
   const html = readFileSync(file, 'utf8');
+  if (!assertNoBleedVisibleText(file, html)) {
+    hasError = true;
+  }
   const blocks = extractScriptBlocks(html);
 
   if (blocks.length === 0) {
