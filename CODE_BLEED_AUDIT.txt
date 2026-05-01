@@ -1,0 +1,43 @@
+CODE BLEEDTHROUGH AUDIT REPORT
+Date: 2026-05-01
+Target: game/play.html
+
+1) game/play.html:3362 (addLog message sanitization)
+- Type: non-string/object/function leak risk into player log.
+- Issue: addLog previously relied on sanitizeNarrativeText only; function/object inputs could degrade inconsistently.
+- Fixed: YES.
+- Change: routed log message + debug rawMessage through safeNarrativeText (ensureNarrativeString -> cleanNarrative).
+
+2) game/play.html:3421 (setNarration input path)
+- Type: code-like/debug string leak risk into narration.
+- Issue: narration accepted raw values after basic sanitize pass.
+- Fixed: YES.
+- Change: setNarration now uses safeNarrativeText before parsing or assigning.
+
+3) game/play.html:3454-3460 (heard/smell cue sources)
+- Type: non-string cue source leak risk.
+- Issue: setHeard/setSmell stored raw values used later in cue rendering.
+- Fixed: YES.
+- Change: both setters now normalize through safeNarrativeText.
+
+4) game/play.html:4957 (formatCueText)
+- Type: cue text bleed risk.
+- Issue: formatter accepted arbitrary values and only ran legacy sanitizer.
+- Fixed: YES.
+- Change: formatter now begins with safeNarrativeText.
+
+5) game/play.html:13439-13501 (encounter card and investigation text)
+- Type: encounter card text/object leak + code-like debug leak risk.
+- Issue: encounter seen text and investigation text were interpolated into card HTML from potentially unsafe values.
+- Fixed: YES.
+- Change: added safeNarrativeText wrapping for encounterSeenText, seeCueText, and investigationText in floating/card/carcass blocks.
+
+Mandatory guard layer implemented:
+- ensureNarrativeString(input)
+- containsCodeLikeText(str)
+- cleanNarrative(str)
+- safeNarrativeText(input, fallback)
+
+Scope note:
+- No gameplay logic or UI layout changes made.
+- Changes limited to output safety / narrative integrity paths.
