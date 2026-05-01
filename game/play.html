@@ -14241,3 +14241,7 @@ function hasNearbyTag(x, y, tag, radius=3) {
 </script>
 </body>
 </html>
+  const actorSize = Number(actor.size || 1);
+  const victimSize = Number(victim.size || 1);
+  if (/needle-billed|hummingbird|orchid bee/.test(actorText) && (victim.kind === "animal" || victim.kind === "carcass")) return false;
+  if (/bird/.test(actorText) && actorSize <= 3 && (victim.kind === "animal" || victim.kind === "carcass") && victimSize >= 3) return false;
