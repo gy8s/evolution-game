@@ -11517,10 +11517,13 @@ function chooseIntelligentBotAction(actions) {
     const escape = threatAwareEscape(actions, escapeThreat);
     if (escape) return escape;
     if (moveActions.length) return randomBotAction(moveActions);
-    // Hard fallback: never fall through silently — pick any non-attack non-idle action
+    // Hard fallback: never fall through silently — pick any non-attack non-idle action.
+    // Also exclude descend when ground is recently dangerous (mirrors threatAwareEscape logic).
+    const groundDangerous = hasRecentGroundThreat();
     const anyEscape = actions.filter(a =>
       !a.id.startsWith("attack") && !a.id.startsWith("queued-attack") &&
-      !["look", "call", "sleep", "wait"].includes(a.id));
+      !["look", "call", "sleep", "wait"].includes(a.id) &&
+      !(groundDangerous && a.id === "descend"));
     return randomBotAction(anyEscape.length ? anyEscape : actions);
   }
 
@@ -11619,7 +11622,9 @@ function chooseIntelligentBotAction(actions) {
       if (goalMove && (player.turn - m.currentGoal.turn) <= 8) return goalMove;
     }
     m.currentGoal = null;
-    // Keep moving laterally — do not descend to ground (ground predators may be present)
+    // Descend toward ground to unlock drink-water (requires z=0), but only if ground is safe
+    if (descendAction && player.z > 0 && !hasRecentGroundThreat()) return descendAction;
+    // Ground is dangerous or already at ground — keep moving laterally
     if (moveActions.length) {
       const landMoves = moveActions.filter(a => {
         const dir = a.id.replace("move-", "");
