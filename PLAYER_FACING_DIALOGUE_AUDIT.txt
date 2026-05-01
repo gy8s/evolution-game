@@ -1,0 +1,303 @@
+PLAYER-FACING DIALOGUE AUDIT
+Repo: gy8s/evolution-game
+Date: 2026-05-01 (UTC)
+Scope: Full player-facing text-source audit (no gameplay/balance changes in this patch)
+
+Method
+- Audited whole repository text sources with targeted search + direct source inspection.
+- Primary player-facing runtime text is concentrated in `game/play.html`.
+- Searched for emitters (`addLog`, `setNarration`, cue/card render paths) and known anti-pattern templates.
+
+====================================================================
+1) COMBAT / DAMAGE TEXT
+====================================================================
+
+1.1 Generic "Damage: X" templates
+- File: game/play.html
+- Function(s): `resolveLianaBridgeCrossing`, `largeConstrictorCloseInvestigationReaction`, `attack`, predator reaction blocks
+- Current templates (examples):
+  - "The lianas slip under you... Damage: ${damage}." (L2763)
+  - "...reacts to your close attention and coils. Damage: ${damage}." (L9488)
+  - "...but it turns the attack into a coil. Damage: ${damage}." (L10032)
+  - "...but it strikes as you close. Damage: ${damage}." (L10047)
+  - "You fail to kill ... Damage: ${damage}." (L10134)
+- Why bad:
+  - Number-first and mechanism-light.
+  - Mixes UI-stat reporting with narrative channel.
+- Replacement pattern:
+  - Physical mechanism first, numbers in stat UI/debug only.
+  - e.g. constrictor: coil pressure; spider: fangs; wasp: sting; bird: claws/wing buffet; fall: impact.
+
+1.2 Generic kill/fail outcomes
+- File: game/play.html
+- Function: `attack`
+- Current templates:
+  - "You kill the ${target.name}, but take ${damage} damage." (L10110)
+  - "You catch the ${target.name} before it reaches cover. The struggle is brief." (L10114)
+  - "You fail to kill the ${target.name}..." (L10134, L10141)
+  - "Attack failed. The ${target.name} escapes." (L10064)
+- Why bad:
+  - Outcome clarity exists, but repeated skeletal structure remains.
+  - Does not consistently encode causal mechanism of injury.
+- Replacement pattern:
+  - Structured combat narrative builder:
+    1) action intent, 2) contact moment, 3) return harm mechanism, 4) resolution.
+
+1.3 Predator/event damage without mechanism detail
+- File: game/play.html
+- Function(s): water risk, peril checks, pursuit reactions
+- Current templates:
+  - "Drowning risk: fitness -${damage}." (L2924)
+  - "The ${e.name} attacks. Damage: ${damage}." (L8450, L8470)
+- Why bad:
+  - Simulation math surfaced directly in primary channel.
+- Replacement pattern:
+  - Describe physical event (lungs/breath/fall/impact/bite) and leave deltas to UI/debug.
+
+====================================================================
+2) FEEDING / EATING / DRINKING TEXT
+====================================================================
+
+2.1 Numeric feeding templates (energy/hydration deltas)
+- File: game/play.html
+- Function(s): `pickOffSwarmIndividuals`, `concealFocusedFood`, `eat`, `eatCarcass`, `drinkWater`
+- Current templates (examples):
+  - "Energy +${...}, fitness -${...}" (L7163, L7165, L7167, L10428)
+  - "...full benefit... Energy +... Hydration +..." (L7433, L7437)
+  - "You drink ... Energy -${energyLoss}.${hydrationText(gain)}" (L10346, L10365)
+- Why bad:
+  - Numbers dominate prose and create mechanical tone.
+- Replacement pattern:
+  - Narrative-first feeding/drinking line; values shown in status chips / optional compact summary panel.
+
+2.2 Drink verb misuse risk
+- File: game/play.html
+- Function: `eat`
+- Current template:
+  - `eatVerb = hydration > energy ? "drink from" : "eat"` (L10546)
+- Why bad:
+  - Can still produce awkward food wording for high-hydration food items.
+- Replacement pattern:
+  - Action labels and verbs should be source-typed:
+    - water sources => drink,
+    - food/nest/carcass => eat/feed.
+
+2.3 Flat carcass/feed lines
+- File: game/play.html
+- Function: `eatCarcass`
+- Current templates:
+  - "You feed from the ${carcass.name} while keeping watch..." (L10583)
+  - Rot follow-up lines often generic.
+- Why bad:
+  - Better than older text, but still templated and repeated in long runs.
+- Replacement pattern:
+  - Rot stage-specific narration pool + risk continuity without stat deltas.
+
+====================================================================
+3) POISON / ALCOHOL / STATUS TEXT
+====================================================================
+
+3.1 Poison status text still system-like in places
+- File: game/play.html
+- Function(s): `tickPoison`, `applyPoison`
+- Current templates:
+  - "Critical poisoning: ${turns} turns to find a remedy." (L3944)
+  - "Poison worsens: ${severity}." / "Poisoned: ${severity}." (L10740)
+- Why bad:
+  - Exposes severity labels/duration in primary channel.
+- Replacement pattern:
+  - Experience-first progression language; severity/duration in UI chip.
+
+3.2 Alcohol duration/mechanic exposure
+- File: game/play.html
+- Function(s): `tickAlcohol`, status chip text
+- Current templates:
+  - "...still has not passed." (improved prose, L3992)
+  - UI detail: `${turns} turns; senses/reactions down` (L13163)
+- Why bad:
+  - Main narrative mostly improved; UI detail acceptable, but ensure no narrative channel duplication of durations.
+- Replacement pattern:
+  - Keep durations only in UI/status panel; narrative stays sensory.
+
+====================================================================
+4) GROWTH / STAT PROGRESSION TEXT
+====================================================================
+
+4.1 Growth still split between prose and hidden numeric event
+- File: game/play.html
+- Function: turn progression/growth block
+- Current templates:
+  - "You feel growth in your frame..." (L3820)
+  - plus internal numeric size update before narration.
+- Why flagged:
+  - Narrative line is good, but architecture still direct from system block rather than centralized output controller.
+- Replacement pattern:
+  - Route growth event through unified narrative event builder with optional secondary UI stat delta.
+
+====================================================================
+5) PERCEPTION / LOOK / SENSES TEXT
+====================================================================
+
+5.1 Over-certain threat guidance in probabilistic look results
+- File: game/play.html
+- Function: `composeLookNarration`, `lookAround`
+- Current templates:
+  - "Treat this as active risk..." (L12873)
+  - certainty phrases generated from probabilistic checks (L12965-L12969)
+- Why bad:
+  - Better than prior, but certainty language can still over-read stale/moving cues.
+- Replacement pattern:
+  - certainty tiers tied to visibility/reachability/actionability.
+
+5.2 Duplicate cue construction pathways
+- File: game/play.html
+- Function(s): `lookAround`, `renderSenses`, `updateRemoteSenses`
+- Current issue:
+  - Multiple systems can narrate similar signals in same turn (look + ambient + encounter reveal).
+- Why bad:
+  - Can reintroduce duplication and contradictory emphasis.
+- Replacement pattern:
+  - Single turn narrative controller that assembles channel outputs once per turn.
+
+5.3 Repetitive sensory pools still possible
+- File: game/play.html
+- Function(s): `makeClue`, `randomAmbientSound`, `randomAmbientSmell`
+- Current issue:
+  - Variation exists but no de-dup merge by semantic class (e.g., repeated musk/rot cues from multiple dirs).
+- Replacement pattern:
+  - Same-turn semantic dedupe + merge line ("from multiple directions...").
+
+====================================================================
+6) ENCOUNTER CARDS / MULTI-ENCOUNTER UI TEXT
+====================================================================
+
+6.1 Residual system-structure language in encounter stacking
+- File: game/play.html
+- Function: `setTileEncounterStack`
+- Current templates:
+  - "You notice several things at once... is closest." (L7595)
+  - "Several encounters overlap here... is nearest." (L7600)
+- Why bad:
+  - Still narrates list-management rather than ecological scene relation.
+- Replacement pattern:
+  - Relationship narration (e.g., wasp over torn fruit) via pairing/scene synthesis.
+
+6.2 Card/cue duplication risk persists via fallbacks
+- File: game/play.html
+- Function(s): `shortEncounterCue`, `cardDetailForEncounter`, card render
+- Current issue:
+  - Improved, but fallbacks can still collapse into similar lines for under-authored entities.
+- Replacement pattern:
+  - Enforce channel separation: cue short factual, card behavioral detail, narration atmospheric.
+
+====================================================================
+7) GROUP BEHAVIOUR TEXT
+====================================================================
+
+7.1 Group cohesion messaging still centralized but generic
+- File: game/play.html
+- Function: `changeGroupCohesion`
+- Current templates:
+  - "The group hesitates around you; trust thins..." (L5874)
+  - "...moves with you more confidently." (L5875)
+- Why bad:
+  - Better than numeric logs; still low variety across contexts.
+- Replacement pattern:
+  - Context-aware variants based on trigger (food error, failed hunt, repeated risk, abandonment).
+
+7.2 Group injury text improved but not tied to cause-specific mechanism
+- File: game/play.html
+- Function: `stressGroupForRisk`
+- Current template:
+  - "...takes the worst of it and pulls back injured." (L5924)
+- Why bad:
+  - Lacks attacker-specific mechanism and can feel generic.
+- Replacement pattern:
+  - Cause-bound variants (fangs, sting, fall, crush, bite).
+
+====================================================================
+8) RAW DEBUG / CODE LEAK SOURCES
+====================================================================
+
+8.1 Historical raw JS leak vector confirmed
+- File: game/play.html
+- Prior observed leak string: `const actorSize = Number(actor.size || 1);`
+- Root-risk class:
+  - Broken file tail or unresolved merge artifacts can render literal code in DOM.
+- Current mitigation:
+  - Stray tail snippet removed in recent patch; syntax check gate catches parse breaks.
+- Additional recommendation:
+  - Add CI/content guard scanning for forbidden tokens in rendered text payloads.
+
+8.2 Object interpolation leak class
+- File: game/play.html
+- Path(s): narration/cue formatting
+- Risk:
+  - `[object Object]` when non-string interpolated.
+- Current mitigation:
+  - `sanitizeNarrativeText()` now guards addLog/setNarration/formatCueText.
+- Remaining risk:
+  - Any direct template string outside these pathways.
+
+====================================================================
+9) GLOBAL ANTI-PATTERN INVENTORY
+====================================================================
+
+A) Number-first narration (damage/energy/hydration turns/severity).
+B) System labels in prose (encounter structure wording, nearest/closest management text).
+C) Generic kill/fail attack formulas without physical mechanism.
+D) Multi-outcome stacking as separate unrelated lines rather than linked sequence.
+E) Perception certainty mismatch (probabilistic signs narrated too strongly).
+F) Sensory duplication within same turn from independent emitters.
+G) Insufficient encounter-channel contract (event box vs scene vs senses vs card).
+H) Direct string emission from many subsystems (no single narrative controller).
+
+====================================================================
+10) FIX PLAN (STRUCTURAL)
+====================================================================
+
+Priority 1 — Create a single narrative output controller
+- Add central builder in `game/play.html` (or split module in later refactor):
+  - `buildTurnNarrative(events, state)`
+  - `emitPrimaryEvent(text)`
+  - `emitSceneContinuity(text)`
+  - `emitSenseLines({see,hear,smell})`
+  - `emitEncounterCards(encounters)`
+- Enforce one write pass per turn/channel, not ad-hoc `addLog` everywhere.
+
+Priority 2 — Event model standardization
+- Convert core systems to emit structured events:
+  - combat, feeding, conditions, growth, group, perception, hazards.
+- Each event carries:
+  - actor/target/cause/mechanism/certainty/visibility/actionability.
+
+Priority 3 — Narrative builders by domain
+- `buildCombatNarrative(event)` with mechanism dictionaries by species/profile.
+- `buildFeedingNarrative(event)` source-aware (water vs carcass vs fruit vs nest).
+- `buildConditionNarrative(event)` poison/alcohol progression language.
+- `buildGroupNarrative(event)` observed behavior style.
+- `buildPerceptionNarrative(event)` certainty-scaled phrasing.
+
+Priority 4 — De-duplication and suppression
+- `suppressDuplicateNarration(lines)` semantic dedupe by class+direction.
+- Same-turn merge for smell/hear classes.
+- Prevent channel repeats of same sentence root.
+
+Priority 5 — Safe text boundary
+- Keep `sanitizeNarrativeText` as final output gate for all user-visible channels.
+- Add test/check for banned patterns in player text:
+  - `[object Object]`, `Damage:`, `Energy +`, `Hydration +`, `Encounter:` etc.
+
+Priority 6 — What is string replacement vs refactor
+- String-only quick wins:
+  - residual `Damage:` and `Energy +` phrases.
+  - residual structure labels (nearest/closest phrasing).
+- Structural refactor required:
+  - multi-outcome coherence,
+  - certainty scaling,
+  - cross-channel dedupe,
+  - central event-to-text architecture.
+
+Audit completeness note
+- Full repository text-source audit performed.
+- Runtime player-facing sources are overwhelmingly in `game/play.html`.
