@@ -339,6 +339,23 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
 .mapOverlayBody .tile { width: min(7vw,38px); height: min(7vw,38px); line-height: min(6.6vw,36px); font-size: min(3.6vw,18px); }
 .mapOverlayBody canvas.worldMap { width: min(82vw,560px); height: min(82vw,560px); }
 .mapOverlayBody .mapLegend { margin-top: 10px; justify-content: center; }
+/* === DESKTOP MODE === */
+body.desktop-mode { padding: 14px; }
+body.desktop-mode * { box-sizing: border-box; }
+body.desktop-mode .layout { width: min(100%, 1760px); max-width: 1760px; grid-template-columns: minmax(520px, 1.2fr) minmax(540px, 1fr); }
+body.desktop-mode .panel,
+body.desktop-mode .scenePanel,
+body.desktop-mode .hudGrid,
+body.desktop-mode .mapMainRow,
+body.desktop-mode .mapTogglePanel,
+body.desktop-mode .statusSideGrid > div,
+body.desktop-mode .mapCueText { min-width: 0; max-width: 100%; }
+body.desktop-mode .mapMainRow { grid-template-columns: minmax(0, 1fr) minmax(128px, 176px) !important; }
+body.desktop-mode .mapSymbolCue,
+body.desktop-mode .mapCueText b,
+body.desktop-mode .mapCueText small,
+body.desktop-mode .groupMemberTop b { overflow-wrap: anywhere; }
+body.desktop-mode .mapToggleWrap .mapCard.activeMapCard { min-height: 0; }
 .callChoiceOverlay { position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,.62); display: none; align-items: center; justify-content: center; padding: 16px; }
 .callChoiceOverlay.open { display: flex; }
 .callChoiceCard { width: min(92vw,420px); background: #07120a; border: 1px solid var(--accent); border-radius: 12px; padding: 14px; box-shadow: 0 18px 60px rgba(0,0,0,.65); }
@@ -657,6 +674,7 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
     <details class="developerTools" id="developerTools">
       <summary>Developer / QA tools</summary>
       <div class="developerToolsBody">
+        <button id="toggleDesktopModeBtn" class="debugButton" type="button">Enable desktop mode</button>
         <button id="downloadDebugLog" class="debugButton" type="button">Download debug + event log</button>
         <button id="downloadDebugCompact" class="debugButton" type="button">Download compact debug</button>
         <div class="small" style="margin-top:6px;">
@@ -13421,6 +13439,19 @@ function renderGroupPanel() {
   body.innerHTML = '<div class="groupSummaryLine">Cohesion: <b class="' + cohesionClass + '">' + cohesion + '</b> · group size: <b>' + groupSize() + '</b> including you.</div>' + rows;
 }
 
+function setDesktopModeEnabled(enabled) {
+  document.body.classList.toggle("desktop-mode", !!enabled);
+  const button = document.getElementById("toggleDesktopModeBtn");
+  if (button) button.textContent = enabled ? "Disable desktop mode" : "Enable desktop mode";
+  try {
+    localStorage.setItem("evolutionDesktopMode", enabled ? "1" : "0");
+  } catch (_) {}
+}
+
+function toggleDesktopMode() {
+  setDesktopModeEnabled(!document.body.classList.contains("desktop-mode"));
+}
+
 // @fn canMoveTo
 
 
@@ -13461,6 +13492,8 @@ document.getElementById("wait").addEventListener("click", waitTurn);
 document.getElementById("climb").addEventListener("click", climb);
 document.getElementById("descend").addEventListener("click", descend);
 document.getElementById("drinkWater").addEventListener("click", drinkWater);
+const toggleDesktopModeButton = document.getElementById("toggleDesktopModeBtn");
+if (toggleDesktopModeButton) toggleDesktopModeButton.addEventListener("click", toggleDesktopMode);
 document.getElementById("downloadDebugLog").addEventListener("click", downloadDebugLog);
 const downloadDebugCompactButton = document.getElementById("downloadDebugCompact");
 if (downloadDebugCompactButton) downloadDebugCompactButton.addEventListener("click", downloadDebugCompact);
@@ -13473,6 +13506,11 @@ if (downloadBotReportButton) downloadBotReportButton.addEventListener("click", d
 const downloadBotCompactButton = document.getElementById("downloadBotCompact");
 if (downloadBotCompactButton) downloadBotCompactButton.addEventListener("click", downloadBotReportCompact);
 initBotRepoConfig();
+let initialDesktopModeEnabled = false;
+try {
+  initialDesktopModeEnabled = localStorage.getItem("evolutionDesktopMode") === "1";
+} catch (_) {}
+setDesktopModeEnabled(initialDesktopModeEnabled);
 document.getElementById("leaveGroup").addEventListener("click", leaveGroup);
 const groomButton = document.getElementById("groom");
 if (groomButton) groomButton.addEventListener("click", groom);
