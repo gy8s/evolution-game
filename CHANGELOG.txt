@@ -1,3 +1,15 @@
+[2026-05-01 patch13a | Claude]
+IntelligentBot recovery sequencing — 6 targeted fixes (A1–A6) from post-Patch12 retrospective and GPT/Claude joint analysis.
+- A1 (CRITICAL): Drink-loop exit. In RECOVER mode's criticalResource block, when H>=65 and E<=10 the bot no longer returns drink-water. Instead it tries safe eat first, sets a seek_food goal, and climbs off Ground toward food-capable layers. Previously the bot could reach H=90+ while starving to death because E=0 triggered the criticalResource drink path on every turn.
+- A2: Water-to-food goal handoff. After a drink action in WATER_PLAN, if E<=30 a seek_food currentGoal is set so subsequent movement is directed toward food recovery rather than random. The seek_food goal also causes the bot to climb off Ground level when active and aerial threats are absent. Goal is cleared when E>=50.
+- A3: Position-based A-B-A-B oscillation breaker. positionHistory (last 6 positions) and loopBlacklist (tiles blocked for 3 turns) added to botState.memory. detectAndBreakOscillation() detects A-B-A-B coordinate loops when E<=15 or H<=15, blacklists both tiles, clears any stale goal, and returns a perpendicular escape move. intelligentFilterMovesAntiLoop() filters blacklisted destination tiles from movement selections. Both applied throughout RECOVER and WATER_PLAN movement paths.
+- A4: Eat before water when both resources critical. In the criticalResource block, when E<=30 a safe eat is tried before the water-move/drink path. Prevents the bot from moving toward water when safe food is immediately available and energy is also dangerously low.
+- A5: Covered structurally by A1+A4 (food or climb chosen over random movement at E=0/H=0) and A3 (no aimless oscillation); no separate code path required.
+- A6: Goal validity timeout. In updateBotMemory(), seek_food goal is cleared when E>=50 (goal achieved) or after 10 turns (staleness). detectAndBreakOscillation() also clears currentGoal when a loop is detected, as an active stale goal likely contributed to the oscillation.
+- Bot/debug tools change only. Gameplay logic, UI/layout, and app-loading behaviour not changed.
+- game/evolution_game_v66_57.html NOT updated — archived reference version only.
+- Syntax check: see PR gate. Browser smoke check not performed by Claude — must be verified before merging.
+
 [2026-05-01 patch12b | Claude]
 IntelligentBot mode telemetry fix — Codex P2 from PR #30.
 - Fixed stale mode in terminalTrace on drowning-escape turns. chooseIntelligentBotAction() now clears botState._lastMode to null at function entry so no early return can leave a previous turn's mode in the step record. The drowning fast-path explicitly sets _lastMode = "EMERGENCY_ESCAPE" before returning the land-escape action.
