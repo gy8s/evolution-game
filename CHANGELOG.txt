@@ -1,3 +1,8 @@
+[2026-05-01 00:00 UTC | GPT-5.3-Codex]
+- Fixed raw JavaScript bleedthrough visible below the UI by removing an orphaned duplicate code fragment that had been appended after the closing </html> tag in game/play.html.
+- Confirmed the canonical consumption-guard logic remains in its intended in-script function block; only the stray out-of-script duplicate was removed.
+- Verified HTML/JS syntax with the repository check script and verified no leaked actorSize/victimSize fragment remains outside script context.
+
 [2026-05-01 patch19 | GPT]
 - Added `CONSENSUS_DIALOGUE_PLAN.txt` comparing four dialogue solution variants (v1-v4) and defining a consensus implementation plan.
 - Includes variant strengths/weaknesses, reject list, root-cause-oriented recommended approach, exact target functions/files, acceptance checks, and staged-PR recommendation.
