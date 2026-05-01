@@ -3803,7 +3803,7 @@ function startTurn() {
       player.size = Math.round((player.size + 0.1) * 10) / 10;
       player.growthProgress = 0;
       addDebugTrace("state-change", {label: "growth", sizeBefore: oldSize, sizeAfter: player.size, reason: "energy reserves >= 75 for enough turns"});
-      addLog(`Turn ${player.turn}: Good energy reserves support growth. Size increases to ${player.size}.`, "prey");
+      addLog(`Turn ${player.turn}: You feel growth in your frame — more weight, more reach.`, "prey");
       setNarration("With food behind you and energy in your body, growth continues slowly — almost invisibly, but it matters.");
     }
   }
@@ -3908,7 +3908,7 @@ function tickPoison() {
   lastDamageContext = {source: "poison", poison: cloneDebug(poison), fitnessBefore, fitnessAfter: player.fitness, damage: fitnessBefore - player.fitness};
   addDebugTrace("damage-breakdown", lastDamageContext);
 
-  addLog(`Poison damages fitness by ${poison.damage}.`, "poison");
+  addLog(poison.turns >= 4 ? "The sickness lingers, draining your strength again." : (poison.turns <= 1 ? "The worst of the toxin begins to ease." : "The toxin bites again."), "poison");
 
   // If damage itself drops fitness to zero, don't print a misleading remedy countdown.
   if (player.fitness <= 0) {
@@ -3975,7 +3975,7 @@ function applyAlcohol(alcohol, sourceName) {
   if (!player.alcohol || incoming.rank >= (player.alcohol.rank || 1) || incoming.turns > (player.alcohol.turns || 0)) {
     player.alcohol = incoming;
   }
-  addLog(`${capitalise(alcoholSourceName(sourceName))} dulls your senses and slows your reactions.`, "threat");
+  addLog(`After ${alcoholSourceName(sourceName)}, the world feels slightly delayed and your movements lose precision.`, "threat");
   setNarration("The fruit gives quick energy, but the sour-sweet ferment pulls at balance, timing, and judgement.");
 }
 
@@ -3989,7 +3989,7 @@ function tickAlcohol() {
     return;
   }
   if (player.alcohol.turns % 2 === 0) {
-    addLog(`Alcohol dulls senses and reaction time for ${player.alcohol.turns} more turns.`, "threat");
+    addLog("The delayed, unsteady feeling still has not passed.", "threat");
   }
 }
 
@@ -5870,7 +5870,10 @@ function changeGroupCohesion(delta, reason, opts = {}) {
   addDebugTrace("group-cohesion", {reason, delta, before, after: socialGroup.cohesion, group: cloneDebug(socialGroup), opts: cloneDebug(opts)});
   if (opts.log && before !== socialGroup.cohesion) {
     const direction = delta < 0 ? "falls" : "improves";
-    addLog(`Turn ${player.turn}: Group cohesion ${direction} (${Math.round(before)} → ${Math.round(socialGroup.cohesion)}): ${reason}.`, delta < 0 ? "threat" : "primate");
+    const text = delta < 0
+      ? "The group hesitates around you; trust thins, even if they stay."
+      : "The group settles and moves with you more confidently.";
+    addLog(`Turn ${player.turn}: ${text}`, delta < 0 ? "threat" : "primate");
   }
 }
 
@@ -5918,7 +5921,7 @@ function stressGroupForRisk(reason, severity = 1, opts = {}) {
     return {injured: true, died: true, member: name, damage};
   }
 
-  const injuryMsg = `${(member.name || "A companion")} is hurt after ${reason}. Injury: ${groupDamageLabel(damage)} (${damage}).`;
+  const injuryMsg = `In the struggle, ${(member.name || "a companion")} takes the worst of it and pulls back injured.`;
   addLog(`Turn ${player.turn}: ${injuryMsg}`, "threat");
   setGroupNotice(injuryMsg);
   return {injured: true, died: false, member: member.name, damage};
@@ -10091,8 +10094,8 @@ function attack() {
       if (target.dangerProfile === "sting") setNarration(`You crush the ${target.name}, but it stings again before it dies.`);
       else setNarration(`The ${target.name} dies fighting. Food remains, but so does pain.`);
     } else {
-      addLog(`Turn ${player.turn}: Clean kill. The ${target.name} is dead.`, "prey");
-      setNarration(`You catch and kill the ${target.name}. In this forest, even a small success matters.`);
+      addLog(`Turn ${player.turn}: You catch the ${target.name} before it reaches cover. The struggle is brief.`, "prey");
+      setNarration(`You catch the ${target.name} before it reaches cover. The struggle is brief.`);
     }
 
     render();
@@ -10457,7 +10460,7 @@ function eat() {
     e.eggs -= 1;
     const eggEnergy = e.energy || 18;
     const share = addFoodEnergy(eggEnergy, 1);
-    addLog(`Turn ${player.turn}: You eat an egg. Energy +${share.playerEnergy}. Eggs left: ${e.eggs}.${share.shareText}`, "food");
+    addLog(`Turn ${player.turn}: You crack and swallow an egg quickly before the scent spreads.${share.shareText}`, "food");
     setNarration(e.key === "largeGroundNest"
       ? "The large egg is rich, but the nest is exposed. Every bite feels like a signal on the forest floor."
       : "The egg is rich food, swallowed quickly before the parent bird or another hunter notices.");
@@ -10524,7 +10527,7 @@ function eat() {
   }
 
   const eatVerb = (e.hydration || defaultHydrationFor(e)) > (e.energy || 0) ? "drink from" : "eat";
-  addLog(`Turn ${player.turn}: You ${eatVerb} ${e.name}. Energy +${share.playerEnergy}.${hydrationText(share.hydration)}${bonusFoodText}${share.shareText}`, e.poison ? "poison" : "food");
+  addLog(`Turn ${player.turn}: You feed quickly on ${e.name}. The gain is real, but the smell travels.${bonusFoodText}${share.shareText}`, e.poison ? "poison" : "food");
   if (e.alcohol) applyAlcohol(e.alcohol, e.name);
   else setNarration(e.poison ? `The food goes down, but your body soon tells you this was not safe.` : (share.hydration > 12 ? `The moisture matters as much as the calories. For now, thirst loosens its grip.` : `You feed quickly, taking what energy and moisture you can before the forest notices.`));
 
@@ -10560,7 +10563,7 @@ function eatCarcass(options = {}) {
   const share = addFoodEnergy(carcass.energy, 2, carcass.hydration ?? defaultHydrationFor(carcass), carcass.name);
   const age = carcass.carcassAge || 0;
 
-  addLog(`Turn ${player.turn}: You feed from the ${carcass.name}. Energy +${share.playerEnergy}.${hydrationText(share.hydration)} Portions left: ${carcass.portions}.${share.shareText}`, "food");
+  addLog(`Turn ${player.turn}: You feed from the ${carcass.name} while keeping watch. The scent deepens around the kill.${share.shareText}`, "food");
 
   const rotPoison = carcassRotPoison(carcass);
   if (rotPoison) {
@@ -13437,7 +13440,6 @@ function renderSenses() {
       const warning = knownWarning(e);
       const statHtml = encounterStatsHtml(e);
       const actions = encounterActionsHtml(e);
-      const recentLookBox = lastLookText && lastLookTurn >= player.turn - 1 ? `<div class="investigationResult"><strong>Look result:</strong><br>${lastLookText}</div>` : "";
       const currentInvestigationRef = encounterInvestigationRef(e);
       const investigationBelongsToCard = investigationText && (!investigationEncounterRef || investigationEncounterRef === currentInvestigationRef);
       const floatingInvestigationBox = investigationText && !investigationBelongsToCard ? `<div class="investigationResult"><strong>Investigation result:</strong><br>${investigationText}</div>` : "";
@@ -13449,7 +13451,6 @@ function renderSenses() {
           <div>
             <div class="creatureName">${sexSymbolHtml(e)}<span>${e.name || "unknown encounter"}</span></div>
             <div class="creatureText">${cardDetailForEncounter(e, seeCueText) || "Something is here, but the game has not described it properly yet."}</div>
-            ${recentLookBox}
             ${investigationBelongsToCard ? `<div class="investigationResult"><strong>Investigation result:</strong><br>${investigationText}</div>` : ""}
             ${warning ? `<div class="creatureText poison">${warning}</div>` : ""}
             <div class="creatureStats">${statHtml}</div>

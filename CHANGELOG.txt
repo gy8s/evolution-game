@@ -1,3 +1,10 @@
+[2026-05-01 patch16 | GPT]
+- Follow-up presentation-system cleanup for stacked outcomes and narration consistency.
+- Removed additional look/card duplication by removing per-card "Look result" replay in encounter cards.
+- Reworked several core outcome messages (growth, poison, alcohol, feeding, clean-kill, group cohesion, group injury) away from system/number-first phrasing toward sensory-first narration.
+- Kept numerical effects in gameplay/UI systems while reducing mechanical wording in primary player-facing narration.
+- No intentional changes to core balance, spawn rates, bot logic, map generation, or survival maths.
+
 [2026-05-01 patch15 | GPT]
 - Fixed narration/presentation logic after text polish.
 - Removed object interpolation bug in Look narration context handling.
