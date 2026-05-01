@@ -1,3 +1,13 @@
+[2026-05-01 patch17 | GPT]
+- Centralised/cleaned player-facing narrative output through shared sanitisation and narration text guards.
+- Removed raw debug/code leak and hardened object interpolation handling for narration/cue/log text.
+- Reduced number-first/system-log phrasing in main player narration pathways.
+- Fixed drink labels on food resources by restricting drink actions to true water sources.
+- Reduced duplicate Look/scene/sense output and removed residual "Last look" replay.
+- Clarified encounter card/noise hierarchy by removing player-facing "Encounter:" / "same tile" system labels.
+- Improved plausibility guards for feeding/competition text.
+- No intentional change to spawn rates, bot logic, survival balance, map generation, or damage values.
+
 [2026-05-01 patch16 | GPT]
 - Follow-up presentation-system cleanup for stacked outcomes and narration consistency.
 - Removed additional look/card duplication by removing per-card "Look result" replay in encounter cards.

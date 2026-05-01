@@ -3346,6 +3346,19 @@ function layerNarrationChoice(layerName) {
  * - Export is capped to prevent unbounded memory growth during long playthroughs.
  */
 // @target [UTILS] Add Log
+function sanitizeNarrativeText(value, fallback = "") {
+  if (value === null || value === undefined) return fallback;
+  if (typeof value === "string") return value.replace(/\[object Object\]/g, fallback || "forest").trim();
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (Array.isArray(value)) return sanitizeNarrativeText(value.join(" "), fallback);
+  if (typeof value === "object") {
+    if (typeof value.text === "string") return value.text.trim();
+    if (typeof value.name === "string") return value.name.trim();
+    return fallback;
+  }
+  return fallback;
+}
+
 function addLog(message, cssClass = "minor") {
   const log = document.getElementById("log");
   const p = document.createElement("p");
@@ -3354,12 +3367,13 @@ function addLog(message, cssClass = "minor") {
   // QA/audit format: every event carries the player coordinate and height layer.
   const prefix = `Turn ${player.turn} [X ${player.x}, Y ${player.y}, ${layers[player.z]}]: `;
 
-  if (message.startsWith(`Turn ${player.turn}: `)) {
-    p.textContent = prefix + message.slice(`Turn ${player.turn}: `.length);
-  } else if (message.startsWith("Turn ")) {
-    p.textContent = message;
+  const cleanMessage = sanitizeNarrativeText(message, "You pause, but nothing resolves clearly.");
+  if (cleanMessage.startsWith(`Turn ${player.turn}: `)) {
+    p.textContent = prefix + cleanMessage.slice(`Turn ${player.turn}: `.length);
+  } else if (cleanMessage.startsWith("Turn ")) {
+    p.textContent = cleanMessage;
   } else {
-    p.textContent = prefix + message;
+    p.textContent = prefix + cleanMessage;
   }
 
   const suppressVisibleAfterDeath = player.dead && cssClass !== "death";
@@ -3377,7 +3391,7 @@ function addLog(message, cssClass = "minor") {
     actionKind: lastActionKind,
     cssClass,
     message: p.textContent,
-    rawMessage: String(message)
+    rawMessage: sanitizeNarrativeText(message, "")
   });
 
   if (debugLog.length > 5000) debugLog.length = 5000;
@@ -3411,7 +3425,7 @@ function setNarration(text) {
     return;
   }
 
-  const raw = String(text || "").trim();
+  const raw = sanitizeNarrativeText(text, "").trim();
   const tupleMatch = raw.match(/^([A-Za-z]+),0\.\d+$/);
 
   if (tupleMatch) {
@@ -3420,7 +3434,7 @@ function setNarration(text) {
     return;
   }
 
-  lastNarration = raw;
+  lastNarration = raw || layerNarrationChoice(layers[player.z]);
 }
 
 // @target [UTILS] Escape Html
@@ -4941,7 +4955,7 @@ function directionLong(dir) {
 
 // @target [TURN] Format Cue Text
 function formatCueText(text) {
-  let out = String(text || "");
+  let out = sanitizeNarrativeText(text, "");
 
   const directionMap = {
     "NE": "North-East",
@@ -7097,9 +7111,7 @@ function isDrinkableEncounter(e) {
   const name = (e.name || "").toLowerCase();
   if (["rainPuddle", "bromeliadPool"].includes(key)) return true;
   if (name.includes("puddle") || name.includes("pool") || name.includes("water")) return true;
-  const hydration = Number(e.hydration || defaultHydrationFor(e) || 0);
-  const energy = Number(e.energy || 0);
-  return e.kind === "forage" && hydration > energy && hydration >= 10;
+  return false;
 }
 
 // @fn consumptionButtonLabel
@@ -7488,10 +7500,15 @@ function canActorConsumeSharedResource(actor, victim) {
 
   const actorText = String(`${actor.key || ""} ${actor.name || ""}`).toLowerCase();
   const victimText = String(`${victim.key || ""} ${victim.name || ""} ${victim.kind || ""}`).toLowerCase();
+  const actorSize = Number(actor.size || 1);
+  const victimSize = Number(victim.size || 1);
 
   const victimIsPlantFood = /(fruit|berry|berries|nut|fig|mushroom|fungus)/.test(victimText);
   const victimIsAnimalFood = victim.kind === "animal" || victim.kind === "carcass" || /(insect|hopper|grasshopper|cricket|cicada|beetle|spider|snail|slug|worm|grub|egg|larv|termite|ant|mammal|bird|toad|frog|lizard)/.test(victimText);
   const victimIsNestFood = victim.kind === "nest";
+
+  if (/needle-billed|hummingbird|orchid bee/.test(actorText) && (victim.kind === "animal" || victim.kind === "carcass")) return false;
+  if (/bird/.test(actorText) && actorSize <= 3 && (victim.kind === "animal" || victim.kind === "carcass") && victimSize >= 3) return false;
 
   if (isPredatoryEncounter(actor)) return victimIsAnimalFood || victimIsNestFood;
   if (/centipede|pitviper|spider|tarantula|mantis|dragonfly/.test(actorText)) return victimIsAnimalFood || victimIsNestFood;
@@ -7576,12 +7593,12 @@ function setTileEncounterStack(encountersHere, source, actionText = "notice") {
       ? (dominantThreat
         ? `Turn ${player.turn}: Immediate danger: ${currentEncounter.name}.`
         : `Turn ${player.turn}: You notice several things at once. ${currentEncounter.name} is closest.`)
-      : `Turn ${player.turn}: Encounter: ${currentEncounter.name}.`)
+      : `Turn ${player.turn}: ${currentEncounter.name} comes into view.`)
     : (tileEncounterQueue.length
       ? (dominantThreat
         ? `Turn ${player.turn}: You ${stackText === "come upon several things in the same place" ? "notice movement" : stackText}. Immediate danger: ${currentEncounter.name}.`
         : `Turn ${player.turn}: You ${stackText}. Several encounters overlap here; ${currentEncounter.name} is nearest.`)
-      : `Turn ${player.turn}: You ${stackText}. Encounter: ${currentEncounter.name}.`);
+      : `Turn ${player.turn}: You ${stackText}. ${currentEncounter.name} is close.`);
   addLog(opener, currentEncounter.className || "minor");
   setNarration(currentEncounter.key === "antTrail" ? antTrailNarrationText(currentEncounter) : (currentEncounter.seen || `You notice ${article(currentEncounter.name)} ${currentEncounter.name}.`));
   return true;
@@ -7641,7 +7658,7 @@ function layerPerilCheck(actionText) {
   const key = weightedPick(table);
   currentEncounter = normaliseEncounter(cloneEncounter(key), key);
   dangerGrace = ["fatal", "grapple", "predator", "venomous_ambush"].includes(currentEncounter.dangerProfile);
-  addLog(`The ${layerName.toLowerCase()} is not empty. Encounter: ${currentEncounter.name}.`, currentEncounter.className || "threat");
+  addLog(`The ${layerName.toLowerCase()} is not empty. ${currentEncounter.name} is close enough to matter.`, currentEncounter.className || "threat");
   setNarration(currentEncounter.seen);
   return true;
 }
@@ -9132,7 +9149,7 @@ function verticalTransitionHazard(direction) {
       currentEncounter = normaliseEncounter(cloneEncounter(key), key);
       dangerGrace = ["fatal", "grapple", "predator", "venomous_ambush"].includes(currentEncounter.dangerProfile);
 
-      addLog(`Your vertical movement exposes you. Encounter: ${currentEncounter.name}.`, currentEncounter.className || "threat");
+      addLog(`Your vertical movement exposes you. ${currentEncounter.name} is now in reach.`, currentEncounter.className || "threat");
       setNarration(currentEncounter.seen);
 
       // Fatal/large predators should immediately feel dangerous if you blunder
@@ -13462,7 +13479,7 @@ function renderSenses() {
           <div class="creatureCard queuedEncounterCard" style="margin-top:8px; opacity:0.94">
             <div class="creatureIcon ${encounterThreatClass(q)}">${q.icon || "?"}</div>
             <div>
-              <div class="creatureName">${sexSymbolHtml(q)}<span>same tile: ${q.name}</span></div>
+              <div class="creatureName">${sexSymbolHtml(q)}<span>${q.name}</span></div>
               <div class="creatureText">${cardDetailForEncounter(q, shortEncounterCue(q)) || "It is present in the same patch of forest. You can choose to deal with this instead."}</div>
               ${knownWarning(q) ? `<div class="creatureText poison">${knownWarning(q)}</div>` : ""}
               <div class="creatureStats">${encounterStatsHtml(q)}</div>
@@ -13507,8 +13524,7 @@ function renderSenses() {
     hearText.innerHTML = formatCueText("water breaks against your body and hides other movement.");
     smellTextEl.innerHTML = formatCueText("wet mineral scent and riverbank rot press close.");
   } else {
-    const recentLook = lastLookText && lastLookTurn >= player.turn - 1 ? ` Last look: ${lastLookText}` : "";
-    seeText.innerHTML = formatCueText("no animal or food source clearly visible." + nearbyWaterText() + staticScarcityCueAt() + recentLook);
+    seeText.innerHTML = formatCueText("no animal or food source clearly visible." + nearbyWaterText() + staticScarcityCueAt());
   }
   if (!lastNarration || isDirectEncounterNarration(lastNarration)) {
     document.getElementById("narration").textContent = weatherNarrationFragment();
