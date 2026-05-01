@@ -1,3 +1,14 @@
+[2026-05-01 patch11 | Claude]
+IntelligentBot regression fix — 5 targeted fixes from post-Patch10 run 235932 analysis.
+- Fix A (CRITICAL): Ground/respawn bootstrap climb. Bot now immediately climbs off the ground floor on respawn unless an aerial threat is present. Previously the canopy-climb logic required both climb AND descend to be available — at ground level there is no descend, so the bot never climbed and instead took look/wait, dying to lingering Gastornis over and over (11 instant deaths in run 235932). Idle actions (look/call/sleep/wait) are now blocked on ground floor when climb or movement is available.
+- Fix B: EMERGENCY_ESCAPE hard fallback. Escape block no longer falls through silently when no lateral moves are available (e.g. at a canopy corner). Adds a guaranteed non-attack non-idle fallback so escape can never bleed into EXPLORE's general picker and choose descend.
+- Fix C: Aerial/ground sandwich handling. Added hasRecentGroundThreat(). Aerial escape now checks whether a fatal/ground/climber predator appeared in the last 15 turns before descending. If so, lateral movement is preferred to avoid descending into a ground threat (Gastornis, Bergisuchus etc.) while fleeing a raptor above.
+- Fix D: RECOVER hard fallback. At E=0 or H=0, if no move actions are available, RECOVER now picks any non-attack non-idle action rather than falling through to EXPLORE where wait/look/sleep can be chosen.
+- Fix E: Global nearest-water scan. intelligentMoveTowardWater now scans the full 100x100 world instead of a radius-capped bounding box. Player can see the map so the bot should always know where water is. Also removed WATER_PLAN's descend-to-ground fallback — that was sending the bot into Gastornis territory when thirsty and water was not in the previous local radius.
+- Bot/debug tools change only. Gameplay logic, UI/layout, and app-loading behaviour not changed.
+- game/evolution_game_v66_57.html NOT updated — archived reference version only.
+- Syntax check: PASS. Browser smoke check not performed by Claude — must be verified before merging.
+
 [2026-04-30 patch10 | Claude]
 IntelligentBot stabilisation patch — 8 fixes from post-P4 log analysis (runs 223453/224611).
 - Fix 1 (CRITICAL): groom added to getRandomBotActions(). groom was absent from the bot action list so byId["groom"] was always null. Bot could never groom regardless of parasite load. This was the root cause of all parasite deaths.
