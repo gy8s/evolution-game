@@ -11332,30 +11332,25 @@ function intelligentFindSafeEat(actions) {
 function intelligentMoveTowardWater(actions) {
   let bestDist = Infinity;
   let bestDx = 0, bestDy = 0;
-  // Prefer land tiles adjacent to water — safe drinking position with no drowning risk
-  for (let dy = -16; dy <= 16; dy++) {
-    for (let dx = -16; dx <= 16; dx++) {
-      if (dx === 0 && dy === 0) continue;
-      const tx = player.x + dx;
-      const ty = player.y + dy;
-      if (tx < 0 || ty < 0 || tx >= WORLD_SIZE || ty >= WORLD_SIZE) continue;
+  // Full world scan — player can see the map, so bot always knows where water is
+  // Prefer land tiles adjacent to water (safe drinking position, no drowning risk)
+  for (let ty = 0; ty < WORLD_SIZE; ty++) {
+    for (let tx = 0; tx < WORLD_SIZE; tx++) {
+      if (tx === player.x && ty === player.y) continue;
       if (terrainAt(tx, ty) !== "water" && isNearWater(tx, ty)) {
-        const dist = Math.abs(dx) + Math.abs(dy);
-        if (dist < bestDist) { bestDist = dist; bestDx = dx; bestDy = dy; }
+        const dist = Math.abs(tx - player.x) + Math.abs(ty - player.y);
+        if (dist < bestDist) { bestDist = dist; bestDx = tx - player.x; bestDy = ty - player.y; }
       }
     }
   }
-  // Fall back to water tiles only if no land-adjacent tile found within range
+  // Fall back to water tiles only if no land-adjacent tile found anywhere
   if (bestDist === Infinity) {
-    for (let dy = -16; dy <= 16; dy++) {
-      for (let dx = -16; dx <= 16; dx++) {
-        if (dx === 0 && dy === 0) continue;
-        const tx = player.x + dx;
-        const ty = player.y + dy;
-        if (tx < 0 || ty < 0 || tx >= WORLD_SIZE || ty >= WORLD_SIZE) continue;
+    for (let ty = 0; ty < WORLD_SIZE; ty++) {
+      for (let tx = 0; tx < WORLD_SIZE; tx++) {
+        if (tx === player.x && ty === player.y) continue;
         if (terrainAt(tx, ty) === "water") {
-          const dist = Math.abs(dx) + Math.abs(dy);
-          if (dist < bestDist) { bestDist = dist; bestDx = dx; bestDy = dy; }
+          const dist = Math.abs(tx - player.x) + Math.abs(ty - player.y);
+          if (dist < bestDist) { bestDist = dist; bestDx = tx - player.x; bestDy = ty - player.y; }
         }
       }
     }
@@ -11447,9 +11442,9 @@ function threatAwareEscape(actions, threat) {
   const climbAction = byId["climb"] || null;
   const descendAction = byId["descend"] || null;
 
-  // Aerial threats (raptor/owl): descend out of canopy, then move laterally
+  // Aerial threats (raptor/owl): descend only if ground is not recently dangerous; otherwise lateral
   if (threat.isGrapple || threat.isAerial) {
-    if (descendAction && player.z > 0) return descendAction;
+    if (descendAction && player.z > 0 && !hasRecentGroundThreat()) return descendAction;
     return moveActions.length ? randomBotAction(moveActions) : null;
   }
   // Climber threats (miacid etc): pursues through all layers — lateral movement only, never vertical
@@ -11479,6 +11474,14 @@ function hasRecentAerialThreat() {
   if (!m || !m.recentThreats.length) return false;
   const now = player.turn;
   return m.recentThreats.some(t => (now - t.turn) <= 20 && t.pursuitType === 'air');
+}
+
+function hasRecentGroundThreat() {
+  const m = botState.memory;
+  if (!m || !m.recentThreats.length) return false;
+  const now = player.turn;
+  return m.recentThreats.some(t => (now - t.turn) <= 15 &&
+    (t.dangerProfile === 'fatal' || t.pursuitType === 'ground' || t.pursuitType === 'climber'));
 }
 
 function determineIntelligentBotMode(threat) {
@@ -11514,6 +11517,11 @@ function chooseIntelligentBotAction(actions) {
     const escape = threatAwareEscape(actions, escapeThreat);
     if (escape) return escape;
     if (moveActions.length) return randomBotAction(moveActions);
+    // Hard fallback: never fall through silently — pick any non-attack non-idle action
+    const anyEscape = actions.filter(a =>
+      !a.id.startsWith("attack") && !a.id.startsWith("queued-attack") &&
+      !["look", "call", "sleep", "wait"].includes(a.id));
+    return randomBotAction(anyEscape.length ? anyEscape : actions);
   }
 
   if (mode === "RECOVER") {
@@ -11580,6 +11588,14 @@ function chooseIntelligentBotAction(actions) {
     });
     if (landMoves.length) return randomBotAction(landMoves);
     if (moveActions.length) return randomBotAction(moveActions);
+    // Hard fallback: at E=0 or H=0 never fall through to EXPLORE
+    if (player.energy <= 0 || player.hydration <= 0) {
+      const survival = actions.filter(a =>
+        !a.id.startsWith("attack") && !a.id.startsWith("queued-attack") &&
+        !["look", "call", "sleep", "wait", "investigate"].includes(a.id) &&
+        !a.id.startsWith("queued-investigate"));
+      return randomBotAction(survival.length ? survival : actions);
+    }
   }
 
   if (mode === "WATER_PLAN") {
@@ -11603,8 +11619,7 @@ function chooseIntelligentBotAction(actions) {
       if (goalMove && (player.turn - m.currentGoal.turn) <= 8) return goalMove;
     }
     m.currentGoal = null;
-    // Descend to ground to improve water scan coverage, then keep moving
-    if (descendAction && player.z > 0) return descendAction;
+    // Keep moving laterally — do not descend to ground (ground predators may be present)
     if (moveActions.length) {
       const landMoves = moveActions.filter(a => {
         const dir = a.id.replace("move-", "");
@@ -11633,12 +11648,19 @@ function chooseIntelligentBotAction(actions) {
   }
 
   // EXPLORE (and fallthrough from SAFE_FORAGE when no action found)
+  // Bootstrap: always climb off ground immediately — ground is most dangerous layer
+  if (player.z === 0 && climbAction && !hasRecentAerialThreat()) return climbAction;
+  // On the ground floor, never waste a turn on look/call/sleep/wait if climbing or moving is possible
+  if (player.z === 0 && (moveActions.length || climbAction)) {
+    const groundSafe = actions.filter(a => a.id.startsWith("move-") || a.id === "climb" || a.id === "drink-water" || a.id === "groom");
+    if (groundSafe.length) return randomBotAction(groundSafe);
+  }
   if (!enc && !activePursuit && byId["look"] && player.turn % 6 === 0 && player.fitness >= 55 && player.energy >= 45 && player.hydration >= 45) return byId["look"];
   if (enc && (threat.isDangerous || threat.isThreatClass) && moveActions.length) {
     return threatAwareEscape(actions, threat) || randomBotAction(moveActions);
   }
-  // Only climb to canopy if no aerial threat in recent memory
-  if (!urgentNeedsGround && !hasRecentAerialThreat() && climbAction && descendAction) return climbAction;
+  // Climb toward canopy when safe — no aerial threat in recent memory, not urgently needed on ground
+  if (!urgentNeedsGround && !hasRecentAerialThreat() && climbAction) return climbAction;
   const nonAttack = actions.filter(a => {
     if (a.id.startsWith("attack") || a.id.startsWith("queued-attack")) return false;
     if (!urgentNeedsGround && a.id === "descend") return false;
