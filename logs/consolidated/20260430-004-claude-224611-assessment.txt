@@ -1,0 +1,136 @@
+Claude Independent Assessment — Run 20260430-224611 vs GPT Review
+==================================================================
+Date: 2026-04-30
+Author: Claude
+Context: GPT reviewed run 224611 and proposed P10-P14 fixes. This is Claude's
+independent read of the same log against that review. No repo changes made here.
+Note: Patch 10 is already implemented on the branch (PR #27, not yet merged).
+      All findings below reference pre-Patch10 code.
+
+---
+
+OVERALL
+
+GPT's diagnoses are correct. The root causes are all in pre-Patch10 code.
+Patch 10 addresses every one of GPT's P10-P13 items directly.
+
+---
+
+AERIAL OSCILLATION — confirmed as primary failure mode
+
+8/23 deaths are aerial predators. Terminal trace evidence:
+
+Run 2 (botStep 48-52): climb→descend→climb→descend→climb around Masillaraptor. Pure oscillation.
+Run 9 (botStep 342-345): descend/climb/descend/climb around large eagle.
+Run 16 (botStep 668-671): descend→climb→descend→climb around large eagle.
+Run 10 (botStep 378-380): bot at Mid-storey, encounters Masillaraptor, descends to Undergrowth,
+  climbs back to Mid-storey. Still there.
+Run 18 (botStep 721-723): monitor lizard (pursuitType: climber), bot descends
+  canopy→mid→undergrowth with lizard following every step.
+
+Root cause: pre-P10 classifyThreat set isAerial = pursuitType === 'air' || pursuitType === 'climber',
+so miacid and monitor lizard triggered descend escape. They follow through all layers.
+Descend cannot help.
+
+P10 Fix 2: splits isClimber from isAerial. Climbers get lateral-only escape.
+P10 Fix 4: gates EXPLORE canopy climb on hasRecentAerialThreat() (20-turn window).
+Together these should eliminate the oscillation pattern.
+
+---
+
+PARASITE DEATHS — root cause is more fundamental than GPT's diagnosis
+
+GPT says "reactive grooming only." The actual problem is worse: groom was never
+in the bot action list at all. getRandomBotActions() had no add("groom", ...) call,
+so byId["groom"] was always null. The RECOVER groom check could never fire regardless
+of parasite load.
+
+Run 3: parasiteLoad 5, E=0/H=14, bot moves and waits. No groom available.
+Run 5: parasiteLoad 4, E=0/H=0. Same.
+Run 22: parasiteLoad 2, E=0/H=0. Same.
+
+P10 Fix 1: adds groom to the action list. This should eliminate parasite deaths
+in the next run — it is not a heuristic fix, it restores a missing capability.
+
+---
+
+RESOURCE COLLAPSE (E=0/H=0 IDLE LOOPS) — confirmed, fixed in P10
+
+Run 12: [514:call|Mid-storey|F19/E0/H0] — call at E=0/H=0.
+Run 6:  [258:look|Mid-storey|F22/E0/H0], [260:look|Mid-storey|F8/E0/H0] — two looks while dying.
+Run 20: [818:sleep|Mid-storey|F11/E0/H0] — sleep at zero resources.
+Run 5:  [192:look|Undergrowth|F11/E0/H0] — look at death's door.
+
+P10 Fix 3: hard gate at E<=10 or H<=10 permits only movement/drink/eat/groom.
+
+---
+
+ANT TRAIL EATING — confirmed in this log
+
+Run 23: [983:sleep|Ground|F11/E0/H62|enc:ant trail] then
+        [984:eat|Ground|F12/E0/H60|enc:ant trail].
+
+Bot is in RECOVER mode (fitness=11, below 45 threshold). The pre-P10 RECOVER safe filter
+only blocked attack and investigate — it allowed eat through unchecked.
+intelligentForageBlocked was only called inside intelligentFindSafeEat, not in the
+general safe filter.
+
+P10 Fix 5: applies intelligentForageBlocked inside the RECOVER safe filter and the
+EXPLORE nonAttack filter. Closes this path.
+
+---
+
+RUN 14 — SPECIFIC OBSERVATION GPT MISSED
+
+[645:wait|Mid-storey|F33/E0/H0|enc:small rain puddle] — bot is at H=0 with a rain puddle
+encounter and waits. Then calls and descends while dying.
+
+Rain puddle is likely a remedy-kind encounter, not a water-edge source, so drink-water was
+unavailable and the bot had no water action. The RECOVER hydration check only triggers
+drink-water or intelligentMoveTowardWater — it does not try to eat/investigate remedy
+encounters as a water substitute. This is a gap P10 does not address.
+
+---
+
+REMAINING GAP — DESPERATION FORAGE (P10 DOES NOT ADDRESS)
+
+Run 5 terminal: [188:move-west|enc:fallen fruit], [189:move-northeast|enc:palm flowers],
+[190:move-southeast|enc:purple berries] — bot at E=0/H=0 walks past food it will not eat.
+All three are either unknown or rank-1 mildly poisonous. intelligentFindSafeEat requires
+known-safe or unknown with no bad history.
+
+At E=0 with no safe food available the bot has no desperation tier and just keeps moving
+until it dies. Fix needed: when E<=5 and no safe food available, accept rank-1 poison food
+as preferable to starvation. Not included in P10.
+
+---
+
+RESPONSE TO GPT's PROPOSED P11 (MODE LOCKING)
+
+Push back on hard turn-count mode locks. If the bot is locked in WATER_PLAN for N turns
+and an aerial predator appears, it cannot switch to EMERGENCY_ESCAPE. Goal persistence
+(P10 Fix 8 — storing water direction in currentGoal and resuming across turns) achieves
+the anti-oscillation benefit without blocking emergency overrides. Mode locks are a blunt
+instrument here.
+
+---
+
+WHAT P10 SHOULD FIX vs WHAT IT WON'T
+
+Should fix:
+- Aerial oscillation (Fix 2 + Fix 4)
+- Parasite deaths (Fix 1)
+- E=0/H=0 idle loops (Fix 3)
+- Ant trail eating (Fix 5)
+- Hydration wandering (Fix 7 + Fix 8)
+
+Won't fix:
+- Desperation forage when E<=5 and all food is mild-poison
+- Rain puddle/remedy as water substitute at H=0
+
+These are candidates for a follow-up patch after the next run validates P10's gains.
+
+---
+
+END OF ASSESSMENT
+Claude, 2026-04-30
