@@ -807,8 +807,8 @@ const encounters = {
     kind: "forage", name: "ant trail", icon: "🐜", className: "food",
     canInvestigate: true, portions: 1, energy: 4,
     poison: {severity: "mild", rank: 1, toxinType: "irritant", lethal: false, turns: 2, damage: 1, warning: "Biting ants / acid"},
-    seen: "A dark ordinary-ant trail runs in a purposeful line. The workers bite if disturbed, but this is not a giant-ant trail.",
-    investigated: "The trail has a direction, not just a smell. One way leads toward ants; the other way leads toward whatever they are feeding on."
+    seen: "A dark line of ants travels with purpose through the leaf litter. It hints at food nearby, and a swarm of biting bodies if disturbed.",
+    investigated: "The trail runs with intent, not chaos. One direction returns to the colony; the other may lead to fruit, carrion, grubs, or conflict."
   },
 
   antNest: {
@@ -888,6 +888,7 @@ const encounters = {
     canInvestigate: true, portions: 1, energy: 6,
     poison: null,
     seen: "A millipede coils beneath a wet leaf. Slow does not always mean safe.",
+    cardDetail: "It remains tightly coiled, glossy segments catching what little light reaches the forest floor.",
     investigationDetails: ["Its shape and movement are clear, but the important question is chemical defence.", "You look for warning smell, colour, and whether predators have avoided it. The signs suggest risk, but not certainty.", "This millipede type is becoming familiar. Some are defended, some are harmless mimics, and some are worse than they look."],
     investigated: "It is tempting because it is slow, but millipedes can punish a careless mouthful."
   },
@@ -936,6 +937,7 @@ const encounters = {
     canInvestigate: true, portions: 3, energy: 18,
     poison: null,
     seen: "A soft fallen fruit lies among leaves, bruised but rich with sugar.",
+    cardDetail: "The skin is split and damp with sugar scent; insects are already feeding at the torn edge.",
     investigationDetails: [
       "The bruised flesh smells sweet, not rotten. Tiny insects are already feeding in the split skin.",
       "The fruit is soft enough to eat quickly, but the scent will not stay private for long.",
@@ -1250,7 +1252,7 @@ const encounters = {
     dangerProfile: "predator", temperament: "hunter", pursuitType: "air", canInvestigate: true,
     fitness: 95, size: 28, speed: 85, agility: 70, aggression: 75, food: 80,
     poison: null,
-    seen: "A large raptor passes above the canopy, turning its head as it searches for movement."
+    seen: "High above the canopy, a broad-winged raptor turns on warm air, searching for the smallest mistake below."
   },
 
   owl: {
@@ -1258,7 +1260,7 @@ const encounters = {
     dangerProfile: "predator", temperament: "hunter", pursuitType: "air", canInvestigate: true,
     fitness: 80, size: 18, speed: 65, agility: 80, aggression: 65, food: 55,
     poison: null,
-    seen: "An owl shape sits silent against the trunk, eyes fixed and unreadable."
+    seen: "Pressed against the trunk, an owl holds perfectly still. Only the eyes move, measuring the gaps between leaves."
   },
 
   pakicetus: {
@@ -1316,6 +1318,7 @@ const encounters = {
     fitness: 100, size: 55, speed: 45, agility: 25, aggression: 55, food: 160,
     poison: null,
     seen: "A huge flightless bird steps between the trees, heavy beak lowering toward the forest floor.",
+    cardDetail: "Each step is heavy and deliberate. On open ground, hesitation is what this bird is waiting for.",
     investigationDetails: [
       "It is not stalking delicately; it does not need to. On the ground, its reach and mass make the rules simple.",
       "The beak turns side to side as it searches the leaf litter. Small animals survive this by not being on the floor when it arrives.",
@@ -1386,7 +1389,7 @@ const encounters = {
     dangerProfile: "predator", temperament: "hunter", pursuitType: "climber", canInvestigate: true,
     fitness: 90, size: 22, speed: 55, agility: 55, aggression: 65, food: 70,
     poison: null,
-    seen: "A monitor lizard moves with deliberate confidence, tongue tasting the wet air."
+    seen: "A monitor lizard works through the undergrowth with slow confidence, its tongue testing the damp air ahead of it."
   },
 
   iguana: {
@@ -1633,7 +1636,8 @@ const encounters = {
     dangerProfile: "rival", temperament: "defensive", canInvestigate: true,
     fitness: 70, size: 7, speed: 45, agility: 75, aggression: 25, food: 30,
     poison: null,
-    seen: "Another primate-like climber moves through the branches, watching you as much as the forest."
+    seen: "Another primate-like climber moves through the branches, watching you as much as the forest.",
+    cardDetail: "It keeps to cover and tests your reactions before deciding whether to close distance or vanish."
   },
 
   europolemur: {
@@ -1737,8 +1741,8 @@ const encounters = {
   birdNest: {
     kind: "nest", name: "bird nest", icon: "🥚", className: "food",
     canInvestigate: true, eggs: 2,
-    seen: "A small nest sits in a fork of branches. Something pale shows inside.",
-    investigated: "The nest holds eggs. It may be easy food, but the smell and sound of feeding can draw attention."
+    seen: "A small nest rests in the fork of a branch. Pale eggs show through the weave of leaves and twigs.",
+    investigated: "The eggs are easy to reach, but feeding here carries smell and noise farther than you want."
   },
 
   largeGroundNest: {
@@ -1938,13 +1942,13 @@ const encounters = {
     kind: "animal", name: "large constrictor", icon: "🐍", className: "threat",
     dangerProfile: "grapple", temperament: "ambush", canInvestigate: true,
     fitness: 80, size: 11, speed: 35, agility: 50, aggression: 65, food: 35,
-    seen: "A heavy-bodied constrictor is looped across the branch. It is far too large to treat as prey.",
+    seen: "A heavy-bodied constrictor lies looped across the branch, so still it could be mistaken for vine.",
     investigationDetails: [
       "The branch-shape has muscle under it. The stillness is hunting, not rest.",
       "Its head is already angled towards you. If you close badly, it can seize and coil before you can pull free.",
       "It is food only in theory. The practical lesson is distance, height, and not giving it another turn beside you."
     ],
-    investigated: "This is not a food assessment. It is a distance assessment: large constrictor, obvious threat, avoid closing."
+    investigated: "At this size it is not prey; it is a trap with muscle. In branches, one bad approach can become a coil you cannot escape."
   },
   groundCarnivore: {
     kind: "animal", name: "mesonychid-like ground predator", icon: "🐺", className: "predator",
@@ -5476,7 +5480,11 @@ function makeClue(template, dir, distance, clarity) {
     }
     return {
       sense: "hear",
-      text: `Something flickers or rustles to the ${dirLong}.`,
+      text: choice([
+        `A brief disturbance passes through the leaves to the ${dirLong}, then stops.`,
+        `Something small shifts in cover to the ${dirLong} before the forest settles again.`,
+        `Leaves move once to the ${dirLong}; whatever made it stays hidden.`
+      ]),
       priority,
       narration: `The forest gives you a hint to the ${dirLong}, but not certainty.`
     };
@@ -5593,7 +5601,11 @@ function makeClue(template, dir, distance, clarity) {
   if (template.kind === "forage") {
     return {
       sense: "hear",
-      text: `A clear patch of possible food lies to the ${dirLong}: ${template.name}. It should still be there if you go that way soon.`,
+      text: choice([
+        `A faint sweetness drifts from the ${dirLong} — likely fallen food.`,
+        `The ground to the ${dirLong} looks recently disturbed, as if something edible dropped there.`,
+        `Fresh feeding sign lies to the ${dirLong}, worth checking before it cools or is claimed.`
+      ]),
       priority,
       narration: `To the ${dirLong}, ${template.name} offer a small chance to refill your energy. Plants and fungi do not run.`
     };
@@ -5676,13 +5688,13 @@ function randomAmbientSound() {
 function randomAmbientSmell() {
   if (timeState.sleepTurnsRemaining > 0) return "Sleep dulls even strong scent.";
   if (timeState.phase === "night" && environment.wind === "still") return "Night air holds scent close and heavy.";
-  if (environment.weather === "heavy rain") return "Heavy rain washes scent from the air.";
+  if (environment.weather === "heavy rain") return choice(["Heavy rain washes scent from the air.", "Wet bark and leaf mould dull the scent trail."]);
   if (environment.weather === "mist") return "Mist holds scent low among the leaves.";
-  if (environment.wind === "still") return "The air is still; scent gathers but does not travel far.";
+  if (environment.wind === "still") return choice(["The air is still; scent gathers close to where it began.", "Still air keeps scent low and close; little carries far."]);
   return choice([
     "Wet leaves, bark, and fungal rot fill the air.",
     "The humid forest carries too many scents to trust.",
-    "Rainwater and leaf litter flatten the smells around you.",
+    "Sweet rot carries faintly on the air — fruit, fungus, or something already opened.",
     "The air is warm and green, heavy with plant life."
   ]);
 }
@@ -7092,7 +7104,13 @@ function consumptionButtonLabel(e) {
   e = normaliseEncounter(e, e && (e.key || e.name) || "unknown");
   if (e.kind === "remedy") return "Consume";
   if (isSwarmEncounter(e)) return "Pick off";
-  if (isDrinkableEncounter(e)) return "Drink";
+  if (isDrinkableEncounter(e)) {
+    const key = e.key || "";
+    if (key === "rainPuddle") return "Drink from puddle";
+    if (key === "bromeliadPool") return "Drink from water pocket";
+    if (isNearWater(player.x, player.y) || terrainAt(player.x, player.y) === "water") return "Drink at water edge";
+    return "Drink from water";
+  }
   return "Eat";
 }
 
@@ -7435,7 +7453,7 @@ function queuedEncounterAction(index, action) {
 // @fn queuedActionButtonsHtml
 function queuedActionButtonsHtml(q, index) {
   q = normaliseEncounter(q, q.key || q.name || "queued");
-  let html = `<button type="button" class="queuedFocusButton investigateButton" data-queued-index="${index}">Focus</button>`;
+  let html = "";
   if (q.canInvestigate) html += `<button type="button" class="queuedInvestigateButton investigateButton" data-queued-index="${index}">Investigate</button>`;
   if (q.kind === "animal") html += `<button type="button" class="queuedAttackButton dangerButton" data-queued-index="${index}">Attack</button>`;
   if (["forage", "nest", "remedy", "carcass"].includes(q.kind)) {
@@ -7500,7 +7518,7 @@ function maybeEncounterConsumesOther(encountersHere) {
       if (idx >= 0) arr.splice(idx, 1);
       if (victim.origin && victim.origin.staticTile) { delete staticTileContents[staticKey(victim.origin.x, victim.origin.y, victim.origin.z)]; markWorldRegistryConsumed(victim, "consumed-by-other-encounter"); }
       observeFoodTest(victim, actor);
-      addLog(`The ${actor.name} gets to the ${victim.name} first and feeds. The easy meal is gone.`, actor.className || "threat");
+      addLog(`The ${actor.name} reaches the ${victim.name} first and strips the easy chance before you can act.`, actor.className || "threat");
       setNarration("The tile is not waiting for you. Other animals feed, raid, and interfere with the same chances you are trying to use.");
       break;
     }
@@ -7544,22 +7562,22 @@ function setTileEncounterStack(encountersHere, source, actionText = "notice") {
   tileEncounterQueue = capped;
   if (currentEncounter && ["fatal", "grapple", "predator", "venomous_ambush"].includes(currentEncounter.dangerProfile)) dangerGrace = true;
   addDebugTrace("multi-encounter-stack", {source, actionText, active: cloneDebug(currentEncounter), queued: cloneDebug(tileEncounterQueue), total: 1 + tileEncounterQueue.length});
-  const suffix = tileEncounterQueue.length ? ` Other encounter${tileEncounterQueue.length === 1 ? "" : "s"} present: ${tileEncounterQueue.map(e => e.name).join(", ")}.` : "";
+  const suffix = "";
   const movementAction = String(actionText || "").startsWith("travel ");
   const stackText = movementAction
     ? "notice"
     : (tileEncounterQueue.length ? actionText : (actionText === "come upon several things in the same place" ? "notice" : actionText));
   const dominantThreat = currentEncounter && ["fatal", "grapple", "predator", "venomous_ambush"].includes(currentEncounter.dangerProfile);
   const opener = movementAction
-    ? (tileEncounterQueue.length
+      ? (tileEncounterQueue.length
       ? (dominantThreat
-        ? `Turn ${player.turn}: Immediate danger takes over: ${currentEncounter.name}.${suffix}`
-        : `Turn ${player.turn}: Multiple encounters here. Main threat/opportunity: ${currentEncounter.name}.${suffix}`)
+        ? `Turn ${player.turn}: Immediate danger: ${currentEncounter.name}.`
+        : `Turn ${player.turn}: You notice several things at once. ${currentEncounter.name} is closest.`)
       : `Turn ${player.turn}: Encounter: ${currentEncounter.name}.`)
     : (tileEncounterQueue.length
       ? (dominantThreat
-        ? `Turn ${player.turn}: You ${stackText === "come upon several things in the same place" ? "notice movement" : stackText}. Immediate danger takes over: ${currentEncounter.name}.${suffix}`
-        : `Turn ${player.turn}: You ${stackText}. Multiple encounters here. Main threat/opportunity: ${currentEncounter.name}.${suffix}`)
+        ? `Turn ${player.turn}: You ${stackText === "come upon several things in the same place" ? "notice movement" : stackText}. Immediate danger: ${currentEncounter.name}.`
+        : `Turn ${player.turn}: You ${stackText}. Several encounters overlap here; ${currentEncounter.name} is nearest.`)
       : `Turn ${player.turn}: You ${stackText}. Encounter: ${currentEncounter.name}.`);
   addLog(opener, currentEncounter.className || "minor");
   setNarration(currentEncounter.key === "antTrail" ? antTrailNarrationText(currentEncounter) : (currentEncounter.seen || `You notice ${article(currentEncounter.name)} ${currentEncounter.name}.`));
@@ -9468,16 +9486,16 @@ function hiddenSubtypeSuspicionText(e, level) {
   const rank = e.poison ? poisonRank(e.poison) : 0;
   const surface = e.genericName || e.name || "thing";
   if (level <= 1) {
-    if (className === "myriapods") return {log: "uncertain millipede-type; possible chemical defence", narration: "This " + surface + " may be edible, chemically defended, or a mimic. You can read shape and behaviour, not the truth yet.", className: "minor"};
-    if (className === "insects") return {log: "uncertain insect; possible mimic or chemical defence", narration: "This " + surface + " has useful clues, but similar insects can be edible, bitter, or toxic.", className: "minor"};
+    if (className === "myriapods") return {log: "uncertain millipede-type; possible chemical defence", narration: "It could be food — or something that punishes the attempt. The pattern is not enough to be sure.", className: "minor"};
+    if (className === "insects") return {log: "uncertain insect; possible mimic or chemical defence", narration: "You recognise enough to be cautious, not enough to be certain.", className: "minor"};
     if (className === "caterpillars") return {log: "uncertain caterpillar; hairs or toxins possible", narration: "This " + surface + " may be food or may punish a careless mouthful.", className: "minor"};
-    return {log: "uncertain food; more evidence needed", narration: "This " + surface + " has clues, but the true risk is still uncertain.", className: "minor"};
+    return {log: "uncertain food; more evidence needed", narration: "You can read some signs, but not enough to trust them.", className: "minor"};
   }
   if (level < 4) {
-    if (rank >= 4) return {log: "strong warning signs, exact identity uncertain", narration: "The signs now look bad. It may be dangerous, though you have not fully identified it.", className: "threat"};
-    if (rank >= 2) return {log: "probable chemical/toxin risk", narration: "The signs lean risky. It may be chemically defended, though a harmless mimic is still possible.", className: "poison"};
-    if (rank >= 1) return {log: "possible mild toxin or bad taste", narration: "There are weak warning signs. It may only be bitter or mildly irritating.", className: "poison"};
-    return {log: "probably edible, but not certain", narration: "The signs lean safe, but mimicry and hidden toxins mean eating is still the real test.", className: "food"};
+    if (rank >= 4) return {log: "strong warning signs, exact identity uncertain", narration: "The signs are bad: bold warning cues, little fear, and no hurry to escape.", className: "threat"};
+    if (rank >= 2) return {log: "probable chemical/toxin risk", narration: "Slow, exposed prey is often defended. This one deserves care.", className: "poison"};
+    if (rank >= 1) return {log: "possible mild toxin or bad taste", narration: "There are warning hints, but they are weak. Treat it as uncertain, not safe.", className: "poison"};
+    return {log: "probably edible, but not certain", narration: "It looks promising, but certainty only comes with experience and risk.", className: "food"};
   }
   return null;
 }
@@ -10024,7 +10042,8 @@ function attack() {
   if (!debugRoll("attack catch check", catchChance, {playerCatch, targetEscape, target: cloneDebug(target)})) {
     addDebugTrace("failure-reason", {action: "attack", reason: "catch check failed", playerCatch, targetEscape, catchChance, target: cloneDebug(target)});
     addLog(`Turn ${player.turn}: Attack failed. The ${target.name} escapes.`, "threat");
-    setNarration(pressure.note || `You lunge, but the ${target.name} is gone before the strike lands.`);
+    if (isBirdEncounter(target)) setNarration("You lunge into fluttering wings; the bird slips through the leaves before your strike can close.");
+    else setNarration(pressure.note || `You lunge, but the ${target.name} is gone before the strike lands.`);
     clearCurrentEncounterAndPromote("attack missed");
     render();
     return;
@@ -10069,7 +10088,8 @@ function attack() {
 
     if (damage > 0) {
       addLog(`Turn ${player.turn}: You kill the ${target.name}, but take ${damage} damage.`, "prey");
-      setNarration(`The ${target.name} dies fighting. Food remains, but so does pain.`);
+      if (target.dangerProfile === "sting") setNarration(`You crush the ${target.name}, but it stings again before it dies.`);
+      else setNarration(`The ${target.name} dies fighting. Food remains, but so does pain.`);
     } else {
       addLog(`Turn ${player.turn}: Clean kill. The ${target.name} is dead.`, "prey");
       setNarration(`You catch and kill the ${target.name}. In this forest, even a small success matters.`);
@@ -10092,7 +10112,8 @@ function attack() {
   } else {
     if (damage > 0) {
       addLog(`Turn ${player.turn}: You fail to kill the ${target.name}. Damage: ${damage}.`, "threat");
-      setNarration(`The attack goes wrong. The ${target.name} turns your attempt into a wound.`);
+      if (target.dangerProfile === "sting") setNarration(`Already agitated, the ${target.name} bends and drives in another sting.`);
+      else setNarration(`The attack goes wrong. The ${target.name} turns your attempt into a wound.`);
     } else if (target.dangerProfile === "toxic_food") {
       addLog(`Turn ${player.turn}: You fail to catch the ${target.name}. It cannot really hurt you, but its toxins are a risk.`, "poison");
       setNarration(`The ${target.name} flutters away. It is not dangerous as a fighter, but touching or eating it can still make you sick.`);
@@ -11036,7 +11057,7 @@ function getRandomBotActions() {
 
   if (carcass) add("eat-carcass", `eat ${carcass.name}`, eat, "encounter");
   if (hasGroup() && (carcass || (currentEncounter && ["forage", "nest", "remedy", "carcass"].includes(currentEncounter.kind)))) add("conceal-food", "conceal food", concealFocusedFood, "social");
-  if (canDrinkAtWaterEdge()) add("drink-water", "drink water", drinkWater, "resource");
+  if (canDrinkAtWaterEdge()) add("drink-water", "drink at water edge", drinkWater, "resource");
   add("look", "look around", lookAround, "sense");
   add("call", "call out", callOut, "social");
   add("wait", "wait", waitTurn, "time");
@@ -12814,6 +12835,50 @@ function timeNarrationFragment() {
  * player has created enough safety first.
  */
 
+// Narration tone: restrained natural-history documentary. Sensory, specific, and readable; avoid debug phrasing, melodrama, or hiding critical gameplay information.
+function lookNarrationPick(arr) {
+  return Array.isArray(arr) && arr.length ? arr[Math.floor(Math.random() * arr.length)] : "";
+}
+
+function composeLookNarration(findings, context = {}) {
+  const phase = context.phase || "day";
+  const weather = context.weather || "";
+  const layerName = context.layerName || "forest";
+  const habitatRaw = context.habitat;
+  const habitat = (typeof habitatRaw === "string" && habitatRaw.trim()) ? habitatRaw : ((habitatRaw && typeof habitatRaw.name === "string" && habitatRaw.name.trim()) ? habitatRaw.name : "forest");
+  const lines = [];
+
+  const atmosphere = lookNarrationPick([
+    `You pause in the ${layerName}, listening to the ${habitat}.`,
+    `You hold still and let the ${habitat} settle around you.`,
+    `You stop moving for a breath and read the ${layerName} around you.`
+  ]);
+  const sensory = weather === "heavy rain"
+    ? "Rain drums over leaves and wood, blurring distance."
+    : weather === "mist"
+      ? "Mist softens edges; shapes move before they resolve."
+      : phase === "night"
+        ? "Night keeps most movement hidden, but sound travels cleanly."
+        : phase === "dawn" || phase === "dusk"
+          ? "Low light shifts the trunks into bands of shadow and movement."
+          : "Air, leaf movement, and distant calls sketch out what is active nearby.";
+  lines.push(`${atmosphere} ${sensory}`);
+
+  const threat = findings.find(f => f.cls === "threat");
+  const food = findings.find(f => f.cls === "food");
+  const resource = findings.find(f => /water|puddle|pool|carcass|fruit|berries|mushroom|nest|clay|mussel|crayfish|fig/i.test(f.text || ""));
+  const neutral = findings.find(f => f.cls !== "threat" && f !== food && f !== resource);
+
+  if (threat) {
+    lines.push(`${threat.text} Treat this as active risk, but not a fixed position.`);
+  } else if (food || resource || neutral) {
+    const cueA = food ? food.text : (resource ? resource.text : neutral.text);
+    const cueB = neutral && neutral !== cueA ? neutral.text : (resource && resource !== cueA ? resource.text : "");
+    lines.push(cueB ? `${cueA} ${cueB}` : cueA);
+  }
+  return lines.filter(Boolean).slice(0, 3).join(" ");
+}
+
 function lookAround() {
   if (player.dead) return;
   lastActionKind = "look";
@@ -12896,7 +12961,12 @@ function lookAround() {
         const r = Math.random() * 100;
         const certainty = r < 22 ? "clear" : r < 62 ? "probable" : "uncertain";
         recentPredatorWarning = {key, certainty: certainty === "uncertain" ? "old" : certainty, turn: player.turn, x, y, z, actionKind: "look", context: where};
-        const phrase = certainty === "clear" ? `Clear warning ${where}: ${t.name}.` : certainty === "probable" ? `Probable danger ${where}: movement, shadow, or fresh sign suggests ${article(t.name)} ${t.name}.` : `Uncertain sign ${where}: old marks or shifting shadows could mean ${article(t.name)} ${t.name}.`;
+        const locationHint = where === "above" ? "in the canopy above, not always this exact branch" : where === "below" ? "below, but not pinned to one exact spot" : "nearby";
+        const phrase = certainty === "clear"
+          ? `Strong warning ${where}: sign of ${t.name} ${locationHint}.`
+          : certainty === "probable"
+            ? `Probable danger ${where}: movement, shadow, or fresh sign suggests ${article(t.name)} ${t.name} nearby.`
+            : `Uncertain sign ${where}: old marks or shifting shadows could mean ${article(t.name)} ${t.name}.`;
         addFinding(phrase, "threat");
       }
     }
@@ -12911,7 +12981,7 @@ function lookAround() {
       if (ordinary >= 3) break;
     }
     if (!findings.length) addFinding("Nothing resolves clearly. Either there is nothing obvious nearby, or you failed to read it.", "minor");
-    const text = findings.map(f => f.text).slice(0, 8).join(" ");
+    const text = composeLookNarration(findings, {phase, weather: environment.weather, layerName, habitat});
     lastLookText = text; lastLookTurn = player.turn;
     addLog(`You look carefully. ${text}`, findings.some(f => f.cls === "threat") ? "threat" : "minor");
     setNarration(`You pause to look. ${text}`);
@@ -13291,6 +13361,26 @@ function displayedNarration() {
   return lastNarration;
 }
 
+function sameText(a, b) {
+  const norm = s => String(s || "").toLowerCase().replace(/<[^>]*>/g, "").replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+  return !!norm(a) && norm(a) === norm(b);
+}
+
+function shortEncounterCue(e) {
+  if (!e) return "Something is close, but details are unclear.";
+  if (e.key === "antTrail") return "A narrow ant line crosses the leaf litter nearby.";
+  if (e.key === "gastornis") return "A towering ground bird is close enough to force immediate caution.";
+  if (e.key === "millipede") return "A millipede tucked beneath a wet leaf.";
+  return `You spot ${article(e.name)} ${e.name} nearby.`;
+}
+
+function cardDetailForEncounter(e, cueText) {
+  if (!e) return "";
+  if (e.cardDetail) return e.cardDetail;
+  if (sameText(e.seen, cueText)) return e.investigated || "Its posture and movement offer clues, but no guarantees.";
+  return e.seen || "";
+}
+
 // Renders current scene and encounter cards.
 // This path is fail-safe: if currentEncounter exists, a card should appear.
 // @fn renderSenses
@@ -13341,7 +13431,8 @@ function renderSenses() {
       const e = currentEncounter;
 
       const encounterSeenText = e.key === "antTrail" ? antTrailSeenText(e) : (e.seen || `You notice ${article(e.name)} ${e.name}.`);
-      seeText.innerHTML = formatCueText(e.key === "antTrail" ? antTrailSeeText(e) : encounterSeenText);
+      const seeCueText = e.key === "antTrail" ? antTrailSeeText(e) : shortEncounterCue(e);
+      seeText.innerHTML = formatCueText(seeCueText);
 
       const warning = knownWarning(e);
       const statHtml = encounterStatsHtml(e);
@@ -13357,13 +13448,13 @@ function renderSenses() {
           <div class="creatureIcon ${encounterThreatClass(e)}">${e.icon || "?"}</div>
           <div>
             <div class="creatureName">${sexSymbolHtml(e)}<span>${e.name || "unknown encounter"}</span></div>
-            <div class="creatureText">${encounterSeenText || "Something is here, but the game has not described it properly yet."}</div>
+            <div class="creatureText">${cardDetailForEncounter(e, seeCueText) || "Something is here, but the game has not described it properly yet."}</div>
             ${recentLookBox}
             ${investigationBelongsToCard ? `<div class="investigationResult"><strong>Investigation result:</strong><br>${investigationText}</div>` : ""}
             ${warning ? `<div class="creatureText poison">${warning}</div>` : ""}
             <div class="creatureStats">${statHtml}</div>
             <div class="cardActions">${actions}</div>
-            ${tileEncounterQueue.length ? `<div class="creatureText" style="margin-top:8px"><strong>Also in this tile:</strong> ${tileEncounterQueue.length} other encounter${tileEncounterQueue.length === 1 ? "" : "s"}. These are in the same place, not distant background signs — you can switch focus or act on them directly.</div>` : ""}
+            
           </div>
         </div>
         ${tileEncounterQueue.length ? tileEncounterQueue.map((rawQ, qi) => { const q = normaliseEncounter(rawQ, rawQ.key || rawQ.name || "queued"); return `
@@ -13371,7 +13462,7 @@ function renderSenses() {
             <div class="creatureIcon ${encounterThreatClass(q)}">${q.icon || "?"}</div>
             <div>
               <div class="creatureName">${sexSymbolHtml(q)}<span>same tile: ${q.name}</span></div>
-              <div class="creatureText">${q.key === "antTrail" ? antTrailSeenText(q) : (q.seen || "It is present in the same patch of forest. You can choose to deal with this instead.")}</div>
+              <div class="creatureText">${cardDetailForEncounter(q, shortEncounterCue(q)) || "It is present in the same patch of forest. You can choose to deal with this instead."}</div>
               ${knownWarning(q) ? `<div class="creatureText poison">${knownWarning(q)}</div>` : ""}
               <div class="creatureStats">${encounterStatsHtml(q)}</div>
               <div class="cardActions">${queuedActionButtonsHtml(q, qi)}</div>
@@ -13667,12 +13758,6 @@ function bindCardActionButtons() {
     };
   }
 
-  document.querySelectorAll(".queuedFocusButton").forEach(button => {
-    button.onclick = function(event) {
-      event.preventDefault();
-      focusTileEncounter(Number(button.dataset.queuedIndex), "focus");
-    };
-  });
   document.querySelectorAll(".queuedInvestigateButton").forEach(button => {
     button.onclick = function(event) {
       event.preventDefault();
@@ -14139,3 +14224,7 @@ function hasNearbyTag(x, y, tag, radius=3) {
 </script>
 </body>
 </html>
+  const actorSize = Number(actor.size || 1);
+  const victimSize = Number(victim.size || 1);
+  if (/needle-billed|hummingbird|orchid bee/.test(actorText) && (victim.kind === "animal" || victim.kind === "carcass")) return false;
+  if (/bird/.test(actorText) && actorSize <= 3 && (victim.kind === "animal" || victim.kind === "carcass") && victimSize >= 3) return false;

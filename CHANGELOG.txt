@@ -1,3 +1,26 @@
+[2026-05-01 patch15 | GPT]
+- Fixed narration/presentation logic after text polish.
+- Removed object interpolation bug in Look narration context handling.
+- Reduced stale/over-certain Look warning phrasing for cross-layer threat cues.
+- Clarified transient vs interactable presentation by reducing redundant multi-encounter system banners and removing player-facing queued Focus button noise.
+- Removed noisy multi-encounter labels and duplicate "also in this tile" card text.
+- Improved plausibility guards for feeding/competition text (prevents implausible small nectar-bird feeding outcomes).
+- Improved sting/attack narration so repeated stings and kill-with-sting outcomes are called out clearly.
+- No intentional changes to core balance, spawn rates, bot logic, map generation, or survival maths.
+
+[2026-05-01 patch14 | GPT]
+- Follow-up text-only narration polish.
+- Reduced repeated scene/sense/card phrasing by separating short sensory cues from encounter-card detail text.
+- Added variation pools for common sensory wording (nearby movement, uncertain movement, forage scent cues, wet/still-air smell lines) to reduce repetitive debug-like phrasing.
+- Improved investigation prose tone for uncertain food/defence reads so interpretation sounds observational rather than clinical.
+- No intentional gameplay mechanics, bot logic, spawn rates, hydration/death logic, movement, map generation, or encounter persistence changes.
+
+[2026-05-01 patch13 | GPT]
+- Text-only narration/action-label patch.
+- Look output and encounter flavour phrasing were revised to read as restrained natural-history narration rather than debug-like scan text.
+- Drink labels were clarified so water-source actions read explicitly as water interactions (for example "drink at water edge" / "drink from water") instead of a generic "drink" label.
+- No intentional gameplay mechanics, bot logic, spawn weights, hydration/death logic, encounter persistence, queue handling, map generation, or UI layout changes.
+
 [2026-05-01 patch12 | Claude]
 IntelligentBot resource discipline and observability — 7 targeted fixes from post-Patch11 run 082425 analysis.
 - Fix A (CRITICAL): Cross-run threat memory false positives. hasRecentAerialThreat() and hasRecentGroundThreat() now guard against t.turn > now (previous-run threats stored with old turn numbers that appear "recent" when player.turn resets to 0 after death). This was the root cause of the Run 10 ground-look bootstrap failure: the aerial raptor from the prior run was flagged as a recent threat at turn 0, blocking the ground-bootstrap climb, causing the bot to take 'look' instead of climbing immediately and then dying to mesonychid on turn 3.
