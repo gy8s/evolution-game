@@ -3359,6 +3359,33 @@ function sanitizeNarrativeText(value, fallback = "") {
   return fallback;
 }
 
+function ensureNarrativeString(input) {
+  if (typeof input === "string") return input;
+  try {
+    if (typeof input === "function") return "[invalid text]";
+    if (typeof input === "object") return "[unreadable]";
+    return String(input);
+  } catch {
+    return "[error]";
+  }
+}
+
+function containsCodeLikeText(str) {
+  return /const |let |function |return |=>|&&|\|\||\{|\}/.test(str);
+}
+
+function cleanNarrative(str) {
+  if (containsCodeLikeText(str)) return "[text error]";
+  return str;
+}
+
+function safeNarrativeText(input, fallback = "") {
+  const ensured = ensureNarrativeString(input);
+  const base = sanitizeNarrativeText(ensured, fallback);
+  const cleaned = cleanNarrative(base);
+  return cleaned || fallback;
+}
+
 function addLog(message, cssClass = "minor") {
   const log = document.getElementById("log");
   const p = document.createElement("p");
@@ -3367,7 +3394,7 @@ function addLog(message, cssClass = "minor") {
   // QA/audit format: every event carries the player coordinate and height layer.
   const prefix = `Turn ${player.turn} [X ${player.x}, Y ${player.y}, ${layers[player.z]}]: `;
 
-  const cleanMessage = sanitizeNarrativeText(message, "You pause, but nothing resolves clearly.");
+  const cleanMessage = safeNarrativeText(message, "You pause, but nothing resolves clearly.");
   if (cleanMessage.startsWith(`Turn ${player.turn}: `)) {
     p.textContent = prefix + cleanMessage.slice(`Turn ${player.turn}: `.length);
   } else if (cleanMessage.startsWith("Turn ")) {
@@ -3391,7 +3418,7 @@ function addLog(message, cssClass = "minor") {
     actionKind: lastActionKind,
     cssClass,
     message: p.textContent,
-    rawMessage: sanitizeNarrativeText(message, "")
+    rawMessage: safeNarrativeText(message, "")
   });
 
   if (debugLog.length > 5000) debugLog.length = 5000;
@@ -3425,7 +3452,7 @@ function setNarration(text) {
     return;
   }
 
-  const raw = sanitizeNarrativeText(text, "").trim();
+  const raw = safeNarrativeText(text, "").trim();
   const tupleMatch = raw.match(/^([A-Za-z]+),0\.\d+$/);
 
   if (tupleMatch) {
@@ -3444,7 +3471,7 @@ function escapeHtml(value) {
 
 // @target [UTILS] Group scene notice helper
 function setGroupNotice(text) {
-  const msg = String(text || "").trim();
+  const msg = safeNarrativeText(text, "").trim();
   if (!msg) return;
   groupSceneNotice = { turn: player.turn, text: msg };
   setNarration(msg);
@@ -3452,12 +3479,12 @@ function setGroupNotice(text) {
 
 // @target [UTILS] Set Heard
 function setHeard(text) {
-  heardText = text;
+  heardText = safeNarrativeText(text, "");
 }
 
 // @target [UTILS] Smell text setter
 function setSmell(text) {
-  smellText = text;
+  smellText = safeNarrativeText(text, "");
 }
 
 let nextInstanceId = 1;
@@ -4955,7 +4982,7 @@ function directionLong(dir) {
 
 // @target [TURN] Format Cue Text
 function formatCueText(text) {
-  let out = sanitizeNarrativeText(text, "");
+  let out = safeNarrativeText(text, "");
 
   const directionMap = {
     "NE": "North-East",
@@ -13436,8 +13463,8 @@ function renderSenses() {
     return;
   }
 
-  hearText.innerHTML = formatCueText(heardText || "the damp forest shifting around you.");
-  smellTextEl.innerHTML = formatCueText(smellText || "wet leaves, bark, and fungal rot.");
+  hearText.innerHTML = formatCueText(safeNarrativeText(heardText || "the damp forest shifting around you.", "the damp forest shifting around you."));
+  smellTextEl.innerHTML = formatCueText(safeNarrativeText(smellText || "wet leaves, bark, and fungal rot.", "wet leaves, bark, and fungal rot."));
 
   if (currentEncounter && currentEncounter.kind === "carcass" && carcass) {
     clearCurrentEncounter("render-carcass-state", {promote: false});
@@ -13450,8 +13477,8 @@ function renderSenses() {
       currentEncounter = normaliseEncounter(currentEncounter, currentEncounter.key || currentEncounter.name || "unknown");
       const e = currentEncounter;
 
-      const encounterSeenText = e.key === "antTrail" ? antTrailSeenText(e) : (e.seen || `You notice ${article(e.name)} ${e.name}.`);
-      const seeCueText = e.key === "antTrail" ? antTrailSeeText(e) : shortEncounterCue(e);
+      const encounterSeenText = safeNarrativeText(e.key === "antTrail" ? antTrailSeenText(e) : (e.seen || `You notice ${article(e.name)} ${e.name}.`), "Something is here.");
+      const seeCueText = safeNarrativeText(e.key === "antTrail" ? antTrailSeeText(e) : shortEncounterCue(e), "Something shifts nearby.");
       seeText.innerHTML = formatCueText(seeCueText);
 
       const warning = knownWarning(e);
@@ -13459,7 +13486,8 @@ function renderSenses() {
       const actions = encounterActionsHtml(e);
       const currentInvestigationRef = encounterInvestigationRef(e);
       const investigationBelongsToCard = investigationText && (!investigationEncounterRef || investigationEncounterRef === currentInvestigationRef);
-      const floatingInvestigationBox = investigationText && !investigationBelongsToCard ? `<div class="investigationResult"><strong>Investigation result:</strong><br>${investigationText}</div>` : "";
+      const cleanInvestigationText = safeNarrativeText(investigationText, "");
+      const floatingInvestigationBox = cleanInvestigationText && !investigationBelongsToCard ? `<div class="investigationResult"><strong>Investigation result:</strong><br>${cleanInvestigationText}</div>` : "";
 
       html += `
         ${floatingInvestigationBox}
@@ -13468,7 +13496,7 @@ function renderSenses() {
           <div>
             <div class="creatureName">${sexSymbolHtml(e)}<span>${e.name || "unknown encounter"}</span></div>
             <div class="creatureText">${cardDetailForEncounter(e, seeCueText) || "Something is here, but the game has not described it properly yet."}</div>
-            ${investigationBelongsToCard ? `<div class="investigationResult"><strong>Investigation result:</strong><br>${investigationText}</div>` : ""}
+            ${investigationBelongsToCard ? `<div class="investigationResult"><strong>Investigation result:</strong><br>${cleanInvestigationText}</div>` : ""}
             ${warning ? `<div class="creatureText poison">${warning}</div>` : ""}
             <div class="creatureStats">${statHtml}</div>
             <div class="cardActions">${actions}</div>
@@ -13498,7 +13526,7 @@ function renderSenses() {
           <div>
             <div class="creatureName">${carcassLabel(carcass)}</div>
             <div class="creatureText">${currentEncounter ? "Food remains nearby, but eating while danger is present is a serious gamble." : (carcass.remainsType === "invertebrate_remains" ? "Small remains are fresh briefly, then quickly dry, sour, or disappear into the leaf litter." : "Food remains, but every turn increases rot risk and sends scent further through the forest.")}</div>
-            ${(investigationText && (!investigationEncounterRef || investigationEncounterRef === encounterInvestigationRef(carcass))) ? `<div class="investigationResult"><strong>Investigation result:</strong><br>${investigationText}</div>` : ""}
+            ${(safeNarrativeText(investigationText, "") && (!investigationEncounterRef || investigationEncounterRef === encounterInvestigationRef(carcass))) ? `<div class="investigationResult"><strong>Investigation result:</strong><br>${safeNarrativeText(investigationText, "")}</div>` : ""}
             <div class="creatureStats">
               <div>Portions: ${carcass.portions}</div>
               <div>Energy/turn: ${carcass.energy}</div>
@@ -14241,7 +14269,3 @@ function hasNearbyTag(x, y, tag, radius=3) {
 </script>
 </body>
 </html>
-  const actorSize = Number(actor.size || 1);
-  const victimSize = Number(victim.size || 1);
-  if (/needle-billed|hummingbird|orchid bee/.test(actorText) && (victim.kind === "animal" || victim.kind === "carcass")) return false;
-  if (/bird/.test(actorText) && actorSize <= 3 && (victim.kind === "animal" || victim.kind === "carcass") && victimSize >= 3) return false;
