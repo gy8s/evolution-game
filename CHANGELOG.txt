@@ -1,3 +1,10 @@
+[2026-05-01 patch14 | GPT]
+- Follow-up text-only narration polish.
+- Reduced repeated scene/sense/card phrasing by separating short sensory cues from encounter-card detail text.
+- Added variation pools for common sensory wording (nearby movement, uncertain movement, forage scent cues, wet/still-air smell lines) to reduce repetitive debug-like phrasing.
+- Improved investigation prose tone for uncertain food/defence reads so interpretation sounds observational rather than clinical.
+- No intentional gameplay mechanics, bot logic, spawn rates, hydration/death logic, movement, map generation, or encounter persistence changes.
+
 [2026-05-01 patch13 | GPT]
 - Text-only narration/action-label patch.
 - Look output and encounter flavour phrasing were revised to read as restrained natural-history narration rather than debug-like scan text.
