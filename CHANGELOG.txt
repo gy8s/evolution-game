@@ -1,3 +1,13 @@
+[2026-05-01 patch15 | GPT]
+- Fixed narration/presentation logic after text polish.
+- Removed object interpolation bug in Look narration context handling.
+- Reduced stale/over-certain Look warning phrasing for cross-layer threat cues.
+- Clarified transient vs interactable presentation by reducing redundant multi-encounter system banners and removing player-facing queued Focus button noise.
+- Removed noisy multi-encounter labels and duplicate "also in this tile" card text.
+- Improved plausibility guards for feeding/competition text (prevents implausible small nectar-bird feeding outcomes).
+- Improved sting/attack narration so repeated stings and kill-with-sting outcomes are called out clearly.
+- No intentional changes to core balance, spawn rates, bot logic, map generation, or survival maths.
+
 [2026-05-01 patch14 | GPT]
 - Follow-up text-only narration polish.
 - Reduced repeated scene/sense/card phrasing by separating short sensory cues from encounter-card detail text.
