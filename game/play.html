@@ -807,8 +807,8 @@ const encounters = {
     kind: "forage", name: "ant trail", icon: "🐜", className: "food",
     canInvestigate: true, portions: 1, energy: 4,
     poison: {severity: "mild", rank: 1, toxinType: "irritant", lethal: false, turns: 2, damage: 1, warning: "Biting ants / acid"},
-    seen: "A dark ordinary-ant trail runs in a purposeful line. The workers bite if disturbed, but this is not a giant-ant trail.",
-    investigated: "The trail has a direction, not just a smell. One way leads toward ants; the other way leads toward whatever they are feeding on."
+    seen: "A dark line of ants travels with purpose through the leaf litter. It hints at food nearby, and a swarm of biting bodies if disturbed.",
+    investigated: "The trail runs with intent, not chaos. One direction returns to the colony; the other may lead to fruit, carrion, grubs, or conflict."
   },
 
   antNest: {
@@ -1250,7 +1250,7 @@ const encounters = {
     dangerProfile: "predator", temperament: "hunter", pursuitType: "air", canInvestigate: true,
     fitness: 95, size: 28, speed: 85, agility: 70, aggression: 75, food: 80,
     poison: null,
-    seen: "A large raptor passes above the canopy, turning its head as it searches for movement."
+    seen: "High above the canopy, a broad-winged raptor turns on warm air, searching for the smallest mistake below."
   },
 
   owl: {
@@ -1258,7 +1258,7 @@ const encounters = {
     dangerProfile: "predator", temperament: "hunter", pursuitType: "air", canInvestigate: true,
     fitness: 80, size: 18, speed: 65, agility: 80, aggression: 65, food: 55,
     poison: null,
-    seen: "An owl shape sits silent against the trunk, eyes fixed and unreadable."
+    seen: "Pressed against the trunk, an owl holds perfectly still. Only the eyes move, measuring the gaps between leaves."
   },
 
   pakicetus: {
@@ -1386,7 +1386,7 @@ const encounters = {
     dangerProfile: "predator", temperament: "hunter", pursuitType: "climber", canInvestigate: true,
     fitness: 90, size: 22, speed: 55, agility: 55, aggression: 65, food: 70,
     poison: null,
-    seen: "A monitor lizard moves with deliberate confidence, tongue tasting the wet air."
+    seen: "A monitor lizard works through the undergrowth with slow confidence, its tongue testing the damp air ahead of it."
   },
 
   iguana: {
@@ -1737,8 +1737,8 @@ const encounters = {
   birdNest: {
     kind: "nest", name: "bird nest", icon: "🥚", className: "food",
     canInvestigate: true, eggs: 2,
-    seen: "A small nest sits in a fork of branches. Something pale shows inside.",
-    investigated: "The nest holds eggs. It may be easy food, but the smell and sound of feeding can draw attention."
+    seen: "A small nest rests in the fork of a branch. Pale eggs show through the weave of leaves and twigs.",
+    investigated: "The eggs are easy to reach, but feeding here carries smell and noise farther than you want."
   },
 
   largeGroundNest: {
@@ -7092,7 +7092,13 @@ function consumptionButtonLabel(e) {
   e = normaliseEncounter(e, e && (e.key || e.name) || "unknown");
   if (e.kind === "remedy") return "Consume";
   if (isSwarmEncounter(e)) return "Pick off";
-  if (isDrinkableEncounter(e)) return "Drink";
+  if (isDrinkableEncounter(e)) {
+    const key = e.key || "";
+    if (key === "rainPuddle") return "Drink from puddle";
+    if (key === "bromeliadPool") return "Drink from water pocket";
+    if (isNearWater(player.x, player.y) || terrainAt(player.x, player.y) === "water") return "Drink at water edge";
+    return "Drink from water";
+  }
   return "Eat";
 }
 
@@ -11036,7 +11042,7 @@ function getRandomBotActions() {
 
   if (carcass) add("eat-carcass", `eat ${carcass.name}`, eat, "encounter");
   if (hasGroup() && (carcass || (currentEncounter && ["forage", "nest", "remedy", "carcass"].includes(currentEncounter.kind)))) add("conceal-food", "conceal food", concealFocusedFood, "social");
-  if (canDrinkAtWaterEdge()) add("drink-water", "drink water", drinkWater, "resource");
+  if (canDrinkAtWaterEdge()) add("drink-water", "drink at water edge", drinkWater, "resource");
   add("look", "look around", lookAround, "sense");
   add("call", "call out", callOut, "social");
   add("wait", "wait", waitTurn, "time");
@@ -12814,6 +12820,49 @@ function timeNarrationFragment() {
  * player has created enough safety first.
  */
 
+// Narration tone: restrained natural-history documentary. Sensory, specific, and readable; avoid debug phrasing, melodrama, or hiding critical gameplay information.
+function lookNarrationPick(arr) {
+  return Array.isArray(arr) && arr.length ? arr[Math.floor(Math.random() * arr.length)] : "";
+}
+
+function composeLookNarration(findings, context = {}) {
+  const phase = context.phase || "day";
+  const weather = context.weather || "";
+  const layerName = context.layerName || "forest";
+  const habitat = context.habitat || "forest";
+  const lines = [];
+
+  const atmosphere = lookNarrationPick([
+    `You pause in the ${layerName}, listening to the ${habitat}.`,
+    `You hold still and let the ${habitat} settle around you.`,
+    `You stop moving for a breath and read the ${layerName} around you.`
+  ]);
+  const sensory = weather === "heavy rain"
+    ? "Rain drums over leaves and wood, blurring distance."
+    : weather === "mist"
+      ? "Mist softens edges; shapes move before they resolve."
+      : phase === "night"
+        ? "Night keeps most movement hidden, but sound travels cleanly."
+        : phase === "dawn" || phase === "dusk"
+          ? "Low light shifts the trunks into bands of shadow and movement."
+          : "Air, leaf movement, and distant calls sketch out what is active nearby.";
+  lines.push(`${atmosphere} ${sensory}`);
+
+  const threat = findings.find(f => f.cls === "threat");
+  const food = findings.find(f => f.cls === "food");
+  const resource = findings.find(f => /water|puddle|pool|carcass|fruit|berries|mushroom|nest|clay|mussel|crayfish|fig/i.test(f.text || ""));
+  const neutral = findings.find(f => f.cls !== "threat" && f !== food && f !== resource);
+
+  if (threat) {
+    lines.push(`${threat.text} Treat this as immediate risk, not background noise.`);
+  } else if (food || resource || neutral) {
+    const cueA = food ? food.text : (resource ? resource.text : neutral.text);
+    const cueB = neutral && neutral !== cueA ? neutral.text : (resource && resource !== cueA ? resource.text : "");
+    lines.push(cueB ? `${cueA} ${cueB}` : cueA);
+  }
+  return lines.filter(Boolean).slice(0, 3).join(" ");
+}
+
 function lookAround() {
   if (player.dead) return;
   lastActionKind = "look";
@@ -12911,7 +12960,7 @@ function lookAround() {
       if (ordinary >= 3) break;
     }
     if (!findings.length) addFinding("Nothing resolves clearly. Either there is nothing obvious nearby, or you failed to read it.", "minor");
-    const text = findings.map(f => f.text).slice(0, 8).join(" ");
+    const text = composeLookNarration(findings, {phase, weather: environment.weather, layerName, habitat});
     lastLookText = text; lastLookTurn = player.turn;
     addLog(`You look carefully. ${text}`, findings.some(f => f.cls === "threat") ? "threat" : "minor");
     setNarration(`You pause to look. ${text}`);
