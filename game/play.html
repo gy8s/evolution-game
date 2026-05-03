@@ -10962,7 +10962,8 @@ function newBotMemory() {
     lowHydrationTurns: 0, // consecutive turns with hydration <= 45 within this run
     currentGoal: null,    // {type, startTurn, ...} persists until satisfied or cleared
     positionHistory: [],  // [{x, y}] last 6 positions for A-B-A-B oscillation detection (P13A-A3)
-    loopBlacklist: []     // [{x, y, until}] positions blocked to escape local movement loops (P13A-A3)
+    loopBlacklist: [],    // [{x, y, until}] positions blocked to escape local movement loops (P13A-A3)
+    goalStagnantTurns: 0  // consecutive turns goal is active but position spread is minimal (P13B-A6ext)
   };
 }
 
@@ -10992,11 +10993,31 @@ function updateBotMemory() {
   // Expire loop blacklist entries
   if (!m.loopBlacklist) m.loopBlacklist = [];
   m.loopBlacklist = m.loopBlacklist.filter(b => player.turn < b.until);
-  // P13A-A6: Clear seek_food goal when energy recovered; clear any goal after 10 turns
+  // P13A-A6 + P13B-A6ext: Clear goal when energy recovered, age exceeded, or position stagnant
+  if (!('goalStagnantTurns' in m)) m.goalStagnantTurns = 0;
   if (m.currentGoal) {
     const goalAge = player.turn - (m.currentGoal.startTurn ?? player.turn);
-    if (m.currentGoal.type === 'seek_food' && player.energy >= 50) m.currentGoal = null;
-    else if (goalAge > 10) m.currentGoal = null;
+    if (m.currentGoal.type === 'seek_food' && player.energy >= 50) {
+      m.currentGoal = null; m.goalStagnantTurns = 0;
+    } else if (goalAge > 10) {
+      m.currentGoal = null; m.goalStagnantTurns = 0;
+    } else {
+      // Stagnation check: if last 4 positions span <= 2 tiles, goal is making no progress
+      const ph = m.positionHistory || [];
+      if (ph.length >= 4) {
+        const recent = ph.slice(-4);
+        const spread = (Math.max(...recent.map(p => p.x)) - Math.min(...recent.map(p => p.x))) +
+                       (Math.max(...recent.map(p => p.y)) - Math.min(...recent.map(p => p.y)));
+        if (spread <= 2) {
+          m.goalStagnantTurns++;
+          if (m.goalStagnantTurns >= 3) { m.currentGoal = null; m.goalStagnantTurns = 0; }
+        } else {
+          m.goalStagnantTurns = 0;
+        }
+      }
+    }
+  } else {
+    m.goalStagnantTurns = 0;
   }
 }
 
@@ -11386,18 +11407,26 @@ function intelligentForageBlocked(e) {
   if (FORAGE_BLACKLIST.has(String(e.name || "").toLowerCase())) return true;
   // Block any forage whose encounter object already exposes a moderate-or-worse poison
   if (e.poison && e.poison.rank >= 2) return true;
-  // Any poison is dangerous when fitness is critically low — mild poison can be fatal at F<=15
-  if (e.poison && e.poison.rank >= 1 && (player.fitness || 0) <= 15) return true;
+  // P13B-B1: Mild poison fatal risk raised — block rank-1 when fitness <= 30
+  if (e.poison && e.poison.rank >= 1 && (player.fitness || 0) <= 30) return true;
+  // P13B-B2: Compound crisis block — any poison when (F<=50 AND H<=20) OR E<=10
+  if (e.poison && e.poison.rank >= 1 &&
+      ((player.fitness <= 50 && player.hydration <= 20) || player.energy <= 10)) return true;
   // Block anything with a guardian spawn mechanic
   if (e.guardianKey || e.guardianChance) return true;
   return false;
 }
 
 function intelligentFindSafeEat(actions) {
+  // P13B-B3: Don't eat while being actively pursued by a predator
+  if (activePursuit && (activePursuit.pursuitType === 'air' ||
+      activePursuit.dangerProfile === 'predator' || activePursuit.dangerProfile === 'fatal')) return null;
   for (const a of actions) {
     if (a.id === "eat" && currentEncounter) {
       const e = currentEncounter;
       if (intelligentForageBlocked(e)) continue;
+      // P13B-P4: Clay is a remedy only — block when not poisoned
+      if (e.remedy && e.remedy.type === 'clay' && !player.poison) continue;
       const known = player.knownFoods[variantKeyFor(e)];
       if (known && known.severity !== "safe") continue;
       if (["forage", "nest", "remedy", "carcass"].includes(e.kind)) return a;
@@ -11409,6 +11438,19 @@ function intelligentFindSafeEat(actions) {
       if (q && !intelligentForageBlocked(q)) {
         const known = player.knownFoods[variantKeyFor(q)];
         if (!known || known.severity === "safe") return a;
+      }
+    }
+  }
+  // P13B-B4: Desperation — F<=5 with no safe food, allow rank-1 poison as last resort
+  if ((player.fitness || 0) <= 5) {
+    for (const a of actions) {
+      if (a.id === "eat" && currentEncounter) {
+        const e = currentEncounter;
+        if (e.poison && e.poison.rank === 1 && !e.guardianKey && !e.guardianChance &&
+            e.dangerProfile !== "toxic_food" && !FORAGE_BLACKLIST.has(String(e.name || "").toLowerCase())) {
+          addQAIssue("DESPERATION_EAT", "info", { encounter: e.name, fitness: player.fitness });
+          return a;
+        }
       }
     }
   }
@@ -11426,29 +11468,34 @@ function detectAndBreakOscillation(actions) {
   const p0 = h[n-4], p1 = h[n-3], p2 = h[n-2], p3 = h[n-1];
   const eq = (a, b) => a.x === b.x && a.y === b.y;
   if (!eq(p0, p2) || !eq(p1, p3) || eq(p0, p1)) return null;
-  // A-B-A-B confirmed — blacklist both positions for 3 turns
+  // A-B-A-B confirmed — blacklist both positions for 6 turns (P13B-P5: increased from 3)
   m.loopBlacklist = m.loopBlacklist || [];
   if (!m.loopBlacklist.find(b => b.x === p0.x && b.y === p0.y))
-    m.loopBlacklist.push({ x: p0.x, y: p0.y, until: player.turn + 3 });
+    m.loopBlacklist.push({ x: p0.x, y: p0.y, until: player.turn + 6 });
   if (!m.loopBlacklist.find(b => b.x === p1.x && b.y === p1.y))
-    m.loopBlacklist.push({ x: p1.x, y: p1.y, until: player.turn + 3 });
-  if (m.currentGoal) m.currentGoal = null; // A6: stale goal likely contributed to loop
+    m.loopBlacklist.push({ x: p1.x, y: p1.y, until: player.turn + 6 });
+  if (m.currentGoal) { m.currentGoal = null; m.goalStagnantTurns = 0; } // A6: stale goal contributed to loop
   const deltas = {
     "move-northwest":[-1,-1],"move-north":[0,-1],"move-northeast":[1,-1],
     "move-west":[-1,0],"move-east":[1,0],
     "move-southwest":[-1,1],"move-south":[0,1],"move-southeast":[1,1]
   };
   const byId = Object.fromEntries(actions.map(a => [a.id, a]));
-  const escapeMoves = [];
+  // P13B-P5: Force perpendicular escape — compute loop axis and prefer cross-axis directions
+  const loopDx = p1.x - p0.x, loopDy = p1.y - p0.y;
+  const perpMoves = [], otherMoves = [];
   for (const [id, d] of Object.entries(deltas)) {
     const a = byId[id];
     if (!a) continue;
     const nx = player.x + d[0], ny = player.y + d[1];
     if (m.loopBlacklist.find(b => b.x === nx && b.y === ny)) continue;
     if (nx >= 0 && ny >= 0 && nx < WORLD_SIZE && ny < WORLD_SIZE && terrainAt(nx, ny) === 'water') continue;
-    escapeMoves.push(a);
+    // A move is perpendicular if its dot product with the loop direction is zero
+    const dot = d[0] * loopDx + d[1] * loopDy;
+    if (dot === 0) perpMoves.push(a); else otherMoves.push(a);
   }
-  if (escapeMoves.length) return randomBotAction(escapeMoves);
+  if (perpMoves.length) return randomBotAction(perpMoves);
+  if (otherMoves.length) return randomBotAction(otherMoves);
   if (byId["climb"]) return byId["climb"];
   if (byId["descend"] && !hasRecentGroundThreat()) return byId["descend"];
   return null;
@@ -11676,8 +11723,15 @@ function chooseIntelligentBotAction(actions) {
   }
 
   if (mode === "RECOVER") {
-    // Groom immediately if parasites — now that groom is in the action list this will fire
-    if ((player.parasites || 0) >= 1 && byId["groom"]) return byId["groom"];
+    // P13B-P2: Resource anchor — multi-portion safe food at low stats: eat before moving
+    if (currentEncounter && (currentEncounter.portions || 0) >= 2 &&
+        (player.energy <= 30 || player.hydration <= 15 || player.fitness <= 15)) {
+      const eat = intelligentFindSafeEat(actions);
+      if (eat) return eat;
+    }
+    // Groom immediately if parasites — skip only when starving and poisoned (P13B-P3)
+    if ((player.parasites || 0) >= 1 && byId["groom"] &&
+        !(player.energy <= 0 && player.poison)) return byId["groom"];
     // Critical hydration — drink immediately
     if (player.hydration <= 20 && byId["drink-water"]) return byId["drink-water"];
     // Critical energy — eat safe food before water-seeking or movement (resource-anchor)
@@ -11689,13 +11743,20 @@ function chooseIntelligentBotAction(actions) {
     const criticalResource = player.energy <= 10 || player.hydration <= 10;
     if (criticalResource) {
       const mCrit = botState.memory || (botState.memory = newBotMemory());
-      // P13A-A1: If adequately hydrated but critically starving, eat or climb toward food — don't keep drinking
-      if (player.hydration >= 65 && player.energy <= 10) {
+      // P13B-P3: Poisoned + E=0 + H sufficient — block drink/groom, force food seek
+      if (player.energy <= 0 && player.hydration >= 40 && player.poison) {
         const eat = intelligentFindSafeEat(actions);
         if (eat) return eat;
         if (!mCrit.currentGoal || mCrit.currentGoal.type !== 'seek_food')
           mCrit.currentGoal = { type: 'seek_food', startTurn: player.turn };
-        // Climb toward food-capable layer when stuck at ground
+        if (player.z === 0 && byId["climb"] && !hasRecentAerialThreat()) return byId["climb"];
+        // fall through to movement — drink-water and groom deliberately skipped
+      } else if (player.hydration >= 65 && player.energy <= 10) {
+        // P13A-A1: Adequately hydrated but starving — eat or seek food, don't keep drinking
+        const eat = intelligentFindSafeEat(actions);
+        if (eat) return eat;
+        if (!mCrit.currentGoal || mCrit.currentGoal.type !== 'seek_food')
+          mCrit.currentGoal = { type: 'seek_food', startTurn: player.turn };
         if (player.z === 0 && byId["climb"] && !hasRecentAerialThreat()) return byId["climb"];
       } else {
         // P13A-A4: If E is also low, try an immediately available safe eat before pursuing water
@@ -11706,7 +11767,7 @@ function chooseIntelligentBotAction(actions) {
         const drinkMove = byId["drink-water"] || intelligentMoveTowardWater(actions);
         if (drinkMove) return drinkMove;
       }
-      // P13A-A3: Break A-B-A-B oscillation before falling back to random movement
+      // P13A-A3: Break A-B-A-B oscillation before falling back to movement
       const oscEscapeCrit = detectAndBreakOscillation(actions);
       if (oscEscapeCrit) return oscEscapeCrit;
       const landMoves = intelligentFilterMovesAntiLoop(moveActions.filter(a => {
@@ -11715,6 +11776,11 @@ function chooseIntelligentBotAction(actions) {
         const d = deltas[dir]; if (!d) return true;
         return terrainAt(player.x + d[0], player.y + d[1]) !== "water";
       }));
+      // P13B-P1: At deepest crisis (E<=5 or H<=5) prefer goal-directed water move over random
+      if (player.energy <= 5 || player.hydration <= 5) {
+        const waterDir = intelligentMoveTowardWater(actions);
+        if (waterDir) return waterDir;
+      }
       if (landMoves.length) return randomBotAction(landMoves);
       if (moveActions.length) return randomBotAction(intelligentFilterMovesAntiLoop(moveActions));
     }

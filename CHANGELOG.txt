@@ -1,3 +1,18 @@
+[2026-05-03 patch13b | Claude]
+IntelligentBot crisis hardening — 10 targeted fixes (B1–B4, P1–P6) from post-Patch13A run analysis (log 20260503-170032) and GPT/Claude joint review. Addresses priority enforcement failure under compound crisis. Bot/debug tools change only.
+- B1: Raise rank-1 poison block threshold from F<=15 to F<=30 in intelligentForageBlocked(). Run 10 confirmed death at F=28 eating rank-1 poison with existing threshold.
+- B2: Compound crisis poison block — any rank-1 poison now blocked when (F<=50 AND H<=20) OR E<=10, regardless of rank-2+ check. Prevents eating marginal food when multiple stats are low.
+- B3: Queued-eat recheck expanded — intelligentFindSafeEat() now returns null immediately if an active predator pursuit is in progress (pursuitType=air or dangerProfile=predator/fatal). Prevents eating while being chased.
+- B4: Desperation exception — if F<=5 and no safe food found, rank-1 non-guardian poison food is allowed as last resort with DESPERATION_EAT QA trace tag.
+- P1: Hard crisis gate — when E<=5 OR H<=5 and movement is the only remaining option in criticalResource block, intelligentMoveTowardWater() is tried before randomBotAction(). Prevents aimless drift at minimum stats (Run 7: 5x move-north at E=0/H=0).
+- P2: Resource anchor — at start of RECOVER mode, if current encounter has portions>=2 and (E<=30 OR H<=15 OR F<=15), eat is returned before any other action including movement. Prevents leaving multi-portion food after one eat (Run 8: ate once, moved away, died).
+- P3: Water→food handoff gap fix — new sub-case in criticalResource: when E=0 AND H>=40 AND poisoned, block drink-water and groom, force seek_food goal and climb. Addresses A1 gap exposed in Run 2 (A1 threshold H>=65 was never reached; bot died at H=52 still drinking). Also: parasite groom is skipped when E=0 and poisoned so the criticalResource block can reach food/water logic.
+- P4: Clay bank filter — intelligentFindSafeEat() now skips clay bank encounters unless player.poison is truthy. Clay provides zero energy; eating it at E=0 wastes turns (Run 9: 3x clay consume at E=0/H=0).
+- P5: Oscillation blacklist duration 3→6 turns + forced perpendicular escape. detectAndBreakOscillation() now blacklists loop tiles for 6 turns. Escape move selection computes loop axis (dx/dy between A and B) and returns a dot-product-zero (perpendicular) move first, falling back to other non-blacklisted moves only if no perpendicular is available.
+- A6ext: Goal stagnancy timeout — goalStagnantTurns counter added to botState.memory. updateBotMemory() increments it when last 4 positions span <=2 Manhattan tiles while a goal is active; clears goal after 3 consecutive stagnant turns. Complements existing 10-turn age timeout.
+- game/evolution_game_v66_57.html NOT updated — archived reference version only.
+- Syntax check: PASS.
+
 [2026-05-01 patch13a | Claude]
 IntelligentBot recovery sequencing — 6 targeted fixes (A1–A6) from post-Patch12 retrospective and GPT/Claude joint analysis.
 - A1 (CRITICAL): Drink-loop exit. In RECOVER mode's criticalResource block, when H>=65 and E<=10 the bot no longer returns drink-water. Instead it tries safe eat first, sets a seek_food goal, and climbs off Ground toward food-capable layers. Previously the bot could reach H=90+ while starving to death because E=0 triggered the criticalResource drink path on every turn.
