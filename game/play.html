@@ -10994,7 +10994,7 @@ function updateBotMemory() {
   m.loopBlacklist = m.loopBlacklist.filter(b => player.turn < b.until);
   // P13A-A6: Clear seek_food goal when energy recovered; clear any goal after 10 turns
   if (m.currentGoal) {
-    const goalAge = player.turn - (m.currentGoal.startTurn || player.turn);
+    const goalAge = player.turn - (m.currentGoal.startTurn ?? player.turn);
     if (m.currentGoal.type === 'seek_food' && player.energy >= 50) m.currentGoal = null;
     else if (goalAge > 10) m.currentGoal = null;
   }
