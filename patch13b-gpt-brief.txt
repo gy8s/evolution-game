@@ -1,0 +1,210 @@
+CLAUDE → GPT: PATCH 13B BRIEF — LOG ANALYSIS + COMBINED SCOPE
+================================================================
+Log: logs/bot-runs/20260503-170032 | Version: v66.57 | Runs: 12
+
+---------------------------------------------------------------
+SECTION 1 — PATCH 13A OUTCOME
+---------------------------------------------------------------
+
+Metrics (post-13A vs post-12b baseline):
+
+  Deaths:   11 (was 13)
+  Median:   78 (was 76 — stable)
+  Mean:     87 (was 75 — improved)
+  Longest:  270 (was 186 — significant improvement)
+  <10t deaths: 0 (was 0 — sustained)
+
+Distribution: 10-29t: 2 | 30-59t: 0 | 60-89t: 7 | 90+t: 2
+
+Death causes (from compact.txt):
+  poison: 5
+  Masillaraptor-like raptor: 1
+  mesonychid-like ground predator: 1
+  dehydration: 1
+  fallen nuts: 1        ← died dehydrated while standing on food
+  clay bank: 1          ← died consuming zero-energy resource
+  large eagle: 1
+
+Assessment: 13A raised the ceiling and improved mean survival.
+It did not solve crisis commitment. Failures are now concentrated
+in compound-crisis scenarios, not early-game mistakes.
+
+
+---------------------------------------------------------------
+SECTION 2 — RUN-BY-RUN DEATH ANALYSIS
+---------------------------------------------------------------
+
+Run 1 (t270 — LONGEST — poison):
+  E=14→0, H=13→9. In RECOVER, groomed then moved north x4, west x1.
+  No food sought despite poisoned + declining E/H.
+  Classic aimless movement under compound crisis.
+  → Confirms: P1 (hard crisis gate), original B2 (compound poison block)
+
+Run 2 (t85 — DRINK LOOP — poison):
+  Terminal: move-west, drink-water, drink-water, groom, drink-water.
+  E=0 all 5 turns. H: 0→28→54→52. F: 22→2. Poisoned (load 2).
+  *** A1 DID NOT FIRE. H reached only 52 — threshold was H>=65. ***
+  A1 gap confirmed: at E=0+poison, bot drank twice and groomed
+  before dying. H>=65 threshold is too high for this failure mode.
+  → Requires: P3 tightening (trigger at H>=40 not H>=65 when E=0+poisoned)
+
+Run 3 (t23 — aerial):
+  Healthy (F100/E76/H64). Raptor at t378 → EMERGENCY_ESCAPE.
+  t379: back to EXPLORE. t380: new encounter in same area.
+  1-turn escape window, immediately re-entered threat zone.
+  → Confirms: P6 (escape stickiness)
+
+Run 4 (t16 — aerial):
+  Healthy (F82/E91/H84). Large eagle. Same pattern as Run 3.
+  EMERGENCY_ESCAPE → EXPLORE immediately next turn.
+  → Confirms: P6 (escape stickiness)
+
+Run 5 (t87 — ground predator):
+  Constrictor at Undergrowth + ground predator at Ground level.
+  Bot descended from Undergrowth into ground predator.
+  Ambiguous trap (threat above, threat below). Stats were healthy
+  (F94-96). Complex environmental death, difficult to target directly.
+  → No clear fix available in 13B scope.
+
+Run 6 (t99 — aerial + oscillation + poison):
+  Mid-storey east↔west oscillation (t578-579) while poisoned.
+  Escaped constrictor (descend), recovered north, then aerial raptor.
+  Oscillation still present despite A3; poisoned at death (load 1 irritant).
+  → Confirms: P5 (oscillation blacklist duration), original B1/B2
+
+Run 7 (t75 — dehydration):
+  E=0, H=0 for all 5 terminal turns. 5x move-north in Mid-storey.
+  No eat or drink attempt. Pure crisis movement failure.
+  → Confirms: P1 (hard crisis gate — movement must be goal-directed at E/H=0)
+
+Run 8 (t80 — resource anchor failure):
+  Fell nuts (2 portions) visible at t733, t734, t735, t736, t737.
+  Sequence: move-west past nuts, move-east past nuts, move-west past nuts,
+  EAT nuts (once, E:36→40), then move-east AWAY from nuts. Died dehydrated.
+  Bot ate once then left with 1 portion remaining and H=0.
+  → Confirms: P2 (resource anchor — eat all portions before moving)
+
+Run 9 (t72 — clay bank):
+  E=0, H=0. Ate clay bank at t806 (E=0, clay provides 0 energy).
+  Groomed at t805 with clay present. Ate clay again at t809.
+  Not poisoned — clay was selected purely because it was the only
+  encounter present. Zero gain, two turns wasted.
+  → Confirms: P4 (clay validity filter — only if poisoned)
+
+Run 10 (t78 — poison eaten at low stats):
+  t883: ate "mildly poisonous purple berries" at F28/E18/H22, RECOVER mode.
+  Rank-1, plant toxin. F=28 is above the current F<=15 block threshold.
+  Died to raptor while carrying poison load 3.
+  *** This is the exact B1 case. Would have been blocked at F<=30. ***
+  → Directly validates: original B1 (raise rank-1 block to F<=30)
+
+Run 11 (t76 — aerial escape stickiness):
+  t961: EMERGENCY_ESCAPE (monitor lizard). t962: RECOVER (descend).
+  t963: RECOVER (climb). Died to large eagle on same escape path.
+  Mode left EMERGENCY immediately. Bot climbed back into aerial zone.
+  → Confirms: P6 (escape stickiness — 2-3 turn bias after aerial threat)
+
+Run 12: Survived (turn limit, 37 turns). Not relevant to death analysis.
+
+
+---------------------------------------------------------------
+SECTION 3 — ORIGINAL 13B ITEMS: VALIDATION STATUS
+---------------------------------------------------------------
+
+All four original GPT-locked B items remain valid and confirmed.
+
+B1 — Raise rank-1 poison block from F<=15 to F<=30
+  Status: CONFIRMED by Run 10. Ate poison at F=28 (above old threshold).
+  Required change: intelligentForageBlocked() rank-1 threshold F<=30.
+
+B2 — Compound block: skip poison if (F<=50 AND H<=20) OR E<=10
+  Status: CONFIRMED by Runs 1, 2, 6. All involve poison + compound crisis.
+  Required change: additional guard in intelligentForageBlocked().
+
+B3 — Queued-eat recheck: re-evaluate food safety with live F/E/H at execution
+  Status: Not directly observed failing in isolation, but structurally necessary.
+  Required change: intelligentFindSafeEat() re-checks block conditions at call time.
+
+B4 — Desperation exception: if F<=5 and no safe food, allow rank-1 with trace tag
+  Status: Not triggered in this run (F rarely hit <=5 before death). Correct to retain.
+  Required change: desperation path in intelligentFindSafeEat() with QA tag.
+
+
+---------------------------------------------------------------
+SECTION 4 — NEW ITEMS FOR 13B (FROM RUN DATA)
+---------------------------------------------------------------
+
+P1 — Hard crisis gate (Runs 7, 9)
+  When E<=5 OR H<=5:
+    - All movement must be goal-directed (toward food/water target),
+      escape, or oscillation-break output.
+    - Random or exploratory movement is NOT allowed.
+    - Eat/drink must override movement when available on current tile.
+  Implementation: flag at top of chooseIntelligentBotAction(), applied
+  before any movement selection that isn't already goal-anchored.
+
+P2 — Resource anchor (Run 8)
+  When: safe multi-portion food present AND (E<=30 OR H<=15 OR F<=15)
+    - Eat BEFORE considering movement.
+    - Do not leave food tile until: all portions consumed OR threat appears.
+  Implementation: check in intelligentFindSafeEat() or pre-movement gate
+  using current tile encounter data.
+
+P3 — Water→food handoff tightened (Run 2 — A1 gap)
+  Current: A1 blocks drink at H>=65 AND E<=10. NOT sufficient.
+  Run 2 died at H=52 with E=0, still drinking.
+  Required: if E=0 AND H>=40 AND poisoned, block drink-water AND groom,
+  force seek_food goal.
+  Also: block groom in criticalResource path when E<=10 (groom seen at
+  t356 with E=0, H=54, while poisoned).
+
+P4 — Clay validity filter (Run 9)
+  Clay bank ONLY allowed when player.poisoned > 0.
+  Otherwise excluded from intelligentFindSafeEat() results entirely.
+  Implementation: single guard in resource selection, check remedy type.
+
+P5 — Oscillation blacklist duration (Runs 6, 8, 9)
+  Current: blacklist 3 turns. Still seeing loops.
+  Increase to 6 turns.
+  Ensure perpendicular escape: if N/S are blacklisted, force E or W output
+  (not just "filter and hope").
+
+P6 — Escape stickiness (Runs 3, 4, 11)
+  Add escapeTimer to botState.memory (init 0).
+  On any EMERGENCY_ESCAPE turn involving aerial predator: escapeTimer = 3.
+  In determineIntelligentBotMode(): if escapeTimer > 0 and no new threat,
+  decrement and return RECOVER (not EXPLORE).
+  EMERGENCY_ESCAPE must still override escapeTimer if new threat appears.
+
+
+---------------------------------------------------------------
+SECTION 5 — COMBINED 13B SCOPE (FINAL PROPOSAL)
+---------------------------------------------------------------
+
+All items are hardening of existing systems. No new architecture.
+
+  B1: Raise rank-1 poison block threshold F<=15 → F<=30
+  B2: Compound poison block at (F<=50 AND H<=20) OR E<=10
+  B3: Queued-eat recheck with live stats at execution time
+  B4: Desperation exception — F<=5, no safe food, allow rank-1 + trace tag
+  P1: Hard crisis gate — no random movement at E<=5 or H<=5
+  P2: Resource anchor — eat all multi-portion food before moving at low stats
+  P3: Water→food handoff tightened — trigger at H>=40+E=0+poisoned, block groom
+  P4: Clay bank filter — only if poisoned
+  P5: Oscillation blacklist 3→6 turns + forced perpendicular escape bearing
+  P6: Escape stickiness — 3-turn aerial escape bias via escapeTimer
+
+Files: game/play.html + CHANGELOG.txt only.
+
+---------------------------------------------------------------
+SECTION 6 — A1 GAP NOTE (PATCH 13A REGRESSION)
+---------------------------------------------------------------
+
+A1 (drink-loop exit) was implemented as: intercept at H>=65 AND E<=10.
+Run 2 shows this is insufficient: the bot can die at H=52 with E=0
+still in the drink loop. The threshold does not cover the full failure mode.
+P3 above corrects this. It should be treated as a 13A fix, not new scope.
+
+---------------------------------------------------------------
+END OF BRIEF
+---------------------------------------------------------------
