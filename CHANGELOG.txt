@@ -1,3 +1,17 @@
+[2026-05-03 patch13c | Claude]
+IntelligentBot crisis enforcement — 8 targeted fixes (C1–C8) from post-Patch13B three-run analysis and GPT/Claude joint review. Enforces hard priority under compound crisis. Bot/debug tools change only.
+- C1: P1 water/food conflation fix. In criticalResource, waterDir is now only returned when H<=20 or H<E. Previously, intelligentMoveTowardWater fired even when E was the crisis and H was adequate (e.g. E=5, H=62), sending the bot toward water when it should have been seeking food.
+- C2: H<=5 drink priority over eat. When H<=5 in the criticalResource else-branch, drink-water and intelligentMoveTowardWater are tried before the A4 eat path. Previously A4 (eat at E<=30) could fire before drink even at H=0.
+- C3: Bootstrap grace period. botState.memory.bootTurns increments each turn and resets on run start. In EXPLORE mode, the climb-toward-canopy action is suppressed when bootTurns<=4 and z>=1. Ground→Undergrowth climb is always permitted. Prevents bot climbing straight into aerial predator on fresh resets.
+- C4: Cache water scan direction in criticalResource. After intelligentMoveTowardWater returns a direction, it is stored as a seek_water goal (dirId + turn). If the scan returns null on the next turn (two equidistant water sources causing flip), the cached direction is reused for up to 3 turns. Eliminates water-scan-flip oscillation (E-W loop driven by scanner, not random movement).
+- C5: Position history movement-only push. updateBotMemory() now only appends to positionHistory when player position changed from the previous entry. Non-movement actions (groom, eat, wait) previously inserted duplicate positions, breaking A-B-A-B detection when groom interrupted an oscillation sequence.
+- C6: Groom guard extended. Parasite groom is skipped when E<=0 AND (player.poison OR player.fitness<=10). Previously the guard checked player.poison only, which cleared before the final damage tick of an expiring poison (turns=0), allowing groom to fire at near-death fitness.
+- C7: Aerial escape stickiness. escapeTimer field added to botState.memory. When EMERGENCY_ESCAPE fires against an aerial threat (pursuitType=air), escapeTimer is set to 3. updateBotMemory() decrements it each turn. determineIntelligentBotMode() returns RECOVER instead of EXPLORE while escapeTimer>0 and no active threat. Prevents immediate re-entry to EXPLORE after one aerial escape turn.
+- C8: Hard resource lock. At the top of RECOVER mode, when (E<=10 OR H<=10) and no active pursuit: drink-water or intelligentFindSafeEat is returned immediately before any other action including parasite groom. Priority: drink first when H<=E, eat first otherwise. Enforces resource consumption before movement when a resource is immediately available.
+- CLAUDE.md updated: added explicit prohibition on writing analysis/reports to repo (chat only).
+- game/evolution_game_v66_57.html NOT updated — archived reference version only.
+- Syntax check: PASS.
+
 [2026-05-03 patch13b | Claude]
 IntelligentBot crisis hardening — 10 targeted fixes (B1–B4, P1–P6) from post-Patch13A run analysis (log 20260503-170032) and GPT/Claude joint review. Addresses priority enforcement failure under compound crisis. Bot/debug tools change only.
 - B1: Raise rank-1 poison block threshold from F<=15 to F<=30 in intelligentForageBlocked(). Run 10 confirmed death at F=28 eating rank-1 poison with existing threshold.

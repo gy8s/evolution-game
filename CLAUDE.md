@@ -113,6 +113,11 @@ You must NOT:
 
 Unless explicitly told.
 
+Analysis, reports, and reviews must NEVER be written to the repository.
+These are always delivered in chat. Repository writes are restricted to
+implementation changes only (game/play.html, CHANGELOG.txt, and explicitly
+authorised log commits). No exceptions without direct instruction from George.
+
 ---
 
 ## 7. SECURITY RULE (CRITICAL)
