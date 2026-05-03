@@ -1,3 +1,10 @@
+[2026-05-03 patch13d | Claude]
+IntelligentBot crisis mode and bootstrap hotfix — 2 surgical fixes (D1–D2) from post-13C three-run analysis. Closes WATER_PLAN bypass gap and completes C3 bootstrap enforcement. Bot/debug tools change only.
+- D1: Compound crisis mode override. In determineIntelligentBotMode(), a new check before WATER_PLAN routes to RECOVER when E<=10 AND H<=10 regardless of fitness. Previously, healthy fitness (>45%) caused WATER_PLAN selection at E=0/H=0, bypassing C8 hard resource lock entirely. 175820 Run 12 confirmed: bot oscillated past safe magnolia flowers in WATER_PLAN at F=69/E=0/H=0.
+- D2: Bootstrap nonAttack filter. In EXPLORE mode nonAttack filter, climb/sleep/call/look are blocked when inBootstrap (bootTurns<=4) and z>=1. C3 suppressed the explicit climb return but randomBotAction(nonAttack) could still return climb or sleep during the grace period. 175503 Runs 10/12/13 confirmed: sleep|Canopy at turn 4 after 3 climbs.
+- game/evolution_game_v66_57.html NOT updated — archived reference version only.
+- Syntax check: PASS.
+
 [2026-05-03 patch13c | Claude]
 IntelligentBot crisis enforcement — 8 targeted fixes (C1–C8) from post-Patch13B three-run analysis and GPT/Claude joint review. Enforces hard priority under compound crisis. Bot/debug tools change only.
 - C1: P1 water/food conflation fix. In criticalResource, waterDir is now only returned when H<=20 or H<E. Previously, intelligentMoveTowardWater fired even when E was the crisis and H was adequate (e.g. E=5, H=62), sending the bot toward water when it should have been seeking food.
