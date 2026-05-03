@@ -11690,6 +11690,8 @@ function hasRecentGroundThreat() {
 function determineIntelligentBotMode(threat) {
   if (threat.isFatal || activePursuit || threat.isPredatorDanger) return "EMERGENCY_ESCAPE";
   if (player.poison || player.fitness <= 45 || (player.parasites || 0) >= 1) return "RECOVER";
+  // P13D-D1: Compound crisis — E<=10 AND H<=10 routes to RECOVER regardless of fitness
+  if (player.energy <= 10 && player.hydration <= 10) return "RECOVER";
   if (player.hydration <= 50) return "WATER_PLAN";
   if (player.energy <= 60) return "SAFE_FORAGE";
   // P13C-C7: After aerial escape, hold RECOVER bias instead of returning to EXPLORE
@@ -11981,6 +11983,8 @@ function chooseIntelligentBotAction(actions) {
   if (!inBootstrap && !urgentNeedsGround && !hasRecentAerialThreat() && climbAction) return climbAction;
   const nonAttack = actions.filter(a => {
     if (a.id.startsWith("attack") || a.id.startsWith("queued-attack")) return false;
+    // P13D-D2: Bootstrap grace — block climb/sleep/call/look above ground for first 4 turns
+    if (inBootstrap && player.z >= 1 && (a.id === "climb" || a.id === "sleep" || a.id === "call" || a.id === "look")) return false;
     // Only descend when thirsty; WATER_PLAN owns descent for water access, so in EXPLORE/SAFE_FORAGE
     // fallthrough (H always >50 here) descent is almost never justified and risks ground predators
     if (a.id === "descend" && player.hydration > 50) return false;
