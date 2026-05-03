@@ -6,6 +6,7 @@ IntelligentBot recovery sequencing — 6 targeted fixes (A1–A6) from post-Patc
 - A4: Eat before water when both resources critical. In the criticalResource block, when E<=30 a safe eat is tried before the water-move/drink path. Prevents the bot from moving toward water when safe food is immediately available and energy is also dangerously low.
 - A5: Covered structurally by A1+A4 (food or climb chosen over random movement at E=0/H=0) and A3 (no aimless oscillation); no separate code path required.
 - A6: Goal validity timeout. In updateBotMemory(), seek_food goal is cleared when E>=50 (goal achieved) or after 10 turns (staleness). detectAndBreakOscillation() also clears currentGoal when a loop is detected, as an active stale goal likely contributed to the oscillation.
+- A6 bugfix (Codex P2): startTurn falsy-zero bug. The staleness check used `startTurn || player.turn`, which treated a valid startTurn of 0 as falsy and reset goalAge to 0, preventing expiry of goals created on turn 0. Fixed to `startTurn ?? player.turn` (nullish coalescing).
 - Bot/debug tools change only. Gameplay logic, UI/layout, and app-loading behaviour not changed.
 - game/evolution_game_v66_57.html NOT updated — archived reference version only.
 - Syntax check: see PR gate. Browser smoke check not performed by Claude — must be verified before merging.
