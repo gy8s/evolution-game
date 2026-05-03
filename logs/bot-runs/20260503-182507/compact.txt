@@ -1,0 +1,54 @@
+EVOLUTION GAME BOT QA COMPACT
+Game version: v66.57_patch8_short_eco_cycles_2026-04-29
+Bot: IntelligentBot
+Started: 2026-05-03T17:25:07.816Z
+Ended: 2026-05-03T17:26:27.899Z
+Stop reason: turn limit reached
+Bot actions: 1000/1000
+Runs recorded: 8
+Deaths: 7
+Auto-resets: 7
+Game turns current run: 0 -> 174
+Final state: X 55, Y 63, Z 2, Mid-storey, fitness 61%, energy 8%, hydration 11%, dead=false
+Final death context: none
+
+--- PATCH GATE SUMMARY ---
+Action crashes/errors: NONE
+Error issue codes: NONE
+Warnings requiring review: 2
+Compact export embedded full debug report: NO
+
+--- SURVIVAL ---
+Deaths with durations: 7
+Median death turn: 133
+Mean death turn: 118
+Longest recorded run duration: 191
+Distribution: <10t: 0 | 10-29t: 1 | 30-59t: 1 | 60-89t: 1 | 90+t: 4
+Death causes: forest owl: 1 | red berries: 1 | mesonychid-like ground predator: 1 | Masillaraptor-like raptor: 1 | dehydration: 1 | poison: 1 | tree-climber band: 1
+
+--- QA ISSUE COUNTS ---
+DESPERATION_EAT: 2
+
+--- QA ISSUES (essential context retained, bulky snapshots removed) ---
+INFO DESPERATION_EAT | run=2 | botStep=155 | turn=132 | pos=X51,Y39,Z2 | layer=Mid-storey | action=? | before[F?/E?/H?/dead=?/enc=none/queue=?] | after[F?/E?/H?/dead=?/enc=none/queue=?] | detail={"encounter":"red berries","fitness":4}
+INFO DESPERATION_EAT | run=6 | botStep=660 | turn=178 | pos=X57,Y49,Z2 | layer=Mid-storey | action=? | before[F?/E?/H?/dead=?/enc=none/queue=?] | after[F?/E?/H?/dead=?/enc=none/queue=?] | detail={"encounter":"purple berries","fitness":3}
+
+--- RUN SUMMARIES ---
+Run 1: reason=player died before next action; steps=22; botSteps=1->22; turns=0->22; dead=true; F=0; E=69; H=56; issues=0; deathContext={"message":"The forest owl kills you.","context":{"source":"unknown"},"encounterAtDeath":{"kind":"animal","name":"forest owl","icon":"🦉","className":"predator","dangerProfile":"predator","temperament":"hunter","pursuitType":"air","canInvestigate":true,"fitness":80,"size":18,"speed":65,"agility":80,"aggression":65,"food":55,"poison":null,"seen":"Pressed against the trunk, an owl holds perfectly still. Only the eyes move, measuring the gaps between leaves.","persistence":"ephemeral","tags":[],"sp... [truncated 495 chars]
+  terminalTrace: [18:wait|Canopy|F100/E75/H66|EXPLORE] [19:look|Canopy|F100/E75/H64|EXPLORE] [20:move-southwest|Canopy|F100/E74/H62|EXPLORE] [21:descend|Canopy|F43/E73/H60|enc:forest owl|EMERGENCY_ESCAPE] [22:climb|Mid-storey|F43/E71/H58|RECOVER]
+Run 2: reason=player died before next action; steps=133; botSteps=23->155; turns=0->133; dead=true; F=0; E=18; H=0; issues=1; deathContext={"message":"You collapse from dehydration.","context":{"source":"unknown"},"encounterAtDeath":{"kind":"forage","name":"red berries","icon":"🍒","className":"food","canInvestigate":true,"portions":2,"energy":14,"poison":{"severity":"mild","rank":1,"toxinType":"plant","lethal":false,"turns":4,"damage":2,"warning":"Mildly poisonous berries"},"seen":"A cluster of red berries hangs beneath glossy leaves.","investigationDetails":["The skins are bright and mostly untouched. Abundance without feeding ma... [truncated 1008 chars]
+  terminalTrace: [151:move-east|Mid-storey|F20/E28/H0|enc:red berries|RECOVER] [152:move-west|Mid-storey|F16/E26/H0|RECOVER] [153:move-east|Mid-storey|F12/E24/H0|enc:red berries|RECOVER] [154:move-west|Mid-storey|F8/E22/H0|enc:tree frog|RECOVER] [155:eat|Mid-storey|F4/E20/H0|enc:red berries|RECOVER]
+Run 3: reason=player died before next action; steps=47; botSteps=156->202; turns=0->47; dead=true; F=0; E=37; H=27; issues=0; deathContext={"message":"The mesonychid-like ground predator keeps contact on the forest floor and catches you.","context":{"source":"ground predator contact","predator":"mesonychid-like ground predator","relation":"no clear scent advantage","moveDirection":"here","wind":"SE","action":"descend"},"encounterAtDeath":{"kind":"animal","name":"mesonychid-like ground predator","icon":"🐺","className":"predator","dangerProfile":"fatal","temperament":"hunter","canInvestigate":true,"pursuitType":"ground","fitness":10... [truncated 607 chars]
+  terminalTrace: [198:descend|Mid-storey|F100/E52/H32|enc:Masillaraptor-like raptor|EMERGENCY_ESCAPE] [199:climb|Undergrowth|F100/E49/H31|enc:Eurheloderma-like venomous lizard|EMERGENCY_ESCAPE] [200:descend|Mid-storey|F100/E46/H30|enc:Masillaraptor-like raptor|EMERGENCY_ESCAPE] [201:climb|Undergrowth|F100/E43/H29|enc:Eurheloderma-like venomous lizard|EMERGENCY_ESCAPE] [202:descend|Mid-storey|F100/E40/H28|enc:Masillaraptor-like raptor|EMERGENCY_ESCAPE]
+Run 4: reason=player died before next action; steps=191; botSteps=203->393; turns=0->191; dead=true; F=0; E=10; H=4; issues=0; deathContext={"message":"The Masillaraptor-like raptor kills you.","context":{"source":"unknown"},"encounterAtDeath":{"kind":"animal","name":"Masillaraptor-like raptor","icon":"🦅","className":"predator","dangerProfile":"predator","temperament":"hunter","pursuitType":"air","canInvestigate":true,"fitness":85,"size":14,"speed":75,"agility":80,"aggression":70,"food":45,"poison":null,"seen":"A small raptor threads between trees, fast enough to make open branches feel unsafe.","persistence":"ephemeral","tags":[],... [truncated 556 chars]
+  terminalTrace: [389:eat|Canopy|F12/E0/H10|enc:laurel-like drupes|RECOVER] [390:eat|Canopy|F10/E13/H10|enc:laurel-like drupes|RECOVER] [391:move-west|Canopy|F11/E22/H10|RECOVER] [392:move-west|Canopy|F11/E18/H8|enc:bright aril fruit|RECOVER] [393:move-west|Canopy|F11/E14/H6|RECOVER]
+Run 5: reason=player died before next action; steps=88; botSteps=394->481; turns=0->88; dead=true; F=0; E=20; H=0; issues=0; deathContext={"message":"You collapse from dehydration.","context":{"source":"unknown"},"encounterAtDeath":null,"poison":null,"activePursuit":null,"lastActionKind":"groom","lastAction":{"kind":"groom","parasiteLoad":1,"groupSize":1}}
+  terminalTrace: [477:eat|Undergrowth|F8/E0/H0|enc:predator leftovers|RECOVER] [478:eat-carcass|Undergrowth|F3/E18/H4|RECOVER] [479:move-north|Undergrowth|F5/E32/H6|RECOVER] [480:move-north|Undergrowth|F5/E28/H4|enc:tree-climber band|RECOVER] [481:groom|Undergrowth|F4/E24/H2|RECOVER]
+Run 6: reason=player died before next action; steps=181; botSteps=482->662; turns=0->181; dead=true; F=0; E=31; H=59; issues=1; deathContext={"message":"Already weakened, you cannot survive the mild poison.","context":{"source":"poison","poison":{"severity":"mild","rank":1,"toxinType":"plant","lethal":false,"turns":2,"damage":2,"criticalTimer":null,"load":1},"fitnessBefore":1,"fitnessAfter":0},"encounterAtDeath":{"kind":"animal","name":"Kopidodon-like arboreal mammal","icon":"🐿️","className":"prey","dangerProfile":"minor","temperament":"defensive","canInvestigate":true,"fitness":65,"size":8,"speed":40,"agility":60,"aggression":20,"f... [truncated 666 chars]
+  terminalTrace: [658:move-southeast|Mid-storey|F3/E23/H53|enc:purple berries|RECOVER] [659:move-northwest|Mid-storey|F3/E21/H51|enc:large dragonfly|RECOVER] [660:eat|Mid-storey|F3/E19/H49|enc:purple berries|RECOVER] [661:move-southeast|Mid-storey|F3/E33/H61|enc:mildly poisonous purple berries|RECOVER] [662:move-northeast|Mid-storey|F1/E31/H59|enc:Kopidodon-like arboreal mammal|RECOVER]
+Run 7: reason=player died before next action; steps=164; botSteps=663->826; turns=0->164; dead=true; F=0; E=13; H=0; issues=0; deathContext={"message":"You collapse from dehydration.","context":{"source":"unknown"},"encounterAtDeath":{"kind":"social","key":"sameSpeciesGroup","name":"tree-climber band","icon":"🐒","className":"primate","canInvestigate":true,"social":{"species":"tree-climber","members":[{"id":"social_163_0_5441","species":"tree-climber","sex":"female","size":5.688219531342344,"fitness":66,"temperament":"cautious"},{"id":"social_163_1_5905","species":"tree-climber","sex":"female","size":5.6454558646112005,"fitness":87,... [truncated 436 chars]
+  terminalTrace: [822:move-southwest|Canopy|F19/E23/H0|PURSUIT|EMERGENCY_ESCAPE] [823:move-southwest|Canopy|F15/E21/H0|enc:tree frog|PURSUIT|EMERGENCY_ESCAPE] [824:move-north|Canopy|F11/E19/H0|enc:hard-shelled beetle|RECOVER] [825:move-east|Canopy|F7/E17/H0|enc:Godinotia-like primate|RECOVER] [826:move-west|Canopy|F3/E15/H0|enc:tree-climber band|RECOVER]
+Run 8: reason=turn limit reached; steps=174; botSteps=827->1000; turns=0->174; dead=false; F=61; E=8; H=11; issues=0; deathContext=none
+  terminalTrace: [996:move-east|Mid-storey|F61/E20/H21|enc:fresh fallen fruit|WATER_PLAN] [997:move-west|Mid-storey|F61/E18/H19|enc:palm-like fruit|WATER_PLAN] [998:move-east|Mid-storey|F61/E16/H17|enc:fallen fruit|WATER_PLAN] [999:move-west|Mid-storey|F61/E14/H15|enc:palm-like fruit|WATER_PLAN] [1000:move-east|Mid-storey|F61/E11/H13|enc:fallen fruit|WATER_PLAN]
+
+Compact export intentionally omits per-step before/after snapshots, availableActionsBefore arrays, actions[], and embedded collectDebugReport() JSON. Use the full bot report only for targeted deep dives.

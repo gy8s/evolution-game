@@ -1,0 +1,13 @@
+{
+  "runId": "20260503-182507",
+  "gameVersion": "v66.57_patch8_short_eco_cycles_2026-04-29",
+  "shortVersion": "v66.57",
+  "startedAt": "2026-05-03T17:25:07.816Z",
+  "endedAt": "2026-05-03T17:26:27.899Z",
+  "stopReason": "turn limit reached",
+  "botActions": "1000/1000",
+  "runsRecorded": "8",
+  "deaths": "7",
+  "hasFullReport": true,
+  "savedAt": "2026-05-03T17:26:28.105Z"
+}
