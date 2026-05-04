@@ -11731,7 +11731,8 @@ function chooseIntelligentBotAction(actions) {
   }
 
   // P13F-F5: H<=5 central gate — drink or move toward water before any mode logic fires
-  if (player.hydration <= 5 && !activePursuit) {
+  // Codex P1: skip gate when encounter is dangerous (threat check guards activePursuit=null case)
+  if (player.hydration <= 5 && !activePursuit && !threat.isDangerous && !threat.isFatal && !threat.isPredatorDanger) {
     const h5drink = byId["drink-water"];
     if (h5drink) { botState._lastMode = "RECOVER"; return h5drink; }
     const h5water = intelligentMoveTowardWater(actions);
