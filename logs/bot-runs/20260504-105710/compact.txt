@@ -1,0 +1,61 @@
+EVOLUTION GAME BOT QA COMPACT
+Game version: v66.57_patch8_short_eco_cycles_2026-04-29
+Bot: IntelligentBot
+Started: 2026-05-04T09:57:10.015Z
+Ended: 2026-05-04T09:58:30.099Z
+Stop reason: turn limit reached
+Bot actions: 1000/1000
+Runs recorded: 12
+Deaths: 11
+Auto-resets: 11
+Game turns current run: 0 -> 6
+Final state: X 52, Y 49, Z 3, Canopy, fitness 100%, energy 92%, hydration 88%, dead=false
+Final death context: none
+
+--- PATCH GATE SUMMARY ---
+Action crashes/errors: NONE
+Error issue codes: NONE
+Warnings requiring review: 0
+Compact export embedded full debug report: NO
+
+--- SURVIVAL ---
+Deaths with durations: 11
+Median death turn: 90
+Mean death turn: 90
+Longest recorded run duration: 137
+Distribution: <10t: 0 | 10-29t: 0 | 30-59t: 1 | 60-89t: 4 | 90+t: 6
+Death causes: poison: 2 | dehydration: 2 | shield bug: 1 | lone tree-climber: 1 | soapberry-like fruit: 1 | large eagle: 1 | pale mushrooms: 1 | mesonychid-like ground predator: 1 | fallen fruit: 1
+
+--- QA ISSUE COUNTS ---
+No issue codes.
+
+--- QA ISSUES (essential context retained, bulky snapshots removed) ---
+No QA issues flagged.
+
+--- RUN SUMMARIES ---
+Run 1: reason=player died before next action; steps=93; botSteps=1->93; turns=0->93; dead=true; F=0; E=0; H=96; issues=0; deathContext={"message":"You collapse from loss of fitness.","context":{"source":"unknown"},"encounterAtDeath":{"kind":"animal","name":"shield bug","icon":"🪲","className":"food","dangerProfile":"toxic_food","temperament":"defensive","canInvestigate":true,"fitness":25,"size":1,"speed":25,"agility":25,"aggression":5,"food":5,"poison":{"severity":"mild","rank":1,"toxinType":"irritant","lethal":false,"turns":3,"damage":2,"warning":"Bitter chemical defence"},"seen":"A shield bug sits exposed on a leaf, angular b... [truncated 408 chars]
+  terminalTrace: [89:drink-water|Ground|F6/E9/H100|enc:Eurotamandua-like anteater|RECOVER] [90:move-northwest|Ground|F6/E6/H100|enc:Pakicetus-like water hunter|EMERGENCY_ESCAPE] [91:climb|Ground|F4/E4/H99|enc:Gastornis|EMERGENCY_ESCAPE] [92:climb|Undergrowth|F4/E1/H98|enc:Gastornis|EMERGENCY_ESCAPE] [93:move-north|Mid-storey|F1/E0/H97|enc:shield bug|RECOVER]
+Run 2: reason=player died before next action; steps=43; botSteps=94->136; turns=0->43; dead=true; F=0; E=62; H=39; issues=0; deathContext={"message":"The large eagle kills you.","context":{"source":"poison","poison":{"severity":"mild","rank":1,"toxinType":"resin","lethal":false,"turns":0,"damage":2,"criticalTimer":null,"load":1},"fitnessBefore":85,"fitnessAfter":83,"damage":2},"encounterAtDeath":{"kind":"animal","name":"large eagle","icon":"🦅","className":"predator","dangerProfile":"predator","temperament":"hunter","pursuitType":"air","canInvestigate":true,"fitness":95,"size":28,"speed":85,"agility":70,"aggression":75,"food":80,"... [truncated 698 chars]
+  terminalTrace: [132:move-north|Canopy|F83/E67/H44|WATER_PLAN] [133:move-north|Canopy|F83/E66/H43|WATER_PLAN] [134:move-east|Canopy|F83/E65/H42|enc:plant hopper|WATER_PLAN] [135:move-west|Canopy|F83/E64/H41|enc:large eagle|EMERGENCY_ESCAPE] [136:move-east|Canopy|F83/E63/H40|WATER_PLAN]
+Run 3: reason=player died before next action; steps=95; botSteps=137->231; turns=0->95; dead=true; F=0; E=80; H=0; issues=0; deathContext={"message":"You collapse from dehydration.","context":{"source":"unknown"},"encounterAtDeath":{"kind":"social","key":"sameSpeciesGroup","name":"lone tree-climber","icon":"🐒","className":"primate","canInvestigate":true,"social":{"species":"tree-climber","members":[{"id":"social_94_0_4022","species":"tree-climber","sex":"male","size":6.091986785387973,"fitness":75,"temperament":"assertive"}],"mixed":false},"seen":"Another tree-climber watches from nearby branches.","investigated":"They are your o... [truncated 260 chars]
+  terminalTrace: [227:move-north|Mid-storey|F20/E90/H0|RECOVER] [228:move-south|Mid-storey|F16/E88/H0|RECOVER] [229:move-north|Mid-storey|F12/E86/H0|RECOVER] [230:move-south|Mid-storey|F8/E84/H0|enc:Godinotia-like primate|RECOVER] [231:move-north|Mid-storey|F4/E82/H0|enc:lone tree-climber|RECOVER]
+Run 4: reason=player died before next action; steps=141; botSteps=232->372; turns=0->137; dead=true; F=0; E=0; H=0; issues=0; deathContext={"message":"You collapse from dehydration.","context":{"source":"unknown"},"encounterAtDeath":null,"poison":null,"activePursuit":null,"lastActionKind":"drink","lastAction":{"kind":"drink","at":{"x":58,"y":57,"z":0},"terrain":"forest","nearWater":true}}
+  terminalTrace: [368:move-west|Undergrowth|F26/E6/H4|enc:ant trail|RECOVER] [369:move-west|Undergrowth|F26/E2/H2|enc:ant trail|RECOVER] [370:move-north|Undergrowth|F19/E0/H0|enc:ant nest|RECOVER] [371:move-north|Undergrowth|F12/E0/H0|enc:cricket|RECOVER] [372:drink-water|Ground|F1/E0/H0|RECOVER]
+Run 5: reason=player died before next action; steps=93; botSteps=373->465; turns=0->92; dead=true; F=0; E=0; H=0; issues=0; deathContext={"message":"You collapse from dehydration.","context":{"source":"unknown"},"encounterAtDeath":null,"poison":null,"activePursuit":null,"lastActionKind":"move","lastAction":{"kind":"move","dx":0,"dy":-1,"actionText":"north","from":{"x":21,"y":43,"z":2}}}
+  terminalTrace: [461:move-north|Mid-storey|F12/E8/H6|RECOVER] [462:move-north|Mid-storey|F12/E4/H4|RECOVER] [463:move-north|Mid-storey|F9/E0/H3|enc:lone tree-climber|RECOVER] [464:move-west|Mid-storey|F6/E0/H2|enc:tree-climber band|RECOVER] [465:move-north|Mid-storey|F3/E0/H1|RECOVER]
+Run 6: reason=player died before next action; steps=78; botSteps=466->543; turns=0->78; dead=true; F=0; E=0; H=0; issues=0; deathContext={"message":"You collapse from dehydration.","context":{"source":"unknown"},"encounterAtDeath":{"kind":"forage","name":"soapberry-like fruit","icon":"🟡","className":"food","canInvestigate":true,"portions":2,"energy":7,"poison":{"severity":"moderate","rank":2,"toxinType":"saponin","lethal":false,"turns":4,"damage":3,"warning":"Foaming bitter fruit"},"seen":"Translucent yellow fruits hang in a sparse cluster.","investigationDetails":["A crushed fruit foams slightly against wet bark. That is not a ... [truncated 632 chars]
+  terminalTrace: [539:move-east|Mid-storey|F31/E0/H0|enc:soapberry-like fruit|RECOVER] [540:move-west|Mid-storey|F24/E0/H0|enc:hairy caterpillar|RECOVER] [541:move-east|Mid-storey|F17/E0/H0|enc:soapberry-like fruit|RECOVER] [542:move-west|Mid-storey|F10/E0/H0|enc:hairy caterpillar|RECOVER] [543:move-east|Mid-storey|F3/E0/H0|enc:soapberry-like fruit|RECOVER]
+Run 7: reason=player died before next action; steps=72; botSteps=544->615; turns=0->72; dead=true; F=0; E=36; H=35; issues=0; deathContext={"message":"The forest owl kills you.","context":{"source":"poison","poison":{"severity":"mild","rank":1,"toxinType":"seed","lethal":false,"turns":0,"damage":2,"criticalTimer":null,"load":1},"fitnessBefore":84,"fitnessAfter":82,"damage":2},"encounterAtDeath":{"kind":"animal","name":"forest owl","icon":"🦉","className":"predator","dangerProfile":"predator","temperament":"hunter","pursuitType":"air","canInvestigate":true,"fitness":80,"size":18,"speed":65,"agility":80,"aggression":65,"food":55,"poi... [truncated 497 chars]
+  terminalTrace: [611:eat|Undergrowth|F89/E16/H17|enc:bean-like pods|RECOVER] [612:groom|Undergrowth|F89/E26/H29|enc:bean-like pods|RECOVER] [613:move-northeast|Undergrowth|F87/E24/H27|enc:bean-like pods|RECOVER] [614:eat|Undergrowth|F85/E22/H25|enc:fallen fruit|RECOVER] [615:climb|Undergrowth|F84/E38/H37|enc:fresh fallen fruit|RECOVER]
+Run 8: reason=player died before next action; steps=132; botSteps=616->747; turns=0->132; dead=true; F=0; E=9; H=28; issues=0; deathContext={"message":"The large eagle kills you.","context":{"source":"unknown"},"encounterAtDeath":{"kind":"animal","name":"large eagle","icon":"🦅","className":"predator","dangerProfile":"predator","temperament":"hunter","pursuitType":"air","canInvestigate":true,"fitness":95,"size":28,"speed":85,"agility":70,"aggression":75,"food":80,"poison":null,"seen":"High above the canopy, a broad-winged raptor turns on warm air, searching for the smallest mistake below.","persistence":"ephemeral","tags":[],"spawn"... [truncated 328 chars]
+  terminalTrace: [743:climb|Mid-storey|F13/E25/H38|enc:soft moth|RECOVER] [744:move-east|Canopy|F13/E22/H36|enc:lone tree-climber|RECOVER] [745:move-northeast|Canopy|F13/E20/H34|enc:soft moth|RECOVER] [746:descend|Canopy|F13/E17/H32|RECOVER] [747:climb|Mid-storey|F13/E13/H30|RECOVER]
+Run 9: reason=player died before next action; steps=90; botSteps=748->837; turns=0->90; dead=true; F=0; E=0; H=0; issues=0; deathContext={"message":"You collapse from dehydration.","context":{"source":"unknown"},"encounterAtDeath":{"kind":"forage","name":"pale mushrooms","icon":"🍄","className":"food","canInvestigate":true,"portions":2,"energy":8,"poison":{"severity":"severe","rank":4,"toxinType":"fungal","lethal":true,"criticalTimer":7,"turns":7,"damage":7,"warning":"Severely poisonous fungus"},"seen":"Pale mushrooms push from rotting wood, clean and untouched.","investigated":"Nothing seems to have eaten them. The clean caps an... [truncated 754 chars]
+  terminalTrace: [833:move-west|Undergrowth|F30/E3/H0|enc:pale mushrooms|RECOVER] [834:move-east|Undergrowth|F26/E1/H0|enc:clay bank|RECOVER] [835:move-west|Undergrowth|F19/E0/H0|enc:pale mushrooms|RECOVER] [836:move-east|Undergrowth|F12/E0/H0|enc:clay bank|RECOVER] [837:move-west|Undergrowth|F5/E0/H0|enc:pale mushrooms|RECOVER]
+Run 10: reason=player died before next action; steps=74; botSteps=838->911; turns=0->74; dead=true; F=0; E=15; H=0; issues=0; deathContext={"message":"The mesonychid-like ground predator keeps contact on the forest floor and catches you.","context":{"source":"ground predator contact","predator":"mesonychid-like ground predator","relation":"no clear scent advantage","moveDirection":"here","wind":"still","action":"descend"},"encounterAtDeath":{"kind":"animal","name":"mesonychid-like ground predator","icon":"🐺","className":"predator","dangerProfile":"fatal","temperament":"hunter","canInvestigate":true,"pursuitType":"ground","fitness"... [truncated 611 chars]
+  terminalTrace: [907:move-west|Mid-storey|F44/E27/H6|RECOVER] [908:move-east|Mid-storey|F44/E24/H4|enc:hard-shelled beetle|RECOVER] [909:move-west|Mid-storey|F44/E21/H2|enc:large wasp|RECOVER] [910:move-east|Mid-storey|F40/E18/H0|RECOVER] [911:descend|Mid-storey|F36/E17/H0|enc:large constrictor|EMERGENCY_ESCAPE]
+Run 11: reason=player died before next action; steps=83; botSteps=912->994; turns=0->83; dead=true; F=0; E=0; H=96; issues=0; deathContext={"message":"You collapse from loss of fitness.","context":{"source":"unknown"},"encounterAtDeath":{"kind":"forage","name":"fallen fruit","icon":"🍈","className":"food","canInvestigate":true,"portions":3,"energy":18,"poison":null,"seen":"A soft fallen fruit lies among leaves, bruised but rich with sugar.","cardDetail":"The skin is split and damp with sugar scent; insects are already feeding at the torn edge.","investigationDetails":["The bruised flesh smells sweet, not rotten. Tiny insects are al... [truncated 906 chars]
+  terminalTrace: [990:drink-water|Ground|F20/E0/H100|RECOVER] [991:drink-water|Ground|F17/E0/H100|RECOVER] [992:drink-water|Ground|F14/E0/H100|RECOVER] [993:move-northwest|Ground|F6/E0/H100|enc:Pakicetus-like water hunter|EMERGENCY_ESCAPE] [994:queued-eat-0|Ground|F3/E0/H98|enc:millipede|RECOVER]
+Run 12: reason=turn limit reached; steps=6; botSteps=995->1000; turns=0->6; dead=false; F=100; E=92; H=88; issues=0; deathContext=none
+  terminalTrace: [996:move-east|Undergrowth|F100/E98/H98|EXPLORE] [997:move-northeast|Undergrowth|F100/E97/H96|EXPLORE] [998:wait|Undergrowth|F100/E96/H94|enc:large mantis|EXPLORE] [999:climb|Undergrowth|F100/E96/H92|enc:large mantis|EXPLORE] [1000:climb|Mid-storey|F100/E94/H90|EXPLORE]
+
+Compact export intentionally omits per-step before/after snapshots, availableActionsBefore arrays, actions[], and embedded collectDebugReport() JSON. Use the full bot report only for targeted deep dives.
