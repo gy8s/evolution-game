@@ -1,0 +1,59 @@
+EVOLUTION GAME BOT QA COMPACT
+Game version: v66.57_patch8_short_eco_cycles_2026-04-29
+Bot: IntelligentBot
+Started: 2026-05-04T09:54:55.342Z
+Ended: 2026-05-04T09:56:15.426Z
+Stop reason: turn limit reached
+Bot actions: 1000/1000
+Runs recorded: 9
+Deaths: 8
+Auto-resets: 8
+Game turns current run: 0 -> 212
+Final state: X 63, Y 4, Z 1, Undergrowth, fitness 13%, energy 47%, hydration 53%, dead=false
+Final death context: none
+
+--- PATCH GATE SUMMARY ---
+Action crashes/errors: FAIL/REVIEW
+Error issue codes: ERR_STAT_OUT_OF_RANGE, ERR_STAT_OUT_OF_RANGE, ERR_STAT_OUT_OF_RANGE
+Warnings requiring review: 1
+Compact export embedded full debug report: NO
+
+--- SURVIVAL ---
+Deaths with durations: 8
+Median death turn: 91
+Mean death turn: 98
+Longest recorded run duration: 242
+Distribution: <10t: 1 | 10-29t: 0 | 30-59t: 0 | 60-89t: 3 | 90+t: 4
+Death causes: termite mound: 1 | large eagle: 1 | forest owl: 1 | brown mushrooms: 1 | unknown: 1 | dehydration: 1 | katydid: 1 | Masillaraptor-like raptor: 1
+
+--- QA ISSUE COUNTS ---
+ERR_STAT_OUT_OF_RANGE: 3
+WARN_DEATH_WITH_HYDRATION_AND_NO_VISIBLE_CAUSE: 1
+
+--- QA ISSUES (essential context retained, bulky snapshots removed) ---
+WARNING WARN_DEATH_WITH_HYDRATION_AND_NO_VISIBLE_CAUSE | run=5 | botStep=645 | turn=242 | pos=X40,Y46,Z1 | layer=Undergrowth | action=move-northwest | before[F10/E28/H29/dead=false/enc=none/queue=0] | after[F0/E25/H27/dead=true/enc=none/queue=0] | detail={"step":{"actionId":"move-northwest","actionLabel":"move northwest","actionCategory":"movement","error":null}}
+ERROR ERR_STAT_OUT_OF_RANGE | run=6 | botStep=707 | turn=62 | pos=X61,Y51,Z1 | layer=Undergrowth | action=? | before[F?/E?/H?/dead=?/enc=none/queue=?] | after[F?/E?/H?/dead=?/enc=none/queue=?] | detail={"context":"after bot action","key":"hydration","value":-1,"snapshot":{"turn":62,"x":61,"y":51,"z":1,"layer":"Undergrowth","terrain":"forest","habitatKey":"primary","fitness":27,"energy":18,"hydration":-1,"dead":false,"deathContext":null,"encounter":{"name":"pale mushrooms","key":"paleMushroom","kind":"forage","instanceId":"inst_17713"},"queuedEncounterCount":0,"queuedEncounters":[],"carcass":null,"poison":null,"waterState":{"inWater":false,"turns":0},"activePursuit":null,"socialGroupSize":1,"callStreak":1}}
+ERROR ERR_STAT_OUT_OF_RANGE | run=6 | botStep=710 | turn=65 | pos=X61,Y51,Z1 | layer=Undergrowth | action=? | before[F?/E?/H?/dead=?/enc=none/queue=?] | after[F?/E?/H?/dead=?/enc=none/queue=?] | detail={"context":"after bot action","key":"hydration","value":-1,"snapshot":{"turn":65,"x":61,"y":51,"z":1,"layer":"Undergrowth","terrain":"forest","habitatKey":"primary","fitness":9,"energy":12,"hydration":-1,"dead":false,"deathContext":null,"encounter":{"name":"pale mushrooms","key":"paleMushroom","kind":"forage","instanceId":"inst_17784"},"queuedEncounterCount":0,"queuedEncounters":[],"carcass":null,"poison":null,"waterState":{"inWater":false,"turns":0},"activePursuit":null,"socialGroupSize":1,"callStreak":1}}
+ERROR ERR_STAT_OUT_OF_RANGE | run=6 | botStep=712 | turn=67 | pos=X62,Y51,Z0 | layer=Ground | action=? | before[F?/E?/H?/dead=?/enc=none/queue=?] | after[F?/E?/H?/dead=?/enc=none/queue=?] | detail={"context":"after bot action","key":"hydration","value":-1,"snapshot":{"turn":67,"x":62,"y":51,"z":0,"layer":"Ground","terrain":"forest","habitatKey":"primary","fitness":0,"energy":8,"hydration":-1,"dead":true,"deathContext":{"message":"You collapse from dehydration.","context":{"source":"unknown"},"encounterAtDeath":null,"poison":null,"activePursuit":null,"lastActionKind":"drink","lastAction":{"kind":"drink","at":{"x":62,"y":51,"z":0},"terrain":"forest","nearWater":true}},"encounter":null,"queuedEncounterCount":0,"queuedEncounters":[],"carcass":null,"poison":null,"waterState":{"inWater":false,"turns":0},"activePursuit":null,"socialGroupSize":1,"callStreak":1}}
+
+--- RUN SUMMARIES ---
+Run 1: reason=player died before next action; steps=75; botSteps=1->75; turns=0->75; dead=true; F=0; E=0; H=0; issues=0; deathContext={"message":"You collapse from dehydration.","context":{"source":"unknown"},"encounterAtDeath":{"kind":"nest","name":"termite mound","icon":"🟤","className":"food","canInvestigate":true,"eggs":4,"energy":9,"guardianKey":"termiteSwarm","guardianChance":32,"poison":null,"seen":"A packed clay termite mound rises from roots and damp leaf litter. Small pale bodies move where the wall has cracked.","investigationDetails":["The mound is food, but not passive food. The outer wall vibrates with living mov... [truncated 792 chars]
+  terminalTrace: [71:groom|Undergrowth|F30/E0/H0|enc:ant trail|RECOVER] [72:move-east|Undergrowth|F23/E0/H0|enc:ant trail|RECOVER] [73:move-west|Undergrowth|F16/E0/H0|enc:termite mound|RECOVER] [74:move-east|Undergrowth|F9/E0/H0|enc:ant trail|RECOVER] [75:move-west|Undergrowth|F2/E0/H0|enc:termite mound|RECOVER]
+Run 2: reason=player died before next action; steps=92; botSteps=76->167; turns=0->92; dead=true; F=0; E=56; H=18; issues=0; deathContext={"message":"The large eagle kills you.","context":{"source":"unknown"},"encounterAtDeath":{"kind":"animal","name":"large eagle","icon":"🦅","className":"predator","dangerProfile":"predator","temperament":"hunter","pursuitType":"air","canInvestigate":true,"fitness":95,"size":28,"speed":85,"agility":70,"aggression":75,"food":80,"poison":null,"seen":"High above the canopy, a broad-winged raptor turns on warm air, searching for the smallest mistake below.","persistence":"ephemeral","tags":[],"spawn"... [truncated 327 chars]
+  terminalTrace: [163:move-south|Mid-storey|F27/E72/H24|RECOVER] [164:move-northwest|Mid-storey|F27/E69/H22|enc:predator leftovers|RECOVER] [165:move-northeast|Mid-storey|F27/E66/H21|RECOVER] [166:move-south|Mid-storey|F27/E63/H20|enc:rose-family blossoms|RECOVER] [167:climb|Mid-storey|F27/E60/H19|enc:tree-climber band|RECOVER]
+Run 3: reason=player died before next action; steps=91; botSteps=168->258; turns=0->91; dead=true; F=0; E=19; H=42; issues=0; deathContext={"message":"The forest owl kills you.","context":{"source":"unknown"},"encounterAtDeath":{"kind":"animal","name":"forest owl","icon":"🦉","className":"predator","dangerProfile":"predator","temperament":"hunter","pursuitType":"air","canInvestigate":true,"fitness":80,"size":18,"speed":65,"agility":80,"aggression":65,"food":55,"poison":null,"seen":"Pressed against the trunk, an owl holds perfectly still. Only the eyes move, measuring the gaps between leaves.","persistence":"ephemeral","tags":[],"sp... [truncated 328 chars]
+  terminalTrace: [254:move-north|Mid-storey|F66/E25/H49|enc:banana-type flowers|WATER_PLAN] [255:move-east|Mid-storey|F66/E24/H47|enc:soapberry-like fruit|WATER_PLAN] [256:move-north|Mid-storey|F66/E23/H45|enc:bromeliad pool|WATER_PLAN] [257:move-north|Mid-storey|F66/E22/H44|enc:shield bug|WATER_PLAN] [258:climb|Undergrowth|F66/E21/H43|WATER_PLAN]
+Run 4: reason=player died before next action; steps=143; botSteps=259->401; turns=0->143; dead=true; F=0; E=0; H=98; issues=0; deathContext={"message":"You collapse from loss of fitness.","context":{"source":"unknown"},"encounterAtDeath":{"kind":"forage","name":"brown mushrooms","icon":"🍄","className":"food","canInvestigate":true,"portions":2,"energy":8,"poison":{"severity":"moderate","rank":2,"toxinType":"fungal","lethal":false,"turns":5,"damage":4,"warning":"Poisonous fungus"},"seen":"Brown mushrooms grow from a damp fallen branch.","investigated":"Gnaw marks and insect feeding suggest these are probably safe.","persistence":"sta... [truncated 675 chars]
+  terminalTrace: [397:drink-water|Ground|F13/E4/H38|enc:Eomanis-like pangolin|RECOVER] [398:drink-water|Ground|F13/E1/H64|enc:Eomanis-like pangolin|RECOVER] [399:drink-water|Ground|F10/E0/H90|enc:Eomanis-like pangolin|RECOVER] [400:drink-water|Ground|F6/E0/H100|enc:Eomanis-like pangolin|RECOVER] [401:drink-water|Ground|F3/E0/H100|enc:brown mushrooms|RECOVER]
+Run 5: reason=player died before next action; steps=243; botSteps=402->644; turns=0->242; dead=true; F=0; E=25; H=27; issues=1; deathContext=none
+  terminalTrace: [640:move-northwest|Mid-storey|F10/E39/H37|enc:grape-like berries|RECOVER] [641:move-south|Mid-storey|F10/E37/H35|RECOVER] [642:move-west|Mid-storey|F10/E34/H33|enc:small rain puddle|RECOVER] [643:move-south|Mid-storey|F10/E31/H31|RECOVER] [644:move-northwest|Mid-storey|F10/E28/H29|RECOVER]
+Run 6: reason=player died before next action; steps=67; botSteps=645->711; turns=0->67; dead=true; F=0; E=8; H=-1; issues=3; deathContext={"message":"You collapse from dehydration.","context":{"source":"unknown"},"encounterAtDeath":null,"poison":null,"activePursuit":null,"lastActionKind":"drink","lastAction":{"kind":"drink","at":{"x":62,"y":51,"z":0},"terrain":"forest","nearWater":true}}
+  terminalTrace: [707:groom|Undergrowth|F27/E18/H-1|enc:pale mushrooms|RECOVER] [708:move-east|Undergrowth|F20/E16/H0|enc:pale mushrooms|RECOVER] [709:move-west|Undergrowth|F13/E14/H0|RECOVER] [710:move-east|Undergrowth|F9/E12/H-1|enc:pale mushrooms|RECOVER] [711:drink-water|Ground|F2/E10/H0|RECOVER]
+Run 7: reason=player died before next action; steps=68; botSteps=712->779; turns=0->68; dead=true; F=0; E=0; H=0; issues=0; deathContext={"message":"You collapse from dehydration.","context":{"source":"unknown"},"encounterAtDeath":{"kind":"animal","name":"katydid","icon":"🦗","className":"food","dangerProfile":"minor","temperament":"skittish","canInvestigate":true,"fitness":25,"size":1.5,"speed":40,"agility":60,"aggression":5,"food":7,"poison":null,"seen":"A katydid blends into the leaf edge, legs folded for a sudden jump.","investigated":"Good insect food if you can tell leaf from animal quickly enough.","persistence":"lingering... [truncated 279 chars]
+  terminalTrace: [775:move-north|Mid-storey|F33/E0/H0|RECOVER] [776:move-north|Mid-storey|F26/E0/H0|RECOVER] [777:move-north|Mid-storey|F19/E0/H0|RECOVER] [778:move-north|Mid-storey|F12/E0/H0|RECOVER] [779:move-north|Mid-storey|F5/E0/H0|enc:katydid|RECOVER]
+Run 8: reason=player died before next action; steps=5; botSteps=780->784; turns=0->5; dead=true; F=0; E=92; H=90; issues=0; deathContext={"message":"The Masillaraptor-like raptor kills you.","context":{"source":"unknown"},"encounterAtDeath":{"kind":"animal","name":"Masillaraptor-like raptor","icon":"🦅","className":"predator","dangerProfile":"predator","temperament":"hunter","pursuitType":"air","canInvestigate":true,"fitness":85,"size":14,"speed":75,"agility":80,"aggression":70,"food":45,"poison":null,"seen":"A small raptor threads between trees, fast enough to make open branches feel unsafe.","persistence":"ephemeral","tags":[],... [truncated 354 chars]
+  terminalTrace: [780:climb|Ground|F100/E100/H100|EXPLORE] [781:move-east|Undergrowth|F100/E98/H98|EXPLORE] [782:move-northeast|Undergrowth|F100/E97/H96|EXPLORE] [783:climb|Undergrowth|F100/E96/H94|enc:wasp nest|EXPLORE] [784:climb|Mid-storey|F100/E94/H92|enc:tree-climber band|EXPLORE]
+Run 9: reason=turn limit reached; steps=216; botSteps=785->1000; turns=0->212; dead=false; F=13; E=47; H=53; issues=0; deathContext=none
+  terminalTrace: [996:eat|Undergrowth|F10/E31/H38|enc:purple berries|RECOVER] [997:move-southwest|Undergrowth|F11/E45/H51|enc:edible purple berries|RECOVER] [998:eat|Undergrowth|F11/E43/H50|enc:magnolia flowers|RECOVER] [999:groom|Undergrowth|F12/E46/H52|enc:magnolia flowers|RECOVER] [1000:eat|Undergrowth|F12/E44/H51|enc:magnolia flowers|RECOVER]
+
+Compact export intentionally omits per-step before/after snapshots, availableActionsBefore arrays, actions[], and embedded collectDebugReport() JSON. Use the full bot report only for targeted deep dives.
