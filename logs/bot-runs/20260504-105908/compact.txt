@@ -1,0 +1,49 @@
+EVOLUTION GAME BOT QA COMPACT
+Game version: v66.57_patch8_short_eco_cycles_2026-04-29
+Bot: IntelligentBot
+Started: 2026-05-04T09:59:08.955Z
+Ended: 2026-05-04T10:00:29.038Z
+Stop reason: turn limit reached
+Bot actions: 1000/1000
+Runs recorded: 5
+Deaths: 4
+Auto-resets: 4
+Game turns current run: 0 -> 216
+Final state: X 42, Y 50, Z 2, Mid-storey, fitness 41%, energy 18%, hydration 25%, dead=false
+Final death context: none
+
+--- PATCH GATE SUMMARY ---
+Action crashes/errors: NONE
+Error issue codes: NONE
+Warnings requiring review: 2
+Compact export embedded full debug report: NO
+
+--- SURVIVAL ---
+Deaths with durations: 4
+Median death turn: 208
+Mean death turn: 196
+Longest recorded run duration: 325
+Distribution: <10t: 0 | 10-29t: 0 | 30-59t: 0 | 60-89t: 0 | 90+t: 4
+Death causes: dehydration: 1 | poison: 1 | unknown: 1 | red berries: 1
+
+--- QA ISSUE COUNTS ---
+DESPERATION_EAT: 1
+WARN_STATIC_QUEUED_ENCOUNTER_DISAPPEARED: 1
+
+--- QA ISSUES (essential context retained, bulky snapshots removed) ---
+INFO DESPERATION_EAT | run=2 | botStep=531 | turn=321 | pos=X29,Y59,Z3 | layer=Canopy | action=? | before[F?/E?/H?/dead=?/enc=none/queue=?] | after[F?/E?/H?/dead=?/enc=none/queue=?] | detail={"encounter":"purple berries","fitness":5}
+WARNING WARN_STATIC_QUEUED_ENCOUNTER_DISAPPEARED | run=4 | botStep=695 | turn=2 | pos=X50,Y50,Z1 | layer=Undergrowth | action=investigate | before[F100/E98/H98/dead=false/enc=spiny insectivore kind=animal/queue=1] | after[F100/E97/H96/dead=false/enc=citrus-type blossoms kind=forage/queue=0] | detail={"step":{"actionId":"investigate","actionLabel":"investigate spiny insectivore","actionCategory":"encounter","error":null}}
+
+--- RUN SUMMARIES ---
+Run 1: reason=player died before next action; steps=209; botSteps=1->209; turns=0->208; dead=true; F=0; E=56; H=0; issues=0; deathContext={"message":"You collapse from dehydration.","context":{"source":"unknown"},"encounterAtDeath":null,"poison":null,"activePursuit":null,"lastActionKind":"drink","lastAction":{"kind":"drink","at":{"x":47,"y":68,"z":0},"terrain":"forest","nearWater":true}}
+  terminalTrace: [205:descend|Undergrowth|F19/E69/H0|enc:large constrictor|EMERGENCY_ESCAPE] [206:climb|Ground|F15/E66/H0|enc:pitviper|EMERGENCY_ESCAPE] [207:descend|Undergrowth|F11/E63/H0|enc:large constrictor|EMERGENCY_ESCAPE] [208:move-southeast|Ground|F7/E60/H0|enc:large constrictor|EMERGENCY_ESCAPE] [209:drink-water|Ground|F3/E58/H0|RECOVER]
+Run 2: reason=player died before next action; steps=325; botSteps=210->534; turns=0->325; dead=true; F=0; E=31; H=49; issues=1; deathContext={"message":"Already weakened, you cannot survive the mild poison.","context":{"source":"poison","poison":{"severity":"mild","rank":1,"toxinType":"plant","lethal":false,"turns":1,"damage":2,"criticalTimer":null,"load":1},"fitnessBefore":2,"fitnessAfter":0},"encounterAtDeath":{"kind":"forage","name":"hibiscus-type flowers","icon":"🌺","className":"food","canInvestigate":true,"portions":1,"energy":6,"hydration":5,"poison":null,"seen":"Bright soft flowers hang open, their centres wet with nectar.","... [truncated 842 chars]
+  terminalTrace: [530:climb|Mid-storey|F5/E20/H34|RECOVER] [531:eat|Canopy|F5/E16/H33|enc:purple berries|RECOVER] [532:move-west|Canopy|F5/E29/H46|enc:mildly poisonous purple berries|RECOVER] [533:eat|Canopy|F3/E27/H45|enc:hibiscus-type flowers|RECOVER] [534:move-southeast|Canopy|F2/E31/H49|enc:hibiscus-type flowers|RECOVER]
+Run 3: reason=player died before next action; steps=158; botSteps=535->692; turns=0->158; dead=true; F=0; E=18; H=43; issues=0; deathContext=none
+  terminalTrace: [688:climb|Mid-storey|F8/E29/H48|enc:woodpecker-like bird|RECOVER] [689:move-west|Canopy|F8/E26/H47|enc:anole lizard|RECOVER] [690:move-south|Canopy|F8/E24/H46|enc:Eurotamandua-like anteater|RECOVER] [691:move-west|Canopy|F8/E22/H45|enc:Eurotamandua-like anteater|RECOVER] [692:move-west|Canopy|F8/E20/H44|enc:bright butterfly|RECOVER]
+Run 4: reason=player died before next action; steps=92; botSteps=693->784; turns=0->92; dead=true; F=0; E=12; H=0; issues=1; deathContext={"message":"You collapse from dehydration.","context":{"source":"defensive-reaction","attacker":"Eurotamandua-like anteater","encounter":{"kind":"animal","name":"Eurotamandua-like anteater","icon":"🦥","className":"prey","dangerProfile":"claw","temperament":"defensive","canInvestigate":true,"fitness":80,"size":20,"speed":30,"agility":25,"aggression":30,"food":65,"poison":null,"seen":"A strange long-snouted climber tears at rotting wood, searching for insects.","persistence":"ephemeral","tags":[]... [truncated 1754 chars]
+  terminalTrace: [780:groom|Undergrowth|F19/E22/H0|enc:wasp nest|RECOVER] [781:move-east|Undergrowth|F15/E20/H0|enc:wasp nest|RECOVER] [782:move-west|Undergrowth|F11/E18/H0|enc:red berries|RECOVER] [783:move-east|Undergrowth|F7/E16/H0|enc:wasp nest|RECOVER] [784:move-west|Undergrowth|F3/E14/H0|enc:red berries|RECOVER]
+Run 5: reason=turn limit reached; steps=216; botSteps=785->1000; turns=0->216; dead=false; F=41; E=18; H=25; issues=0; deathContext=none
+  terminalTrace: [996:move-east|Mid-storey|F49/E6/H16|enc:fallen fruit|WATER_PLAN] [997:move-west|Mid-storey|F49/E4/H15|enc:hairy caterpillar|WATER_PLAN] [998:move-east|Mid-storey|F49/E1/H14|enc:fallen fruit|WATER_PLAN] [999:move-west|Mid-storey|F46/E0/H13|enc:hairy caterpillar|WATER_PLAN] [1000:eat|Mid-storey|F43/E0/H12|enc:fallen fruit|RECOVER]
+
+Compact export intentionally omits per-step before/after snapshots, availableActionsBefore arrays, actions[], and embedded collectDebugReport() JSON. Use the full bot report only for targeted deep dives.
