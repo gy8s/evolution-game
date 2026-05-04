@@ -1,3 +1,15 @@
+[2026-05-04 patch13f | Claude]
+IntelligentBot final hardening — 7 fixes (F1–F7) consolidating original 13C aerial/layer scope and latest-log blockers. This is the v1 QA completion patch. Bot/debug tools change only.
+- F1: Aerial escape direction variation. In threatAwareEscape(), when an aerial threat fires lateral movement, the chosen direction is stored in botState.memory.lastAerialEscapeDir and excluded from the candidate set on the next aerial escape. Eliminates same-key lateral trap where the bot repeatedly moved one direction into the threat.
+- F2: Canopy idle block after recent aerial threat. In the EXPLORE nonAttack filter, look/wait/call/sleep are blocked when player.z>=2 and hasRecentAerialThreat() is true. Prevents idle canopy exposure immediately after an aerial encounter.
+- F3: Weak-state canopy suppression. The EXPLORE climb-toward-canopy return is now gated on player.fitness>40 AND player.energy>30 AND player.hydration>30. Low-stat bot no longer climbs into exposed canopy where aerial predators are disproportionately lethal.
+- F4: Stat underflow clamp (blocker). Wildfire tick used bare `-=` for fitness and hydration; both now use Math.max(0,...). botActionSnapshot() also clamps all three stats defensively. Fixes ERR_STAT_OUT_OF_RANGE x3 and hydration=-1 confirmed in 105455.
+- F5: H<=5 central water priority. Top-level gate added in chooseIntelligentBotAction() before mode dispatch: when H<=5 and no active pursuit, drink-water or intelligentMoveTowardWater is returned immediately. Groom guard extended to also skip when player.hydration<=5 (dehydration kills faster than parasites at this threshold).
+- F6: Drink-loop starvation fix. In determineIntelligentBotMode(), when H>=65 AND E<=30, SAFE_FORAGE is returned instead of WATER_PLAN. Cuts the drink loop at mode level when hydration is recovered but energy is still critical.
+- F7: Resource lock at E<=10 in WATER_PLAN. Mirrors C8: when E<=10 and intelligentFindSafeEat returns an action, eat is returned before any water pursuit. Previously C8 only ran in RECOVER; WATER_PLAN bypassed it even at zero energy.
+- game/evolution_game_v66_57.html NOT updated — archived reference version only.
+- Syntax check: PASS.
+
 [2026-05-04 patch13e | Claude]
 IntelligentBot logging observability — 5 targeted changes (E1–E5) from GPT post-13D log review. Adds decision context to step records and introduces trace.json per run for API-fetchable diagnostics. Bot/debug tools change only; no behaviour change.
 - E1: Decision context capture. In chooseIntelligentBotAction(), after mode is determined, botState._lastContext is populated with: goalType, goalTarget, bootTurns, escapeTimer, drinkAvailable, eatAvailable. Captured once per step at the point where mode routing is resolved.
