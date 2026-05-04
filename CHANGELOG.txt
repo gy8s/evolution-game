@@ -1,3 +1,13 @@
+[2026-05-04 patch13e | Claude]
+IntelligentBot logging observability — 5 targeted changes (E1–E5) from GPT post-13D log review. Adds decision context to step records and introduces trace.json per run for API-fetchable diagnostics. Bot/debug tools change only; no behaviour change.
+- E1: Decision context capture. In chooseIntelligentBotAction(), after mode is determined, botState._lastContext is populated with: goalType, goalTarget, bootTurns, escapeTimer, drinkAvailable, eatAvailable. Captured once per step at the point where mode routing is resolved.
+- E2: Step record extended. Each entry in botState.steps now includes: mode, goalType, goalTarget, bootTurns, escapeTimer, drinkAvailable, eatAvailable. These fields flow into full.txt JSON and trace.json. Allows reviewers to see what goal was active and whether resources were available at every decision point.
+- E3: trace.json added per run. buildBotTraceJson() produces a compact JSON file containing the last 10 steps per run with full decision-context fields. File stays well under 1MB, making it fetchable via the GitHub contents API. Included in pushBotRunToGitHub() alongside meta.json, compact.txt, full.txt.
+- E4: hasFullReport truthfulness fix. buildBotMetaJson() previously hardcoded hasFullReport: true. Now set to report.stepsRun > 0, so meta.json correctly reflects whether step data was actually captured.
+- E5: trace.json documents mode routing, goal state, and resource availability at each terminal step — directly answering the diagnostic questions raised in the post-13D GPT review (was drink available? was a goal active? what was bootTurns/escapeTimer?).
+- game/evolution_game_v66_57.html NOT updated — archived reference version only.
+- Syntax check: PASS.
+
 [2026-05-03 patch13d | Claude]
 IntelligentBot crisis mode and bootstrap hotfix — 2 surgical fixes (D1–D2) from post-13C three-run analysis. Closes WATER_PLAN bypass gap and completes C3 bootstrap enforcement. Bot/debug tools change only.
 - D1: Compound crisis mode override. In determineIntelligentBotMode(), a new check before WATER_PLAN routes to RECOVER when E<=10 AND H<=10 regardless of fitness. Previously, healthy fitness (>45%) caused WATER_PLAN selection at E=0/H=0, bypassing C8 hard resource lock entirely. 175820 Run 12 confirmed: bot oscillated past safe magnolia flowers in WATER_PLAN at F=69/E=0/H=0.
