@@ -8047,10 +8047,10 @@ function applyWildfireProximityEffects() {
   const r = environment.wildfire.radius;
 
   if (dist <= r) {
-    player.fitness -= (2 + environment.wildfire.intensity);
+    player.fitness = Math.max(0, player.fitness - (2 + environment.wildfire.intensity));
     addLog("Flames move through the undergrowth nearby.", "threat");
   } else if (dist <= r + 3) {
-    player.hydration -= 1;
+    player.hydration = Math.max(0, player.hydration - 1);
     addLog("The air grows hot. Animals are moving in the same direction.", "minor");
   } else if (dist <= r + 6) {
     if (player.turn % 3 === 0) addLog("Smoke hangs faintly in the air.", "minor");
@@ -10964,8 +10964,9 @@ function newBotMemory() {
     positionHistory: [],  // [{x, y}] last 6 positions for A-B-A-B oscillation detection (P13A-A3)
     loopBlacklist: [],    // [{x, y, until}] positions blocked to escape local movement loops (P13A-A3)
     goalStagnantTurns: 0, // consecutive turns goal is active but position spread is minimal (P13B-A6ext)
-    escapeTimer: 0,       // turns remaining of post-aerial-escape RECOVER bias (P13C-C7)
-    bootTurns: 0          // turns elapsed since last reset; suppresses early canopy climb (P13C-C3)
+    escapeTimer: 0,           // turns remaining of post-aerial-escape RECOVER bias (P13C-C7)
+    bootTurns: 0,             // turns elapsed since last reset; suppresses early canopy climb (P13C-C3)
+    lastAerialEscapeDir: null // last lateral direction used when escaping aerial threat (P13F-F1)
   };
 }
 
@@ -11094,9 +11095,9 @@ function botActionSnapshot() {
     layer: layers[player.z],
     terrain: terrainAt(player.x, player.y),
     habitatKey: habitatKeyAt(player.x, player.y),
-    fitness: Math.round(player.fitness),
-    energy: Math.round(player.energy),
-    hydration: Math.round(player.hydration),
+    fitness: Math.max(0, Math.round(player.fitness)),
+    energy: Math.max(0, Math.round(player.energy)),
+    hydration: Math.max(0, Math.round(player.hydration)),
     dead: player.dead,
     deathContext: cloneDebug(player.deathContext || null),
     encounter: currentEncounter ? {
@@ -11646,7 +11647,13 @@ function threatAwareEscape(actions, threat) {
   // Aerial threats (raptor/owl): descend only if ground is not recently dangerous; otherwise lateral
   if (threat.isGrapple || threat.isAerial) {
     if (descendAction && player.z > 0 && !hasRecentGroundThreat()) return descendAction;
-    return moveActions.length ? randomBotAction(moveActions) : null;
+    // P13F-F1: Vary lateral escape direction — avoid repeating same direction as last aerial escape
+    const mEscAer = botState.memory;
+    const lastAerDir = mEscAer ? mEscAer.lastAerialEscapeDir : null;
+    const variedMoves = lastAerDir ? moveActions.filter(a => a.id !== lastAerDir) : moveActions;
+    const aerMove = randomBotAction(variedMoves.length ? variedMoves : moveActions);
+    if (aerMove && mEscAer) mEscAer.lastAerialEscapeDir = aerMove.id;
+    return aerMove || null;
   }
   // Climber threats (miacid etc): pursues through all layers — lateral movement only, never vertical
   if (threat.isClimber) {
@@ -11692,6 +11699,8 @@ function determineIntelligentBotMode(threat) {
   if (player.poison || player.fitness <= 45 || (player.parasites || 0) >= 1) return "RECOVER";
   // P13D-D1: Compound crisis — E<=10 AND H<=10 routes to RECOVER regardless of fitness
   if (player.energy <= 10 && player.hydration <= 10) return "RECOVER";
+  // P13F-F6: H recovered but E critical — exit drink loop, seek food
+  if (player.hydration >= 65 && player.energy <= 30) return "SAFE_FORAGE";
   if (player.hydration <= 50) return "WATER_PLAN";
   if (player.energy <= 60) return "SAFE_FORAGE";
   // P13C-C7: After aerial escape, hold RECOVER bias instead of returning to EXPLORE
@@ -11719,6 +11728,14 @@ function chooseIntelligentBotAction(actions) {
   if (waterState && waterState.inWater && moveActions.length) {
     const landEscape = intelligentEscapeWater(actions);
     if (landEscape) { botState._lastMode = "EMERGENCY_ESCAPE"; return landEscape; }
+  }
+
+  // P13F-F5: H<=5 central gate — drink or move toward water before any mode logic fires
+  if (player.hydration <= 5 && !activePursuit) {
+    const h5drink = byId["drink-water"];
+    if (h5drink) { botState._lastMode = "RECOVER"; return h5drink; }
+    const h5water = intelligentMoveTowardWater(actions);
+    if (h5water) { botState._lastMode = "RECOVER"; return h5water; }
   }
 
   const mode = determineIntelligentBotMode(threat);
@@ -11767,9 +11784,10 @@ function chooseIntelligentBotAction(actions) {
       const eat = intelligentFindSafeEat(actions);
       if (eat) return eat;
     }
-    // Groom immediately if parasites — skip when starving+poisoned or near-death (P13B-P3 + P13C-C6)
+    // Groom if parasites — skip when starving+poisoned, near-death, or dehydration is lethal (P13B-P3+P13C-C6+P13F-F5)
     if ((player.parasites || 0) >= 1 && byId["groom"] &&
-        !(player.energy <= 0 && (player.poison || player.fitness <= 10))) return byId["groom"];
+        !(player.energy <= 0 && (player.poison || player.fitness <= 10)) &&
+        player.hydration > 5) return byId["groom"];
     // Critical hydration — drink immediately
     if (player.hydration <= 20 && byId["drink-water"]) return byId["drink-water"];
     // Critical energy — eat safe food before water-seeking or movement (resource-anchor)
@@ -11922,6 +11940,11 @@ function chooseIntelligentBotAction(actions) {
 
   if (mode === "WATER_PLAN") {
     const m = botState.memory || (botState.memory = newBotMemory());
+    // P13F-F7: Mirror C8 in WATER_PLAN — E<=10 eats safe food before pursuing water
+    if (player.energy <= 10 && !activePursuit) {
+      const wpEat = intelligentFindSafeEat(actions);
+      if (wpEat) return wpEat;
+    }
     if (byId["drink-water"]) {
       // P13A-A2: After drinking, if energy is critically low set a food-seek goal for subsequent turns
       m.currentGoal = player.energy <= 30 ? { type: 'seek_food', startTurn: player.turn } : null;
@@ -11990,12 +12013,15 @@ function chooseIntelligentBotAction(actions) {
   if (enc && (threat.isDangerous || threat.isThreatClass) && moveActions.length) {
     return threatAwareEscape(actions, threat) || randomBotAction(moveActions);
   }
-  // Climb toward canopy when safe — suppressed during bootstrap grace (C3) and aerial threat memory
-  if (!inBootstrap && !urgentNeedsGround && !hasRecentAerialThreat() && climbAction) return climbAction;
+  // Climb toward canopy when safe — suppressed during bootstrap, aerial threat, or weak stats (P13C-C3, P13F-F3)
+  if (!inBootstrap && !urgentNeedsGround && !hasRecentAerialThreat() && climbAction &&
+      player.fitness > 40 && player.energy > 30 && player.hydration > 30) return climbAction;
   const nonAttack = actions.filter(a => {
     if (a.id.startsWith("attack") || a.id.startsWith("queued-attack")) return false;
     // P13D-D2: Bootstrap grace — block climb/sleep/call/look above ground for first 4 turns
     if (inBootstrap && player.z >= 1 && (a.id === "climb" || a.id === "sleep" || a.id === "call" || a.id === "look")) return false;
+    // P13F-F2: Block idle actions in canopy after recent aerial threat
+    if (player.z >= 2 && hasRecentAerialThreat() && (a.id === "look" || a.id === "wait" || a.id === "call" || a.id === "sleep")) return false;
     // Only descend when thirsty; WATER_PLAN owns descent for water access, so in EXPLORE/SAFE_FORAGE
     // fallthrough (H always >50 here) descent is almost never justified and risks ground predators
     if (a.id === "descend" && player.hydration > 50) return false;
