@@ -11707,7 +11707,8 @@ function chooseIntelligentBotAction(actions) {
   const descendAction = byId["descend"] || null;
   const urgentNeedsGround = player.hydration <= 30 || player.energy <= 25;
 
-  botState._lastMode = null; // clear stale mode before any early return
+  botState._lastMode = null;    // clear stale mode before any early return
+  botState._lastContext = null; // P13E Codex: clear stale context before any early return
 
   const enc = currentEncounter;
   const threat = classifyThreat(enc);
@@ -11722,6 +11723,16 @@ function chooseIntelligentBotAction(actions) {
 
   const mode = determineIntelligentBotMode(threat);
   botState._lastMode = mode;
+  // P13E: Capture decision context for step recording
+  const _mem = botState.memory;
+  botState._lastContext = {
+    goalType: (_mem && _mem.currentGoal) ? _mem.currentGoal.type : null,
+    goalTarget: (_mem && _mem.currentGoal) ? _mem.currentGoal.target : null,
+    bootTurns: _mem ? (_mem.bootTurns || 0) : 0,
+    escapeTimer: _mem ? (_mem.escapeTimer || 0) : 0,
+    drinkAvailable: !!byId["drink-water"],
+    eatAvailable: actions.some(a => a.id === "eat" || a.id.startsWith("queued-eat-"))
+  };
 
   if (mode === "EMERGENCY_ESCAPE") {
     // P13C-C7: Set escape stickiness timer when aerial threat is present
@@ -12026,7 +12037,8 @@ function stepIntelligentBot() {
     addDebugFlag("Intelligent bot action threw an error", {action: action.id, error});
   }
   const after = botActionSnapshot();
-  const step = {botStep: botState.steps.length + 1, runIndex: botState.runIndex, actionId: action.id, actionLabel: action.label, actionCategory: action.category, availableActionsBefore: actionList, before, after, error, mode: botState._lastMode || null};
+  const _ctx = botState._lastContext || {};
+  const step = {botStep: botState.steps.length + 1, runIndex: botState.runIndex, actionId: action.id, actionLabel: action.label, actionCategory: action.category, availableActionsBefore: actionList, before, after, error, mode: botState._lastMode || null, goalType: _ctx.goalType || null, goalTarget: _ctx.goalTarget || null, bootTurns: _ctx.bootTurns ?? null, escapeTimer: _ctx.escapeTimer ?? null, drinkAvailable: _ctx.drinkAvailable ?? null, eatAvailable: _ctx.eatAvailable ?? null};
   botState.steps.push(step);
   botValidateStep(step);
   if (error) { stopRandomBot("action error"); render(); return; }
@@ -12130,6 +12142,41 @@ function buildBotFullText(report) {
     "--- JSON BOT DATA ---",
     JSON.stringify(report, null, 2)
   ].join("\n");
+}
+
+// P13E: Compact per-run terminal trace with decision context — stays under 1MB for API fetching
+function buildBotTraceJson(report) {
+  const runs = report.runs.map(run => {
+    const runSteps = report.actions.filter(s => s.runIndex === run.runIndex);
+    const terminalSteps = runSteps.slice(-10).map(s => ({
+      botStep: s.botStep,
+      turn: s.before ? s.before.turn : null,
+      action: s.actionId,
+      mode: s.mode || null,
+      goalType: s.goalType || null,
+      goalTarget: s.goalTarget || null,
+      bootTurns: s.bootTurns ?? null,
+      escapeTimer: s.escapeTimer ?? null,
+      drinkAvailable: s.drinkAvailable ?? null,
+      eatAvailable: s.eatAvailable ?? null,
+      before: s.before ? {x: s.before.x, y: s.before.y, z: s.before.z, layer: s.before.layer, fitness: s.before.fitness, energy: s.before.energy, hydration: s.before.hydration} : null,
+      after: s.after ? {fitness: s.after.fitness, energy: s.after.energy, hydration: s.after.hydration, dead: s.after.dead} : null
+    }));
+    return {
+      runIndex: run.runIndex,
+      reason: run.reason,
+      turns: run.endTurn,
+      issues: run.issues ? run.issues.length : 0,
+      finalState: run.finalState ? {fitness: run.finalState.fitness, energy: run.finalState.energy, hydration: run.finalState.hydration, dead: run.finalState.dead} : null,
+      terminalSteps
+    };
+  });
+  return JSON.stringify({
+    runId: report.startedAt || "",
+    gameVersion: typeof GAME_VERSION !== "undefined" ? GAME_VERSION : "",
+    deaths: report.deaths,
+    runs
+  }, null, 2);
 }
 
 function downloadBotReport() {
@@ -12890,7 +12937,7 @@ function buildBotMetaJson(runId, shortVersion, report) {
     botActions: `${report.stepsRun}/${report.maxSteps}`,
     runsRecorded: String(report.runsCompletedOrRecorded),
     deaths: String(report.deaths),
-    hasFullReport: true,
+    hasFullReport: report.stepsRun > 0,
     savedAt: new Date().toISOString()
   }, null, 2);
 }
@@ -12921,7 +12968,8 @@ async function pushBotRunToGitHub() {
   const files = [
     { path: `${prefix}/meta.json`,   content: buildBotMetaJson(runId, shortVersion, report) },
     { path: `${prefix}/compact.txt`, content: buildBotCompactLines(report).join("\n") },
-    { path: `${prefix}/full.txt`,    content: buildBotFullText(report) }
+    { path: `${prefix}/full.txt`,    content: buildBotFullText(report) },
+    { path: `${prefix}/trace.json`,  content: buildBotTraceJson(report) }
   ];
 
   const base = "https://api.github.com/repos/gy8s/evolution-game";
