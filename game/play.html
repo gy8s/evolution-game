@@ -12953,7 +12953,7 @@ function downloadBotReportCompact() {
 // ---------------------------------------------------------------------------
 // @target [BOT] GitHub auto-save
 
-function buildBotMetaJson(runId, shortVersion, report) {
+function buildBotMetaJson(runId, shortVersion, report, hasFullReport) {
   return JSON.stringify({
     runId,
     gameVersion: GAME_VERSION,
@@ -12964,7 +12964,7 @@ function buildBotMetaJson(runId, shortVersion, report) {
     botActions: `${report.stepsRun}/${report.maxSteps}`,
     runsRecorded: String(report.runsCompletedOrRecorded),
     deaths: String(report.deaths),
-    hasFullReport: report.stepsRun > 0,
+    hasFullReport: hasFullReport !== undefined ? hasFullReport : report.stepsRun > 0,
     savedAt: new Date().toISOString()
   }, null, 2);
 }
@@ -13027,20 +13027,7 @@ async function pushBotRunToGitHub() {
     if (!commitRes.ok) throw new Error(`commit fetch failed (HTTP ${commitRes.status})`);
     const baseTreeSha = (await commitRes.json()).tree.sha;
 
-    // Essential files — must all succeed
-    const essentialFiles = [
-      { path: `${prefix}/meta.json`,   content: buildBotMetaJson(runId, shortVersion, report) },
-      { path: `${prefix}/compact.txt`, content: buildBotCompactLines(report).join("\n") },
-      { path: `${prefix}/trace.json`,  content: buildBotTraceJson(report) }
-    ];
-
-    botSaveStatus("Uploading compact/meta/trace…");
-    const essentialEntries = await Promise.all(essentialFiles.map(async f => {
-      const sha = await uploadBlob(f.path, f.content);
-      return { path: f.path, mode: "100644", type: "blob", sha };
-    }));
-
-    // full.txt — optional; skip if too large or upload fails
+    // full.txt — optional; attempt first so meta.json can reflect the real outcome
     let fullSkipReason = null;
     let fullEntry = null;
     botSaveStatus("Uploading full report…");
@@ -13051,6 +13038,19 @@ async function pushBotRunToGitHub() {
     } catch (e) {
       fullSkipReason = e.message;
     }
+
+    // Essential files — must all succeed; meta.json reflects actual full.txt outcome
+    const essentialFiles = [
+      { path: `${prefix}/meta.json`,   content: buildBotMetaJson(runId, shortVersion, report, fullEntry !== null) },
+      { path: `${prefix}/compact.txt`, content: buildBotCompactLines(report).join("\n") },
+      { path: `${prefix}/trace.json`,  content: buildBotTraceJson(report) }
+    ];
+
+    botSaveStatus("Uploading compact/meta/trace…");
+    const essentialEntries = await Promise.all(essentialFiles.map(async f => {
+      const sha = await uploadBlob(f.path, f.content);
+      return { path: f.path, mode: "100644", type: "blob", sha };
+    }));
 
     const treeEntries = fullEntry ? [...essentialEntries, fullEntry] : essentialEntries;
 
