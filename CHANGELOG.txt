@@ -1,3 +1,13 @@
+[2026-05-04 autosave-reliability | Claude]
+GitHub auto-save reliability fix. Bot run data no longer lost when full.txt upload fails. No bot logic change.
+- Essential files (meta.json, compact.txt, trace.json) uploaded first and unconditionally; full.txt attempted separately and skipped on failure.
+- full.txt failure (btoa encode error, network error, or HTTP error) is caught individually — compact/meta/trace commit proceeds regardless.
+- Error messages now include the specific file path, HTTP status code, and up to 120 chars of API error body instead of generic "Failed to fetch".
+- Each upload stage updates the status indicator ("Connecting…", "Uploading compact/meta/trace…", "Uploading full report…", "Creating commit…") so failure point is visible.
+- If full.txt is skipped, UI shows "Saved: … (full.txt skipped — <reason>)" in warn state and the skip reason is appended to the commit message.
+- game/evolution_game_v66_57.html NOT updated — archived reference version only.
+- Syntax check: PASS.
+
 [2026-05-04 patch13f | Claude]
 IntelligentBot final hardening — 7 fixes (F1–F7) consolidating original 13C aerial/layer scope and latest-log blockers. This is the v1 QA completion patch. Bot/debug tools change only.
 - F1: Aerial escape direction variation. In threatAwareEscape(), when an aerial threat fires lateral movement, the chosen direction is stored in botState.memory.lastAerialEscapeDir and excluded from the candidate set on the next aerial escape. Eliminates same-key lateral trap where the bot repeatedly moved one direction into the threat.

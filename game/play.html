@@ -12991,14 +12991,6 @@ async function pushBotRunToGitHub() {
   const runId = botFileTimestamp(report.startedAt);
   const shortVersion = botFileShortVersion();
   const prefix = `logs/bot-runs/${runId}`;
-
-  const files = [
-    { path: `${prefix}/meta.json`,   content: buildBotMetaJson(runId, shortVersion, report) },
-    { path: `${prefix}/compact.txt`, content: buildBotCompactLines(report).join("\n") },
-    { path: `${prefix}/full.txt`,    content: buildBotFullText(report) },
-    { path: `${prefix}/trace.json`,  content: buildBotTraceJson(report) }
-  ];
-
   const base = "https://api.github.com/repos/gy8s/evolution-game";
   const headers = {
     "Authorization": `Bearer ${pat}`,
@@ -13006,52 +12998,92 @@ async function pushBotRunToGitHub() {
     "Accept": "application/vnd.github+json"
   };
 
+  // Helper: upload one blob, returns sha or throws with a clear message
+  async function uploadBlob(path, content) {
+    let encoded;
+    try {
+      encoded = btoa(unescape(encodeURIComponent(content)));
+    } catch (e) {
+      throw new Error(`encode failed for ${path}: ${e.message}`);
+    }
+    const res = await fetch(`${base}/git/blobs`, {
+      method: "POST", headers,
+      body: JSON.stringify({ content: encoded, encoding: "base64" })
+    });
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      throw new Error(`blob upload failed for ${path} (HTTP ${res.status}${detail ? ": " + detail.slice(0, 120) : ""})`);
+    }
+    return (await res.json()).sha;
+  }
+
   try {
+    botSaveStatus("Connecting to repo…");
     const refRes = await fetch(`${base}/git/ref/heads/${branch}`, { headers });
-    if (!refRes.ok) throw new Error(`Branch '${branch}' not found (${refRes.status})`);
+    if (!refRes.ok) throw new Error(`branch '${branch}' not found (HTTP ${refRes.status})`);
     const latestCommitSha = (await refRes.json()).object.sha;
 
     const commitRes = await fetch(`${base}/git/commits/${latestCommitSha}`, { headers });
-    if (!commitRes.ok) throw new Error(`Commit fetch failed (${commitRes.status})`);
+    if (!commitRes.ok) throw new Error(`commit fetch failed (HTTP ${commitRes.status})`);
     const baseTreeSha = (await commitRes.json()).tree.sha;
 
-    const blobShas = await Promise.all(files.map(async f => {
-      const res = await fetch(`${base}/git/blobs`, {
-        method: "POST", headers,
-        body: JSON.stringify({ content: btoa(unescape(encodeURIComponent(f.content))), encoding: "base64" })
-      });
-      if (!res.ok) throw new Error(`Blob failed for ${f.path} (${res.status})`);
-      return (await res.json()).sha;
+    // Essential files — must all succeed
+    const essentialFiles = [
+      { path: `${prefix}/meta.json`,   content: buildBotMetaJson(runId, shortVersion, report) },
+      { path: `${prefix}/compact.txt`, content: buildBotCompactLines(report).join("\n") },
+      { path: `${prefix}/trace.json`,  content: buildBotTraceJson(report) }
+    ];
+
+    botSaveStatus("Uploading compact/meta/trace…");
+    const essentialEntries = await Promise.all(essentialFiles.map(async f => {
+      const sha = await uploadBlob(f.path, f.content);
+      return { path: f.path, mode: "100644", type: "blob", sha };
     }));
 
+    // full.txt — optional; skip if too large or upload fails
+    let fullSkipReason = null;
+    let fullEntry = null;
+    botSaveStatus("Uploading full report…");
+    try {
+      const fullContent = buildBotFullText(report);
+      const fullSha = await uploadBlob(`${prefix}/full.txt`, fullContent);
+      fullEntry = { path: `${prefix}/full.txt`, mode: "100644", type: "blob", sha: fullSha };
+    } catch (e) {
+      fullSkipReason = e.message;
+    }
+
+    const treeEntries = fullEntry ? [...essentialEntries, fullEntry] : essentialEntries;
+
+    botSaveStatus("Creating commit…");
     const treeRes = await fetch(`${base}/git/trees`, {
       method: "POST", headers,
-      body: JSON.stringify({
-        base_tree: baseTreeSha,
-        tree: files.map((f, i) => ({ path: f.path, mode: "100644", type: "blob", sha: blobShas[i] }))
-      })
+      body: JSON.stringify({ base_tree: baseTreeSha, tree: treeEntries })
     });
-    if (!treeRes.ok) throw new Error(`Tree create failed (${treeRes.status})`);
+    if (!treeRes.ok) throw new Error(`tree create failed (HTTP ${treeRes.status})`);
     const newTreeSha = (await treeRes.json()).sha;
 
     const newCommitRes = await fetch(`${base}/git/commits`, {
       method: "POST", headers,
       body: JSON.stringify({
-        message: `Add bot run ${runId} (${shortVersion})\n\nStarted: ${report.startedAt || "unknown"}\nRuns: ${report.runsCompletedOrRecorded}, Deaths: ${report.deaths}, Stop: ${report.stopReason}`,
+        message: `Add bot run ${runId} (${shortVersion})\n\nStarted: ${report.startedAt || "unknown"}\nRuns: ${report.runsCompletedOrRecorded}, Deaths: ${report.deaths}, Stop: ${report.stopReason}${fullSkipReason ? "\nfull.txt skipped: " + fullSkipReason : ""}`,
         tree: newTreeSha,
         parents: [latestCommitSha]
       })
     });
-    if (!newCommitRes.ok) throw new Error(`Commit create failed (${newCommitRes.status})`);
+    if (!newCommitRes.ok) throw new Error(`commit create failed (HTTP ${newCommitRes.status})`);
     const newCommitSha = (await newCommitRes.json()).sha;
 
     const updateRes = await fetch(`${base}/git/refs/heads/${branch}`, {
       method: "PATCH", headers,
       body: JSON.stringify({ sha: newCommitSha })
     });
-    if (!updateRes.ok) throw new Error(`Ref update failed (${updateRes.status})`);
+    if (!updateRes.ok) throw new Error(`ref update failed (HTTP ${updateRes.status})`);
 
-    botSaveStatus(`Saved: logs/bot-runs/${runId}/`, "ok");
+    if (fullSkipReason) {
+      botSaveStatus(`Saved: ${prefix}/ (full.txt skipped — ${fullSkipReason.slice(0, 80)})`, "warn");
+    } else {
+      botSaveStatus(`Saved: ${prefix}/`, "ok");
+    }
   } catch (err) {
     botSaveStatus(`Save failed: ${err.message}`, "error");
   } finally {
