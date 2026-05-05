@@ -1,0 +1,44 @@
+EVOLUTION GAME BOT QA COMPACT
+Game version: v66.57_patch8_short_eco_cycles_2026-04-29
+Bot: IntelligentBot
+Started: 2026-05-05T21:45:40.403Z
+Ended: 2026-05-05T21:45:48.896Z
+Stop reason: action error
+Bot actions: 106/1000
+Runs recorded: 3
+Deaths: 2
+Auto-resets: 2
+Game turns current run: 0 -> 32
+Final state: X 54, Y 50, Z 4, Emergent, fitness 88%, energy 78%, hydration 50%, dead=false
+Final death context: none
+
+--- PATCH GATE SUMMARY ---
+Action crashes/errors: FAIL/REVIEW
+Error issue codes: ERR_ACTION_EXCEPTION, ERR_ACTION_EXCEPTION
+Warnings requiring review: 0
+Compact export embedded full debug report: NO
+
+--- SURVIVAL ---
+Deaths with durations: 2
+Median death turn: 49
+Mean death turn: 37
+Longest recorded run duration: 49
+Distribution: <10t: 0 | 10-29t: 1 | 30-59t: 1 | 60-89t: 0 | 90+t: 0
+Death causes: miacid-like climbing hunter: 1 | Masillaraptor-like raptor: 1
+
+--- QA ISSUE COUNTS ---
+ERR_ACTION_EXCEPTION: 2
+
+--- QA ISSUES (essential context retained, bulky snapshots removed) ---
+ERROR ERR_ACTION_EXCEPTION | run=3 | botStep=106 | turn=32 | pos=X54,Y50,Z4 | layer=Emergent | action=? | before[F?/E?/H?/dead=?/enc=none/queue=?] | after[F?/E?/H?/dead=?/enc=none/queue=?] | detail={"action":"move-southwest","label":"move southwest","error":"TypeError: table is not iterable\n    at spawnNearbyEntities (https://gy8s.github.io/evolution-game/game/play.html:5346:27)\n    at updateNearbyEntities (https://gy8s.github.io/evolution-game/game/play.html:5110:35)\n    at startTurn (https://gy8s.github.io/evolution-game/game/play.html:3876:3)\n    at move (https://gy8s.github.io/evolution-game/game/play.html:8796:8)\n    at Object.execute (https://gy8s.github.io/evolution-game/game/play.html:11167:94)\n    at stepIntelligentBot (https://gy8s.github.io/evolution-game/game/play.html:12060:16)"}
+ERROR ERR_ACTION_EXCEPTION | run=3 | botStep=107 | turn=32 | pos=X54,Y50,Z4 | layer=Emergent | action=move-southwest | before[F88/E79/H52/dead=false/enc=none/queue=0] | after[F88/E78/H50/dead=false/enc=none/queue=0] | detail={"step":{"actionId":"move-southwest","actionLabel":"move southwest","actionCategory":"movement","error":"TypeError: table is not iterable\n    at spawnNearbyEntities (https://gy8s.github.io/evolution-game/game/play.html:5346:27)\n    at updateNearbyEntities (https://gy8s.github.io/evolution-game/game/play.html:5110:35)\n    at startTurn (https://gy8s.github.io/evolution-game/game/play.html:3876:3)\n    at move (https://gy8s.github.io/evolution-game/game/play.html:8796:8)\n    at Object.execute (https://gy8s.github.io/evolution-game/game/play.html:11167:94)\n    at stepIntelligentBot (https://gy8s.github.... [truncated 42 chars]"}}
+
+--- RUN SUMMARIES ---
+Run 1: reason=player died before next action; steps=49; botSteps=1->49; turns=0->49; dead=true; F=0; E=22; H=19; issues=0; deathContext={"message":"The miacid-like climbing hunter kills you.","context":{"source":"unknown"},"encounterAtDeath":{"kind":"animal","name":"miacid-like climbing hunter","icon":"🐈","className":"predator","dangerProfile":"predator","temperament":"hunter","canInvestigate":true,"pursuitType":"climber","fitness":95,"size":24,"speed":72,"agility":86,"aggression":86,"food":95,"seen":"A miacid-like hunter moves with sudden precision. Low branches will not save you, and even canopy routes only buy distance.","pe... [truncated 595 chars]
+  terminalTrace: [45:move-northeast|Mid-storey|F38/E36/H24|enc:resinous yellow fruit|RECOVER] [46:move-northwest|Undergrowth|F28/E34/H23|RECOVER] [47:move-west|Undergrowth|F28/E31/H22|enc:miacid-like climbing hunter|EMERGENCY_ESCAPE] [48:move-south|Undergrowth|F28/E28/H21|enc:miacid-like climbing hunter|EMERGENCY_ESCAPE] [49:move-southwest|Undergrowth|F28/E25/H20|enc:miacid-like climbing hunter|EMERGENCY_ESCAPE]
+Run 2: reason=player died before next action; steps=25; botSteps=50->74; turns=0->25; dead=true; F=0; E=73; H=50; issues=0; deathContext={"message":"The Masillaraptor-like raptor kills you.","context":{"source":"unknown"},"encounterAtDeath":{"kind":"animal","name":"Masillaraptor-like raptor","icon":"🦅","className":"predator","dangerProfile":"predator","temperament":"hunter","pursuitType":"air","canInvestigate":true,"fitness":85,"size":14,"speed":75,"agility":80,"aggression":70,"food":45,"poison":null,"seen":"A small raptor threads between trees, fast enough to make open branches feel unsafe.","persistence":"ephemeral","tags":[],... [truncated 521 chars]
+  terminalTrace: [70:look|Undergrowth|F99/E81/H60|enc:katydid|EXPLORE] [71:move-northeast|Undergrowth|F99/E80/H58|enc:katydid|EXPLORE] [72:climb|Undergrowth|F99/E79/H56|enc:katydid|EXPLORE] [73:descend|Mid-storey|F35/E77/H54|enc:Masillaraptor-like raptor|EMERGENCY_ESCAPE] [74:climb|Undergrowth|F35/E75/H52|enc:pitviper|EMERGENCY_ESCAPE]
+Run 3: reason=action error; steps=32; botSteps=75->106; turns=0->32; dead=false; F=88; E=78; H=50; issues=2; deathContext=none
+  terminalTrace: [102:climb|Mid-storey|F88/E85/H60|EXPLORE] [103:move-south|Canopy|F88/E83/H58|enc:monitor lizard|EMERGENCY_ESCAPE] [104:move-south|Canopy|F88/E82/H56|EXPLORE] [105:climb|Canopy|F88/E81/H54|enc:metallic orchid bee|EXPLORE] [106:move-southwest|Emergent|F88/E79/H52|EXPLORE]
+
+Compact export intentionally omits per-step before/after snapshots, availableActionsBefore arrays, actions[], and embedded collectDebugReport() JSON. Use the full bot report only for targeted deep dives.

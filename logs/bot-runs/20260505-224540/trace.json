@@ -1,0 +1,859 @@
+{
+  "runId": "2026-05-05T21:45:40.403Z",
+  "gameVersion": "v66.57_patch8_short_eco_cycles_2026-04-29",
+  "deaths": 2,
+  "runs": [
+    {
+      "runIndex": 1,
+      "reason": "player died before next action",
+      "turns": 49,
+      "issues": 0,
+      "finalState": {
+        "fitness": 0,
+        "energy": 22,
+        "hydration": 19,
+        "dead": true
+      },
+      "terminalSteps": [
+        {
+          "botStep": 40,
+          "turn": 39,
+          "action": "move-southeast",
+          "mode": "RECOVER",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 40,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": true,
+          "before": {
+            "x": 56,
+            "y": 44,
+            "z": 1,
+            "layer": "Undergrowth",
+            "fitness": 38,
+            "energy": 47,
+            "hydration": 29
+          },
+          "after": {
+            "fitness": 38,
+            "energy": 45,
+            "hydration": 28,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 41,
+          "turn": 40,
+          "action": "move-northwest",
+          "mode": "RECOVER",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 41,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": true,
+          "before": {
+            "x": 57,
+            "y": 45,
+            "z": 1,
+            "layer": "Undergrowth",
+            "fitness": 38,
+            "energy": 45,
+            "hydration": 28
+          },
+          "after": {
+            "fitness": 38,
+            "energy": 43,
+            "hydration": 27,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 42,
+          "turn": 41,
+          "action": "climb",
+          "mode": "RECOVER",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 42,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": true,
+          "before": {
+            "x": 56,
+            "y": 44,
+            "z": 1,
+            "layer": "Undergrowth",
+            "fitness": 38,
+            "energy": 43,
+            "hydration": 27
+          },
+          "after": {
+            "fitness": 38,
+            "energy": 40,
+            "hydration": 26,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 43,
+          "turn": 42,
+          "action": "move-south",
+          "mode": "RECOVER",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 43,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": false,
+          "before": {
+            "x": 56,
+            "y": 44,
+            "z": 2,
+            "layer": "Mid-storey",
+            "fitness": 38,
+            "energy": 40,
+            "hydration": 26
+          },
+          "after": {
+            "fitness": 38,
+            "energy": 38,
+            "hydration": 25,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 44,
+          "turn": 43,
+          "action": "move-west",
+          "mode": "RECOVER",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 44,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": false,
+          "before": {
+            "x": 56,
+            "y": 45,
+            "z": 2,
+            "layer": "Mid-storey",
+            "fitness": 38,
+            "energy": 38,
+            "hydration": 25
+          },
+          "after": {
+            "fitness": 38,
+            "energy": 36,
+            "hydration": 24,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 45,
+          "turn": 44,
+          "action": "move-northeast",
+          "mode": "RECOVER",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 45,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": true,
+          "before": {
+            "x": 55,
+            "y": 45,
+            "z": 2,
+            "layer": "Mid-storey",
+            "fitness": 38,
+            "energy": 36,
+            "hydration": 24
+          },
+          "after": {
+            "fitness": 28,
+            "energy": 34,
+            "hydration": 23,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 46,
+          "turn": 45,
+          "action": "move-northwest",
+          "mode": "RECOVER",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 46,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": false,
+          "before": {
+            "x": 56,
+            "y": 44,
+            "z": 1,
+            "layer": "Undergrowth",
+            "fitness": 28,
+            "energy": 34,
+            "hydration": 23
+          },
+          "after": {
+            "fitness": 28,
+            "energy": 31,
+            "hydration": 22,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 47,
+          "turn": 46,
+          "action": "move-west",
+          "mode": "EMERGENCY_ESCAPE",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 47,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": false,
+          "before": {
+            "x": 55,
+            "y": 43,
+            "z": 1,
+            "layer": "Undergrowth",
+            "fitness": 28,
+            "energy": 31,
+            "hydration": 22
+          },
+          "after": {
+            "fitness": 28,
+            "energy": 28,
+            "hydration": 21,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 48,
+          "turn": 47,
+          "action": "move-south",
+          "mode": "EMERGENCY_ESCAPE",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 48,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": true,
+          "before": {
+            "x": 54,
+            "y": 43,
+            "z": 1,
+            "layer": "Undergrowth",
+            "fitness": 28,
+            "energy": 28,
+            "hydration": 21
+          },
+          "after": {
+            "fitness": 28,
+            "energy": 25,
+            "hydration": 20,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 49,
+          "turn": 48,
+          "action": "move-southwest",
+          "mode": "EMERGENCY_ESCAPE",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 49,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": false,
+          "before": {
+            "x": 54,
+            "y": 44,
+            "z": 1,
+            "layer": "Undergrowth",
+            "fitness": 28,
+            "energy": 25,
+            "hydration": 20
+          },
+          "after": {
+            "fitness": 0,
+            "energy": 22,
+            "hydration": 19,
+            "dead": true
+          }
+        }
+      ]
+    },
+    {
+      "runIndex": 2,
+      "reason": "player died before next action",
+      "turns": 25,
+      "issues": 0,
+      "finalState": {
+        "fitness": 0,
+        "energy": 73,
+        "hydration": 50,
+        "dead": true
+      },
+      "terminalSteps": [
+        {
+          "botStep": 65,
+          "turn": 15,
+          "action": "move-west",
+          "mode": "EXPLORE",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 16,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": false,
+          "before": {
+            "x": 54,
+            "y": 49,
+            "z": 1,
+            "layer": "Undergrowth",
+            "fitness": 100,
+            "energy": 85,
+            "hydration": 70
+          },
+          "after": {
+            "fitness": 100,
+            "energy": 84,
+            "hydration": 68,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 66,
+          "turn": 16,
+          "action": "move-north",
+          "mode": "EXPLORE",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 17,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": false,
+          "before": {
+            "x": 53,
+            "y": 49,
+            "z": 1,
+            "layer": "Undergrowth",
+            "fitness": 100,
+            "energy": 84,
+            "hydration": 68
+          },
+          "after": {
+            "fitness": 100,
+            "energy": 83,
+            "hydration": 66,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 67,
+          "turn": 17,
+          "action": "wait",
+          "mode": "EXPLORE",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 18,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": false,
+          "before": {
+            "x": 53,
+            "y": 48,
+            "z": 1,
+            "layer": "Undergrowth",
+            "fitness": 100,
+            "energy": 83,
+            "hydration": 66
+          },
+          "after": {
+            "fitness": 99,
+            "energy": 83,
+            "hydration": 64,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 68,
+          "turn": 18,
+          "action": "groom",
+          "mode": "RECOVER",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 19,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": false,
+          "before": {
+            "x": 53,
+            "y": 48,
+            "z": 1,
+            "layer": "Undergrowth",
+            "fitness": 99,
+            "energy": 83,
+            "hydration": 64
+          },
+          "after": {
+            "fitness": 99,
+            "energy": 82,
+            "hydration": 62,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 69,
+          "turn": 19,
+          "action": "move-northeast",
+          "mode": "EXPLORE",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 20,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": false,
+          "before": {
+            "x": 53,
+            "y": 48,
+            "z": 1,
+            "layer": "Undergrowth",
+            "fitness": 99,
+            "energy": 82,
+            "hydration": 62
+          },
+          "after": {
+            "fitness": 99,
+            "energy": 81,
+            "hydration": 60,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 70,
+          "turn": 20,
+          "action": "look",
+          "mode": "EXPLORE",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 21,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": false,
+          "before": {
+            "x": 54,
+            "y": 47,
+            "z": 1,
+            "layer": "Undergrowth",
+            "fitness": 99,
+            "energy": 81,
+            "hydration": 60
+          },
+          "after": {
+            "fitness": 99,
+            "energy": 80,
+            "hydration": 58,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 71,
+          "turn": 21,
+          "action": "move-northeast",
+          "mode": "EXPLORE",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 22,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": false,
+          "before": {
+            "x": 54,
+            "y": 47,
+            "z": 1,
+            "layer": "Undergrowth",
+            "fitness": 99,
+            "energy": 80,
+            "hydration": 58
+          },
+          "after": {
+            "fitness": 99,
+            "energy": 79,
+            "hydration": 56,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 72,
+          "turn": 22,
+          "action": "climb",
+          "mode": "EXPLORE",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 23,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": false,
+          "before": {
+            "x": 55,
+            "y": 46,
+            "z": 1,
+            "layer": "Undergrowth",
+            "fitness": 99,
+            "energy": 79,
+            "hydration": 56
+          },
+          "after": {
+            "fitness": 35,
+            "energy": 77,
+            "hydration": 54,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 73,
+          "turn": 23,
+          "action": "descend",
+          "mode": "EMERGENCY_ESCAPE",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 24,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": false,
+          "before": {
+            "x": 55,
+            "y": 46,
+            "z": 2,
+            "layer": "Mid-storey",
+            "fitness": 35,
+            "energy": 77,
+            "hydration": 54
+          },
+          "after": {
+            "fitness": 35,
+            "energy": 75,
+            "hydration": 52,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 74,
+          "turn": 24,
+          "action": "climb",
+          "mode": "EMERGENCY_ESCAPE",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 25,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": false,
+          "before": {
+            "x": 55,
+            "y": 46,
+            "z": 1,
+            "layer": "Undergrowth",
+            "fitness": 35,
+            "energy": 75,
+            "hydration": 52
+          },
+          "after": {
+            "fitness": 0,
+            "energy": 73,
+            "hydration": 50,
+            "dead": true
+          }
+        }
+      ]
+    },
+    {
+      "runIndex": 3,
+      "reason": "action error",
+      "turns": 32,
+      "issues": 2,
+      "finalState": {
+        "fitness": 88,
+        "energy": 78,
+        "hydration": 50,
+        "dead": false
+      },
+      "terminalSteps": [
+        {
+          "botStep": 97,
+          "turn": 22,
+          "action": "move-north",
+          "mode": "EXPLORE",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 23,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": true,
+          "before": {
+            "x": 52,
+            "y": 51,
+            "z": 3,
+            "layer": "Canopy",
+            "fitness": 100,
+            "energy": 90,
+            "hydration": 70
+          },
+          "after": {
+            "fitness": 100,
+            "energy": 89,
+            "hydration": 68,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 98,
+          "turn": 23,
+          "action": "move-east",
+          "mode": "EXPLORE",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 24,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": true,
+          "before": {
+            "x": 52,
+            "y": 50,
+            "z": 3,
+            "layer": "Canopy",
+            "fitness": 100,
+            "energy": 89,
+            "hydration": 68
+          },
+          "after": {
+            "fitness": 100,
+            "energy": 88,
+            "hydration": 66,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 99,
+          "turn": 24,
+          "action": "look",
+          "mode": "EXPLORE",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 25,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": false,
+          "before": {
+            "x": 53,
+            "y": 50,
+            "z": 3,
+            "layer": "Canopy",
+            "fitness": 100,
+            "energy": 88,
+            "hydration": 66
+          },
+          "after": {
+            "fitness": 100,
+            "energy": 87,
+            "hydration": 64,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 100,
+          "turn": 25,
+          "action": "move-northeast",
+          "mode": "EXPLORE",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 26,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": false,
+          "before": {
+            "x": 53,
+            "y": 50,
+            "z": 3,
+            "layer": "Canopy",
+            "fitness": 100,
+            "energy": 87,
+            "hydration": 64
+          },
+          "after": {
+            "fitness": 100,
+            "energy": 86,
+            "hydration": 62,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 101,
+          "turn": 26,
+          "action": "move-north",
+          "mode": "EXPLORE",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 27,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": false,
+          "before": {
+            "x": 54,
+            "y": 49,
+            "z": 3,
+            "layer": "Canopy",
+            "fitness": 100,
+            "energy": 86,
+            "hydration": 62
+          },
+          "after": {
+            "fitness": 88,
+            "energy": 85,
+            "hydration": 60,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 102,
+          "turn": 27,
+          "action": "climb",
+          "mode": "EXPLORE",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 28,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": false,
+          "before": {
+            "x": 54,
+            "y": 48,
+            "z": 2,
+            "layer": "Mid-storey",
+            "fitness": 88,
+            "energy": 85,
+            "hydration": 60
+          },
+          "after": {
+            "fitness": 88,
+            "energy": 83,
+            "hydration": 58,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 103,
+          "turn": 28,
+          "action": "move-south",
+          "mode": "EMERGENCY_ESCAPE",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 29,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": false,
+          "before": {
+            "x": 54,
+            "y": 48,
+            "z": 3,
+            "layer": "Canopy",
+            "fitness": 88,
+            "energy": 83,
+            "hydration": 58
+          },
+          "after": {
+            "fitness": 88,
+            "energy": 82,
+            "hydration": 56,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 104,
+          "turn": 29,
+          "action": "move-south",
+          "mode": "EXPLORE",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 30,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": false,
+          "before": {
+            "x": 54,
+            "y": 49,
+            "z": 3,
+            "layer": "Canopy",
+            "fitness": 88,
+            "energy": 82,
+            "hydration": 56
+          },
+          "after": {
+            "fitness": 88,
+            "energy": 81,
+            "hydration": 54,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 105,
+          "turn": 30,
+          "action": "climb",
+          "mode": "EXPLORE",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 31,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": false,
+          "before": {
+            "x": 54,
+            "y": 50,
+            "z": 3,
+            "layer": "Canopy",
+            "fitness": 88,
+            "energy": 81,
+            "hydration": 54
+          },
+          "after": {
+            "fitness": 88,
+            "energy": 79,
+            "hydration": 52,
+            "dead": false
+          }
+        },
+        {
+          "botStep": 106,
+          "turn": 31,
+          "action": "move-southwest",
+          "mode": "EXPLORE",
+          "goalType": null,
+          "goalTarget": null,
+          "bootTurns": 32,
+          "escapeTimer": 0,
+          "drinkAvailable": false,
+          "eatAvailable": false,
+          "before": {
+            "x": 54,
+            "y": 50,
+            "z": 4,
+            "layer": "Emergent",
+            "fitness": 88,
+            "energy": 79,
+            "hydration": 52
+          },
+          "after": {
+            "fitness": 88,
+            "energy": 78,
+            "hydration": 50,
+            "dead": false
+          }
+        }
+      ]
+    }
+  ]
+}
