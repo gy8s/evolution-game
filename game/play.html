@@ -6103,6 +6103,13 @@ function updateSocialGroupAfterTurn() {
     reasons.push("the group is fed and stable");
   }
 
+  // Companions still in avoidance (poisoned, keeping distance) drain cohesion each turn
+  const avoidingCount = socialGroup.members.filter(m => (m.avoidsTurn || 0) > player.turn).length;
+  if (avoidingCount > 0) {
+    delta -= avoidingCount * 2;
+    reasons.push(avoidingCount === 1 ? "a companion is keeping distance after food sickness" : "companions are keeping distance after food sickness");
+  }
+
   if (delta) changeGroupCohesion(delta, reasons.join("; "), {log: delta <= -6});
 
   for (const member of socialGroup.members) {
@@ -7447,9 +7454,24 @@ function maybeGroupLearnsBySampling() {
       : ` ${pronoun} avoids you for a while.`;
     addLog(`Turn ${player.turn}: While you focus elsewhere, ${name} tastes ${e.name} and reacts badly. You learn this individual is poisonous without taking the poison yourself.${avoidSuffix}`, "poison");
     setNarration(`Social learning matters. Another individual paid the cost, and you now recognise the danger signs in this food.`);
-    // If this companion has been poisoned multiple times, they may leave
+    // If this companion has been poisoned multiple times, they leave — targeted removal,
+    // not a random companion.
     if (member && (member.poisonExposures || 0) >= 2 && roll(40)) {
-      maybeGroupMemberLeaves("repeated food danger exposure", 30);
+      const idx = socialGroup.members.indexOf(member);
+      if (idx !== -1) {
+        socialGroup.members.splice(idx, 1);
+        socialGroup.losses = (socialGroup.losses || 0) + 1;
+        const leaveMsg = `${name} leaves after repeated exposure to dangerous food. Companions ${idx + 1} → ${socialGroup.members.length}.`;
+        addLog(`Turn ${player.turn}: ${leaveMsg}`, "threat");
+        setGroupNotice(leaveMsg);
+        addDebugTrace("group-member-left", {reason: "repeated food danger exposure", leaving: cloneDebug(member), groupAfter: cloneDebug(socialGroup)});
+        if (!socialGroup.members.length) {
+          socialGroup.cohesion = 0;
+          socialGroup.turnsTogether = 0;
+        } else {
+          socialGroup.cohesion = clamp(Math.max(12, socialGroup.cohesion), 0, 100);
+        }
+      }
     }
   } else {
     player.knownFoods[key] = {severity: "safe", warning: "A companion ate this individual safely"};
