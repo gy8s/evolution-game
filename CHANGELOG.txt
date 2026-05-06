@@ -1,10 +1,18 @@
+[2026-05-06 quick-fixes | Claude]
+Four small fixes from turn-399 playthrough review. No new systems, no balance change.
+- containsCodeLikeText() regex tightened: removed "let " and "return " as code-detection triggers. Both appear in ordinary English narrative ("let the forest settle", "conditions return to normal") and were producing 16 false-positive text-error traces per run. Remaining triggers (const [identifier], function [identifier], =>, &&, ||, {, }) are reliably code-specific.
+- Compact debug Carcasses count fixed: the filter included rec.carcassAge !== undefined which matched all 123 world-registry entries. Now filters by rec.kind === "carcass" only; the correct count is 22.
+- Trace type renamed: "fatal predator strike" → "predator-attack-roll". The trace fires before the outcome is resolved so the player may survive; the old name implied a kill had occurred.
+- Fire UI palette added: body.wildfire-active CSS rule was missing despite the class being toggled by updateThemeClasses(). Rule added (warm red/orange palette, matching the storm-major pattern). No logic change.
+- Syntax check: PASS.
+
 [2026-05-06 fire-sensory | Claude]
 Fire hazard directional sensory cues. No new system — extends the existing wildfire state and sensory rendering pipeline.
 - wildfireDirection(dx, dy): new helper that maps fire-to-player delta into a compass string (North, South-East, etc.) or null when fire is directly adjacent.
 - applyWildfireProximityEffects(): inner zone (dist <= radius) log now reads "Flames move through the undergrowth to the [direction]." Edge zone (dist <= r+3) reads "The air grows hot. Animals move away from the [direction]." Outer zone (dist <= r+6) reads "Smoke hangs faintly from the [direction]." All log messages are suppressed after the first per turn using environment.wildfire._lastLogTurn to prevent the repeated identical-line problem seen in the turn-399 log.
 - renderSenses(): fire sensory cues injected after the normal heardText/smellText render. Inner zone overrides both HEAR ("Dry wood cracks to [direction]. The fire is here.") and SMELL ("Scorched bark and ash from [direction]."). Edge zone overrides SMELL only ("Smoke drifts from [direction]."). Outer zone sets a faint SMELL cue ("Faint smoke from [direction]."). The injection happens after updateRemoteSenses so fire dominates when the player is genuinely in danger from the inner zone.
 - No encounter card added. No fire logic change. Game version string not updated.
-- Syntax check: PASS.
+
 
 [2026-05-06 predator-persistence | Claude]
 Predator encounter-state consistency — four fixes ensuring missed, fleeing, and pursuing predators remain visible and detectable. No new systems, no predator behaviour change.
