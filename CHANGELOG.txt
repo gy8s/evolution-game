@@ -5,6 +5,7 @@ Predator encounter-state consistency — four fixes ensuring missed, fleeing, an
 - descend(): same fix applied symmetrically for predators that remain threatening when the player descends.
 - renderSenses(): activePursuit is now rendered as a visible pursuit card in the encounter area. When activePursuit is set alongside a currentEncounter both are shown; when activePursuit is the only active threat the card is shown alone. Card shows predator name and current distance. Previously activePursuit had no UI representation and the player had no indication a predator was still following.
 - CSS: .pursuitCard, .pursuitIcon, .pursuitName, .pursuitStatus added for the pursuit card display.
+- Codex P2 fix: downwind-escape narration in the miss branch updated to no longer say contact is broken (it isn't — dangerGrace retains the encounter).
 - Syntax check: PASS.
 
 [2026-05-06 social-patch-1b-presentation | Claude]
