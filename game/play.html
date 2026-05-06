@@ -6148,12 +6148,13 @@ function incrementSocialHarassment(encounter) {
 function socialGroupCountDraw() {
   const cap = clamp(playerSpeciesProfile.groupSizeCap || 6, 1, SOCIAL_ENGINE_MAX_GROUP);
   if (Math.random() < 0.70) return 1;
-  // Multi-member weights: 2-3 ~60%, 4-5 ~30%, 6 ~10%, 7-10 only reachable if cap > 6
+  // Multi-member weights: 2-3 ~60%, 4-5 ~30%, 6 ~10%, 7-10 only reachable if cap > 6.
+  // Each branch is clamped to cap so a low-cap species never produces an oversized encounter.
   const roll = Math.random();
-  if (roll < 0.60) return 2 + Math.floor(Math.random() * 2);   // 2 or 3
-  if (roll < 0.90) return 4 + Math.floor(Math.random() * 2);   // 4 or 5
+  if (roll < 0.60) return Math.min(cap, 2 + Math.floor(Math.random() * 2));   // 2 or 3
+  if (roll < 0.90) return Math.min(cap, 4 + Math.floor(Math.random() * 2));   // 4 or 5
   // Remaining 10%: draw from 6..cap (for T. belgica cap=6, always returns 6)
-  return 6 + Math.floor(Math.random() * Math.max(1, cap - 5));
+  return Math.min(cap, 6 + Math.floor(Math.random() * Math.max(1, cap - 5)));
 }
 
 // @fn socialMemberLabel
@@ -6322,7 +6323,9 @@ function memberCombatStats(member, fallbackName = "tree-climber") {
     size,
     speed: player.speed,
     agility: player.agility,
-    aggression: member.temperament === "assertive" ? 55 : 32,
+    aggression: (member.temperament === "aggressive" || member.temperament === "assertive") ? 55
+               : member.temperament === "wary" ? 38
+               : 28,
     food: Math.max(12, Math.round(size * 6)),
     sex: member.sex || "unknown",
     canInvestigate: true,
@@ -6391,7 +6394,7 @@ function attackSocialEncounter() {
 
   addDebugTrace("same-species-aggression", {encounter: cloneDebug(encounter), target: cloneDebug(target), playerAdv, enemyAdv, playerAllies, enemyGroupSize, outnumbered, sizeGap});
 
-  if (enemyGroupSize === 1 && target.size < player.size * 0.9 && target.temperament !== "assertive" && debugRoll("same species flees aggression", 35, {target: cloneDebug(target)})) {
+  if (enemyGroupSize === 1 && target.size < player.size * 0.9 && target.temperament !== "assertive" && target.temperament !== "aggressive" && debugRoll("same species flees aggression", 35, {target: cloneDebug(target)})) {
     addLog(`Turn ${player.turn}: You lunge at the ${target.name}, but it flees before the fight forms.`, "minor");
     setNarration("Your aggression clears the space. The encounter is over; there is no joining after an attack.");
     clearCurrentEncounter("same-species-fled-aggression");
