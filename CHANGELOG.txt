@@ -1,3 +1,13 @@
+[2026-05-06 patch-death-trace-snapshot | Claude]
+trace.json now focused on death runs only, with encounter and pursuit context per step.
+- buildBotTraceJson() filtered to runs where run.death !== null (death runs only). Survival-run terminal steps were low-value; death steps are where behaviour matters.
+- Window increased from last 10 to last 15 steps per death run.
+- Each step's before snapshot now includes encounter: {name, dangerProfile, pursuitType} and pursuit: {name, dangerProfile, pursuitType} (both null-safe). These were already present in botActionSnapshot() but not forwarded to trace.json.
+- Each run record now includes deathTurn (the turn the player died) and deathContext (the death cause string from player.deathContext).
+- Top-level trace.json object now includes deathRunsRecorded count.
+- No bot logic change. No change to botActionSnapshot(), compact.txt, or meta.json.
+- Syntax check: PASS.
+
 [2026-05-04 autosave-reliability | Claude]
 GitHub auto-save reliability fix. Bot run data no longer lost when full.txt upload fails. No bot logic change.
 - Essential files (meta.json, compact.txt, trace.json) uploaded first and unconditionally; full.txt attempted separately and skipped on failure.

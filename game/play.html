@@ -12173,9 +12173,10 @@ function buildBotFullText(report) {
 
 // P13E: Compact per-run terminal trace with decision context — stays under 1MB for API fetching
 function buildBotTraceJson(report) {
-  const runs = report.runs.map(run => {
+  const deathRuns = report.runs.filter(run => run.death !== null);
+  const runs = deathRuns.map(run => {
     const runSteps = report.actions.filter(s => s.runIndex === run.runIndex);
-    const terminalSteps = runSteps.slice(-10).map(s => ({
+    const terminalSteps = runSteps.slice(-15).map(s => ({
       botStep: s.botStep,
       turn: s.before ? s.before.turn : null,
       action: s.actionId,
@@ -12186,13 +12187,28 @@ function buildBotTraceJson(report) {
       escapeTimer: s.escapeTimer ?? null,
       drinkAvailable: s.drinkAvailable ?? null,
       eatAvailable: s.eatAvailable ?? null,
-      before: s.before ? {x: s.before.x, y: s.before.y, z: s.before.z, layer: s.before.layer, fitness: s.before.fitness, energy: s.before.energy, hydration: s.before.hydration} : null,
+      before: s.before ? {
+        x: s.before.x, y: s.before.y, z: s.before.z, layer: s.before.layer,
+        fitness: s.before.fitness, energy: s.before.energy, hydration: s.before.hydration,
+        encounter: s.before.encounter ? {
+          name: s.before.encounter.name,
+          dangerProfile: s.before.encounter.dangerProfile || null,
+          pursuitType: s.before.encounter.pursuitType || null
+        } : null,
+        pursuit: s.before.activePursuit ? {
+          name: s.before.activePursuit.name,
+          dangerProfile: s.before.activePursuit.dangerProfile || null,
+          pursuitType: s.before.activePursuit.pursuitType || null
+        } : null
+      } : null,
       after: s.after ? {fitness: s.after.fitness, energy: s.after.energy, hydration: s.after.hydration, dead: s.after.dead} : null
     }));
     return {
       runIndex: run.runIndex,
       reason: run.reason,
       turns: run.endTurn,
+      deathTurn: run.death ? run.death.turn : null,
+      deathContext: run.finalState ? run.finalState.deathContext : null,
       issues: run.issues ? run.issues.length : 0,
       finalState: run.finalState ? {fitness: run.finalState.fitness, energy: run.finalState.energy, hydration: run.finalState.hydration, dead: run.finalState.dead} : null,
       terminalSteps
@@ -12202,6 +12218,7 @@ function buildBotTraceJson(report) {
     runId: report.startedAt || "",
     gameVersion: typeof GAME_VERSION !== "undefined" ? GAME_VERSION : "",
     deaths: report.deaths,
+    deathRunsRecorded: deathRuns.length,
     runs
   }, null, 2);
 }
