@@ -8221,6 +8221,13 @@ function maybeSimpleDepthEvent(actionText) {
 
 // @fn endTurn
 
+function wildfireDirection(dx, dy) {
+  const ns = dy > 1 ? "South" : dy < -1 ? "North" : "";
+  const ew = dx > 1 ? "East" : dx < -1 ? "West" : "";
+  if (!ns && !ew) return null;
+  return ns && ew ? ns + "-" + ew : (ns || ew);
+}
+
 function applyWildfireProximityEffects() {
   if (!environment.wildfire || !environment.wildfire.active) return;
 
@@ -8228,7 +8235,6 @@ function applyWildfireProximityEffects() {
   const dy = environment.wildfire.y - player.y;
   let dist = Math.max(Math.abs(dx), Math.abs(dy));
 
-  // simple wind bias
   if (environment.wind) {
     if ((environment.wind.dx > 0 && dx > 0) || (environment.wind.dx < 0 && dx < 0)) dist -= 2;
     if ((environment.wind.dx > 0 && dx < 0) || (environment.wind.dx < 0 && dx > 0)) dist += 2;
@@ -8237,15 +8243,27 @@ function applyWildfireProximityEffects() {
   dist = Math.max(0, dist);
 
   const r = environment.wildfire.radius;
+  const dir = wildfireDirection(dx, dy);
+  const dirStr = dir ? "to the " + dir : "nearby";
+  const alreadyLogged = environment.wildfire._lastLogTurn === player.turn;
 
   if (dist <= r) {
     player.fitness = Math.max(0, player.fitness - (2 + environment.wildfire.intensity));
-    addLog("Flames move through the undergrowth nearby.", "threat");
+    if (!alreadyLogged) {
+      addLog(`Flames move through the undergrowth ${dirStr}.`, "threat");
+      environment.wildfire._lastLogTurn = player.turn;
+    }
   } else if (dist <= r + 3) {
     player.hydration = Math.max(0, player.hydration - 1);
-    addLog("The air grows hot. Animals are moving in the same direction.", "minor");
+    if (!alreadyLogged) {
+      addLog(`The air grows hot. Animals move away from the ${dir || "heat"}.`, "minor");
+      environment.wildfire._lastLogTurn = player.turn;
+    }
   } else if (dist <= r + 6) {
-    if (player.turn % 3 === 0) addLog("Smoke hangs faintly in the air.", "minor");
+    if (player.turn % 3 === 0 && !alreadyLogged) {
+      addLog(`Smoke hangs faintly from the ${dir || "nearby trees"}.`, "minor");
+      environment.wildfire._lastLogTurn = player.turn;
+    }
   }
 }
 function endTurn(actionText, suppressEncounter = false, options = {}) {
@@ -14026,6 +14044,28 @@ function renderSenses() {
 
   hearText.innerHTML = formatCueText(safeNarrativeText(heardText || "the damp forest shifting around you.", "the damp forest shifting around you."));
   smellTextEl.innerHTML = formatCueText(safeNarrativeText(smellText || "wet leaves, bark, and fungal rot.", "wet leaves, bark, and fungal rot."));
+
+  if (environment.wildfire && environment.wildfire.active) {
+    const wdx = environment.wildfire.x - player.x;
+    const wdy = environment.wildfire.y - player.y;
+    let wdist = Math.max(Math.abs(wdx), Math.abs(wdy));
+    if (environment.wind) {
+      if ((environment.wind.dx > 0 && wdx > 0) || (environment.wind.dx < 0 && wdx < 0)) wdist -= 2;
+      if ((environment.wind.dx > 0 && wdx < 0) || (environment.wind.dx < 0 && wdx > 0)) wdist += 2;
+    }
+    wdist = Math.max(0, wdist);
+    const wr = environment.wildfire.radius;
+    const wdir = wildfireDirection(wdx, wdy);
+    const wdirStr = wdir ? "the " + wdir : "nearby";
+    if (wdist <= wr) {
+      hearText.innerHTML = formatCueText(`Dry wood cracks${wdir ? " to " + wdirStr : " close by"}. The fire is here.`);
+      smellTextEl.innerHTML = formatCueText(`Scorched bark and ash from ${wdirStr}. Smoke fills the air.`);
+    } else if (wdist <= wr + 3) {
+      smellTextEl.innerHTML = formatCueText(`Smoke drifts from ${wdirStr}. Something burns nearby.`);
+    } else if (wdist <= wr + 6) {
+      smellTextEl.innerHTML = formatCueText(`Faint smoke from ${wdirStr}.`);
+    }
+  }
 
   if (currentEncounter && currentEncounter.kind === "carcass" && carcass) {
     clearCurrentEncounter("render-carcass-state", {promote: false});
