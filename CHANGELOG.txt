@@ -1,10 +1,18 @@
+[2026-05-06 social-persist | Claude]
+Social encounter short-duration tile hold and movement feedback. No new encounter generation, no balance change.
+- nearbyRecentSocial: new module-level variable {encounter, x, y, z, expiresAfterTurn}. Null-safe; cleared on resetGameForPlayer() and resetGameForBot().
+- move(): when movement clears a social encounter, a log line is now emitted ("The [group/lone species] falls behind as you move away. The contact passes."). The encounter is stored in nearbyRecentSocial with a 4-turn expiry. Previously the encounter vanished silently with no player feedback.
+- move(): after the player arrives at the new tile, if no encounter is active and nearbyRecentSocial targets the same x/y/z and has not expired, the social encounter is restored as currentEncounter and a log line is emitted ("The [name] is still nearby. You have another chance."). The social group has not moved; the player returned to them. This gives 4 turns to reconsider without permanently pinning the group to a tile.
+- The 4-turn window is intentional — enough to take one detour and return, not enough to keep an encounter open indefinitely. On expiry the slot is not restored; the encounter is simply gone.
+- Syntax check: PASS.
+
 [2026-05-06 fire-sensory | Claude]
 Fire hazard directional sensory cues. No new system — extends the existing wildfire state and sensory rendering pipeline.
 - wildfireDirection(dx, dy): new helper that maps fire-to-player delta into a compass string (North, South-East, etc.) or null when fire is directly adjacent.
 - applyWildfireProximityEffects(): inner zone (dist <= radius) log now reads "Flames move through the undergrowth to the [direction]." Edge zone (dist <= r+3) reads "The air grows hot. Animals move away from the [direction]." Outer zone (dist <= r+6) reads "Smoke hangs faintly from the [direction]." All log messages are suppressed after the first per turn using environment.wildfire._lastLogTurn to prevent the repeated identical-line problem seen in the turn-399 log.
 - renderSenses(): fire sensory cues injected after the normal heardText/smellText render. Inner zone overrides both HEAR ("Dry wood cracks to [direction]. The fire is here.") and SMELL ("Scorched bark and ash from [direction]."). Edge zone overrides SMELL only ("Smoke drifts from [direction]."). Outer zone sets a faint SMELL cue ("Faint smoke from [direction]."). The injection happens after updateRemoteSenses so fire dominates when the player is genuinely in danger from the inner zone.
 - No encounter card added. No fire logic change. Game version string not updated.
-- Syntax check: PASS.
+
 
 [2026-05-06 predator-persistence | Claude]
 Predator encounter-state consistency — four fixes ensuring missed, fleeing, and pursuing predators remain visible and detectable. No new systems, no predator behaviour change.
