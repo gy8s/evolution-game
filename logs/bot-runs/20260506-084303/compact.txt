@@ -1,0 +1,57 @@
+EVOLUTION GAME BOT QA COMPACT
+Game version: v66.57_patch8_short_eco_cycles_2026-04-29
+Bot: IntelligentBot
+Started: 2026-05-06T07:43:03.355Z
+Ended: 2026-05-06T07:44:23.449Z
+Stop reason: turn limit reached
+Bot actions: 1000/1000
+Runs recorded: 10
+Deaths: 9
+Auto-resets: 9
+Game turns current run: 0 -> 62
+Final state: X 54, Y 31, Z 2, Mid-storey, fitness 75%, energy 12%, hydration 3%, dead=false
+Final death context: none
+
+--- PATCH GATE SUMMARY ---
+Action crashes/errors: NONE
+Error issue codes: NONE
+Warnings requiring review: 0
+Compact export embedded full debug report: NO
+
+--- SURVIVAL ---
+Deaths with durations: 9
+Median death turn: 87
+Mean death turn: 104
+Longest recorded run duration: 164
+Distribution: <10t: 0 | 10-29t: 0 | 30-59t: 0 | 60-89t: 5 | 90+t: 4
+Death causes: resource collapse: 2 | parasites: 2 | ant trail: 1 | bright aril fruit: 1 | dehydration: 1 | unknown: 1 | beehive: 1
+
+--- QA ISSUE COUNTS ---
+No issue codes.
+
+--- QA ISSUES (essential context retained, bulky snapshots removed) ---
+No QA issues flagged.
+
+--- RUN SUMMARIES ---
+Run 1: reason=player died before next action; steps=77; botSteps=1->77; turns=0->77; dead=true; F=0; E=0; H=0; issues=0; deathContext={"message":"You collapse from dehydration.","context":{"source":"unknown"},"encounterAtDeath":{"kind":"forage","name":"ant trail","icon":"🐜","className":"food","canInvestigate":true,"portions":1,"energy":4,"poison":{"severity":"mild","rank":1,"toxinType":"irritant","lethal":false,"turns":2,"damage":1,"warning":"Biting ants / acid"},"seen":"A dark line of ants travels with purpose through the leaf litter. It hints at food nearby, and a swarm of biting bodies if disturbed.","investigated":"The tr... [truncated 527 chars]
+  terminalTrace: [73:move-east|Undergrowth|F37/E0/H0|enc:ant trail|RECOVER] [74:move-west|Undergrowth|F30/E0/H0|enc:grape-like berries|RECOVER] [75:move-east|Undergrowth|F23/E0/H0|enc:ant trail|RECOVER] [76:move-west|Undergrowth|F14/E0/H0|enc:grape-like berries|RECOVER] [77:move-east|Undergrowth|F7/E0/H0|enc:ant trail|RECOVER]
+Run 2: reason=player died before next action; steps=73; botSteps=78->150; turns=0->73; dead=true; F=0; E=0; H=0; issues=0; deathContext={"message":"You collapse from dehydration.","context":{"source":"unknown"},"encounterAtDeath":{"kind":"forage","name":"bright aril fruit","icon":"🔴","className":"food","canInvestigate":true,"portions":1,"energy":10,"hydration":2,"poison":{"severity":"mild","rank":1,"toxinType":"seed","lethal":false,"turns":4,"damage":2,"warning":"Edible flesh around risky seeds"},"seen":"Bright fleshy arils cling around hard dark seeds.","investigationDetails":["The coloured flesh is the lure. The hard seeds ar... [truncated 653 chars]
+  terminalTrace: [146:move-east|Mid-storey|F35/E0/H0|enc:bright aril fruit|RECOVER] [147:move-west|Mid-storey|F28/E0/H0|enc:palm-like fruit|RECOVER] [148:move-east|Mid-storey|F21/E0/H0|enc:bright aril fruit|RECOVER] [149:move-west|Mid-storey|F14/E0/H0|enc:palm-like fruit|RECOVER] [150:move-east|Mid-storey|F7/E0/H0|enc:bright aril fruit|RECOVER]
+Run 3: reason=player died before next action; steps=80; botSteps=151->230; turns=0->80; dead=true; F=0; E=0; H=0; issues=0; deathContext={"message":"You collapse from dehydration.","context":{"source":"unknown"},"encounterAtDeath":null,"poison":null,"activePursuit":{"key":"climbingHunter","name":"miacid-like climbing hunter","turns":1,"distance":1,"abandonBonus":0},"lastActionKind":"climb","lastAction":{"kind":"climb","from":{"x":53,"y":52,"z":2}}}
+  terminalTrace: [226:move-east|Mid-storey|F30/E0/H0|enc:strangler fig fruit|RECOVER] [227:move-east|Mid-storey|F23/E0/H0|enc:hairy caterpillar|RECOVER] [228:move-east|Mid-storey|F16/E0/H0|enc:bird nest|RECOVER] [229:move-northwest|Mid-storey|F9/E0/H0|enc:miacid-like climbing hunter|EMERGENCY_ESCAPE] [230:climb|Mid-storey|F2/E0/H0|PURSUIT|EMERGENCY_ESCAPE]
+Run 4: reason=player died before next action; steps=135; botSteps=231->365; turns=0->135; dead=true; F=0; E=0; H=70; issues=0; deathContext={"message":"You collapse from loss of fitness.","context":{"source":"unknown"},"encounterAtDeath":null,"poison":null,"activePursuit":null,"lastActionKind":"move","lastAction":{"kind":"move","dx":-1,"dy":0,"actionText":"west","from":{"x":45,"y":7,"z":1}}}
+  terminalTrace: [361:move-southeast|Undergrowth|F13/E0/H80|enc:Darwinius-like primate|RECOVER] [362:move-north|Undergrowth|F10/E0/H78|RECOVER] [363:move-west|Undergrowth|F7/E0/H76|enc:woodpecker-like bird|RECOVER] [364:move-northwest|Undergrowth|F4/E0/H74|enc:katydid|RECOVER] [365:move-west|Undergrowth|F1/E0/H72|RECOVER]
+Run 5: reason=player died before next action; steps=87; botSteps=366->452; turns=0->87; dead=true; F=0; E=0; H=100; issues=0; deathContext={"message":"Parasites and exhaustion wear you down.","context":{"source":"parasites","parasiteLoad":5},"encounterAtDeath":{"kind":"forage","name":"ant trail","icon":"🐜","className":"food","canInvestigate":true,"portions":1,"energy":4,"poison":{"severity":"mild","rank":1,"toxinType":"irritant","lethal":false,"turns":2,"damage":1,"warning":"Biting ants / acid"},"seen":"A dark ant trail runs South and North. Workers pass both ways, carrying fragments. One end will lead back to ants; the other may ... [truncated 704 chars]
+  terminalTrace: [448:drink-water|Ground|F24/E0/H98|RECOVER] [449:drink-water|Ground|F21/E0/H100|RECOVER] [450:drink-water|Ground|F13/E0/H100|enc:ant trail|RECOVER] [451:drink-water|Ground|F10/E0/H100|enc:ant trail|RECOVER] [452:drink-water|Ground|F7/E0/H100|enc:ant trail|RECOVER]
+Run 6: reason=player died before next action; steps=164; botSteps=453->616; turns=0->164; dead=true; F=0; E=0; H=93; issues=0; deathContext=none
+  terminalTrace: [612:queued-eat-0|Undergrowth|F5/E1/H98|enc:small multituberculate|RECOVER] [613:eat|Undergrowth|F3/E4/H97|enc:bitter leaves|RECOVER] [614:move-northeast|Undergrowth|F4/E6/H96|enc:small multituberculate|RECOVER] [615:move-west|Undergrowth|F4/E4/H95|enc:large cockroach|RECOVER] [616:move-east|Undergrowth|F4/E2/H94|enc:ant trail|RECOVER]
+Run 7: reason=player died before next action; steps=102; botSteps=617->718; turns=0->102; dead=true; F=0; E=0; H=98; issues=0; deathContext={"message":"Parasites and exhaustion wear you down.","context":{"source":"parasites","parasiteLoad":5},"encounterAtDeath":null,"poison":null,"activePursuit":null,"lastActionKind":"climb","lastAction":{"kind":"climb","from":{"x":33,"y":48,"z":0}}}
+  terminalTrace: [714:drink-water|Ground|F22/E0/H100|RECOVER] [715:move-east|Ground|F19/E0/H100|enc:crocodile|EMERGENCY_ESCAPE] [716:drink-water|Ground|F12/E0/H99|RECOVER] [717:move-northeast|Ground|F9/E0/H100|enc:Pakicetus-like water hunter|EMERGENCY_ESCAPE] [718:climb|Ground|F6/E0/H99|enc:large toucan-like bird|RECOVER]
+Run 8: reason=player died before next action; steps=145; botSteps=719->863; turns=0->144; dead=true; F=0; E=0; H=7; issues=0; deathContext={"message":"You collapse from loss of fitness.","context":{"source":"unknown"},"encounterAtDeath":null,"poison":null,"activePursuit":null,"lastActionKind":"move","lastAction":{"kind":"move","dx":-1,"dy":0,"actionText":"west","from":{"x":36,"y":63,"z":0}}}
+  terminalTrace: [859:groom|Undergrowth|F18/E0/H17|enc:grasshopper|RECOVER] [860:move-west|Undergrowth|F15/E0/H15|RECOVER] [861:move-west|Undergrowth|F12/E0/H13|enc:brown mushrooms|RECOVER] [862:move-west|Undergrowth|F9/E0/H11|enc:large cockroach|RECOVER] [863:move-west|Ground|F2/E0/H9|RECOVER]
+Run 9: reason=player died before next action; steps=75; botSteps=864->938; turns=0->75; dead=true; F=0; E=0; H=0; issues=0; deathContext={"message":"You collapse from dehydration.","context":{"source":"unknown"},"encounterAtDeath":{"kind":"nest","name":"beehive","icon":"🐝","className":"food","canInvestigate":true,"eggs":4,"energy":16,"poison":{"severity":"mild","rank":1,"toxinType":"venom","lethal":false,"turns":3,"damage":2,"warning":"Sting risk"},"seen":"A small wild beehive hums in a hollow, sweet smell leaking from wax.","investigated":"High reward, but each disturbance risks a defensive swarm.","persistence":"static","tags"... [truncated 375 chars]
+  terminalTrace: [934:move-east|Mid-storey|F34/E0/H0|enc:beehive|RECOVER] [935:move-west|Mid-storey|F27/E0/H0|enc:bird nest|RECOVER] [936:move-east|Mid-storey|F20/E0/H0|enc:beehive|RECOVER] [937:move-west|Mid-storey|F13/E0/H0|enc:bird nest|RECOVER] [938:move-east|Mid-storey|F6/E0/H0|enc:beehive|RECOVER]
+Run 10: reason=turn limit reached; steps=62; botSteps=939->1000; turns=0->62; dead=false; F=75; E=12; H=3; issues=0; deathContext=none
+  terminalTrace: [996:move-west|Mid-storey|F74/E14/H11|enc:laurel-like drupes|WATER_PLAN] [997:move-east|Mid-storey|F74/E11/H9|enc:bird nest|WATER_PLAN] [998:eat|Mid-storey|F74/E8/H7|enc:laurel-like drupes|RECOVER] [999:move-west|Mid-storey|F75/E18/H7|enc:laurel-like drupes|WATER_PLAN] [1000:move-east|Mid-storey|F75/E15/H5|enc:bird nest|RECOVER]
+
+Compact export intentionally omits per-step before/after snapshots, availableActionsBefore arrays, actions[], and embedded collectDebugReport() JSON. Use the full bot report only for targeted deep dives.
