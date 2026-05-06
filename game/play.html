@@ -223,8 +223,15 @@ h1 { margin: 0 0 12px 0; color: #9bea72; letter-spacing: 0.5px; font-size: 24px 
 .socialStatusBox > span { display: flex !important; flex-wrap: wrap !important; gap: 7px !important; margin-top: 5px !important; align-items: center !important; }
 .hudGrid { display: grid; gap: 10px !important; grid-auto-rows: auto !important; grid-template-columns: minmax(0, .96fr) minmax(300px, .86fr) !important; align-items: start !important; }
 .groupPanel { background: #07120a; border: 1px solid var(--border); border-radius: 6px; padding: 10px; margin-top: 8px; grid-column: 1 !important; grid-row: 3 !important; width: 100% !important; max-width: 460px !important; justify-self: center !important; align-self: start !important; margin: 8px auto 0 auto !important; box-sizing: border-box !important; }
-.groupPanelBody { display: grid; color: var(--muted); font-size: 13px; line-height: 1.35; gap: 8px !important; }
-.groupSummaryLine { color: var(--muted); font-size: 12px; border-bottom: 1px solid #244722; padding-bottom: 6px; }
+.groupPanelBody { display: flex; flex-direction: column; color: var(--muted); font-size: 13px; line-height: 1.35; gap: 0 !important; }
+.groupSummaryLine { color: var(--muted); font-size: 12px; border-bottom: 1px solid #244722; padding-bottom: 6px; margin-bottom: 6px; }
+.groupMemberScroll { display: flex; flex-direction: column; gap: 6px; max-height: 192px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-right: 2px; }
+.groupMemberScroll::-webkit-scrollbar { width: 4px; }
+.groupMemberScroll::-webkit-scrollbar-thumb { background: #345d30; border-radius: 999px; }
+.groupPlayerRow { display: grid; grid-template-columns: 40px 1fr; gap: 8px; align-items: center; padding: 7px; border: 1px solid #4a7840; border-radius: 8px; background: #0f2414; }
+.groupPlayerIcon { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: #2a5e38; border: 1px solid #d9c747; font-size: 19px; }
+.groupPlayerLabel { color: #f1f0c4; font-size: 12px; font-weight: bold; }
+.groupPlayerSub { color: #9bea72; font-size: 11px; margin-top: 2px; }
 .groupMemberCard { display: grid; grid-template-columns: 40px 1fr; gap: 8px; align-items: center; padding: 7px; border: 1px solid #244722; border-radius: 8px; background: #09180d; }
 .groupPrimateIcon { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: #1d4b28; border: 1px solid #4a8741; font-size: 19px; }
 .groupMemberInfo { min-width: 0; }
@@ -3387,6 +3394,10 @@ function safeNarrativeText(input, fallback = "") {
   const ensured = ensureNarrativeString(input);
   const base = sanitizeNarrativeText(ensured, fallback);
   const cleaned = cleanNarrative(base);
+  if (cleaned === "[text error]") {
+    addDebugTrace("text-error", {input: String(input).slice(0, 120)});
+    return fallback || "You hesitate as the forest shifts around you.";
+  }
   return cleaned || fallback;
 }
 
@@ -6148,13 +6159,14 @@ function incrementSocialHarassment(encounter) {
 function socialGroupCountDraw() {
   const cap = clamp(playerSpeciesProfile.groupSizeCap || 6, 1, SOCIAL_ENGINE_MAX_GROUP);
   if (Math.random() < 0.70) return 1;
-  // Multi-member weights: 2-3 ~60%, 4-5 ~30%, 6 ~10%, 7-10 only reachable if cap > 6.
+  // T. belgica distribution: pair ~55%, 3 ~30%, 4 ~12%, 5-cap ~3%.
   // Each branch is clamped to cap so a low-cap species never produces an oversized encounter.
   const roll = Math.random();
-  if (roll < 0.60) return Math.min(cap, 2 + Math.floor(Math.random() * 2));   // 2 or 3
-  if (roll < 0.90) return Math.min(cap, 4 + Math.floor(Math.random() * 2));   // 4 or 5
-  // Remaining 10%: draw from 6..cap (for T. belgica cap=6, always returns 6)
-  return Math.min(cap, 6 + Math.floor(Math.random() * Math.max(1, cap - 5)));
+  if (roll < 0.55) return Math.min(cap, 2);                                         // pair
+  if (roll < 0.85) return Math.min(cap, 3);                                         // 3
+  if (roll < 0.97) return Math.min(cap, 4);                                         // 4
+  // Remaining ~3%: draw from 5..cap (very rare for T. belgica with cap=6)
+  return Math.min(cap, 5 + Math.floor(Math.random() * Math.max(1, cap - 4)));
 }
 
 // @fn socialMemberLabel
@@ -6502,8 +6514,13 @@ function acceptSocialEncounter(mode) {
   socialGroup.sharedFoodRatio = 1;
   socialGroup.lastFoodTurn = player.turn;
   socialGroup.lastWaterTurn = player.turn;
-  addLog(recruits.length + " " + player.species + (recruits.length === 1 ? " joins" : "s join") + " you. Group size: " + groupSize() + ".", "primate");
-  setNarration("You move as a group now: more eyes, more warning, and more bodies in a fight — but every meal must stretch further.");
+  if (recruits.length > 0) {
+    addLog(recruits.length + " " + player.species + (recruits.length === 1 ? " joins" : "s join") + " you. Group size: " + groupSize() + ".", "primate");
+    setNarration("You move as a group now: more eyes, more warning, and more bodies in a fight — but every meal must stretch further.");
+  } else {
+    addLog("The group does not come any closer. No new companions join you.", "minor");
+    setNarration("The contact passes without a new addition. Your group is already at capacity.");
+  }
   clearCurrentEncounter("social-contact-accepted");
   endTurn("make social contact", true, {skipTileCheck: true});
 }
@@ -7415,10 +7432,25 @@ function maybeGroupLearnsBySampling() {
     player.knownFoods[key] = e.poison;
     player.knownFoods[e.key] = {severity: "uncertain", warning: (e.genericName || e.key || e.name) + " can be poisonous"};
     const damage = clamp((e.poison.damage || 2) * (e.poison.rank || 1), 2, 24);
-    if (member) member.fitness = clamp((member.fitness ?? 70) - damage, 0, 100);
+    if (member) {
+      member.fitness = clamp((member.fitness ?? 70) - damage, 0, 100);
+      // Track repeated poison exposures on this member
+      member.poisonExposures = (member.poisonExposures || 0) + 1;
+      // Set avoidance flag: member keeps distance for 3-5 turns
+      member.avoidsTurn = player.turn + 3 + Math.floor(Math.random() * 3);
+    }
     changeGroupCohesion(-10, `${name} gets sick after testing ${e.name}`, {log: true});
-    addLog(`Turn ${player.turn}: While you focus elsewhere, ${name} tastes ${e.name} and reacts badly. You learn this individual is poisonous without taking the poison yourself.`, "poison");
+    const pronoun = member && member.sex === "female" ? "She" : member && member.sex === "male" ? "He" : "They";
+    const exposures = member ? (member.poisonExposures || 1) : 1;
+    const avoidSuffix = exposures >= 2
+      ? ` The group becomes warier of feeding near you.`
+      : ` ${pronoun} avoids you for a while.`;
+    addLog(`Turn ${player.turn}: While you focus elsewhere, ${name} tastes ${e.name} and reacts badly. You learn this individual is poisonous without taking the poison yourself.${avoidSuffix}`, "poison");
     setNarration(`Social learning matters. Another individual paid the cost, and you now recognise the danger signs in this food.`);
+    // If this companion has been poisoned multiple times, they may leave
+    if (member && (member.poisonExposures || 0) >= 2 && roll(40)) {
+      maybeGroupMemberLeaves("repeated food danger exposure", 30);
+    }
   } else {
     player.knownFoods[key] = {severity: "safe", warning: "A companion ate this individual safely"};
     player.knownFoods[e.key] = {severity: "mixed", warning: (e.genericName || e.key || e.name) + " includes edible and risky lookalikes"};
@@ -14543,16 +14575,31 @@ function renderGroupPanel() {
   if (!panel || !countEl || !body) return;
 
   const members = Array.isArray(socialGroup.members) ? socialGroup.members : [];
-  countEl.textContent = members.length + " companion" + (members.length === 1 ? "" : "s");
-
-  if (!members.length) {
-    body.innerHTML = '<div class="groupEmpty">No companions.</div>';
-    return;
-  }
-
+  const total = groupSize();
   const cohesion = Math.round(socialGroup.cohesion || 0);
   const cohesionClass = cohesion < 35 ? "groupWarning" : "";
-  const rows = members.map(member => {
+
+  // Header count pill
+  if (total <= 1) {
+    countEl.textContent = "1 total";
+  } else {
+    countEl.textContent = total + " total";
+  }
+
+  // Summary line
+  const summaryLine = total <= 1
+    ? '<div class="groupSummaryLine">Travelling alone.</div>'
+    : '<div class="groupSummaryLine">Cohesion: <b class="' + cohesionClass + '">' + cohesion + '</b> · <b>' + total + ' total</b> · You + ' + members.length + ' companion' + (members.length === 1 ? "" : "s") + '</div>';
+
+  // Player row (always shown first)
+  const playerRow = '<div class="groupPlayerRow">'
+    + '<div class="groupPlayerIcon" title="you">🐒</div>'
+    + '<div><div class="groupPlayerLabel">you</div>'
+    + '<div class="groupPlayerSub">group leader · fitness ' + Math.round(player.fitness) + '%</div>'
+    + '</div></div>';
+
+  // Companion rows
+  const companionRows = members.map(member => {
     const name = escapeHtml(member.name || ((member.sex || "unknown") + " tree-climber"));
     const sex = member.sex === "female" ? "♀" : member.sex === "male" ? "♂" : "?";
     const temperament = escapeHtml(member.temperament || "unknown");
@@ -14572,7 +14619,11 @@ function renderGroupPanel() {
       + '</div></div>';
   }).join("");
 
-  body.innerHTML = '<div class="groupSummaryLine">Cohesion: <b class="' + cohesionClass + '">' + cohesion + '</b> · group size: <b>' + groupSize() + '</b> including you.</div>' + rows;
+  const scrollContent = total <= 1
+    ? '<div class="groupMemberScroll">' + playerRow + '</div>'
+    : '<div class="groupMemberScroll">' + playerRow + companionRows + '</div>';
+
+  body.innerHTML = summaryLine + scrollContent;
 }
 
 // @fn canMoveTo
