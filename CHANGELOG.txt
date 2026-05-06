@@ -1,3 +1,12 @@
+[2026-05-06 predator-persistence | Claude]
+Predator encounter-state consistency — four fixes ensuring missed, fleeing, and pursuing predators remain visible and detectable. No new systems, no predator behaviour change.
+- fatalPredatorPressure() miss branch: when a ground predator misses and player.z < 2, the encounter card is no longer cleared. dangerGrace is set (giving one free turn before the next attack roll) but the predator remains as currentEncounter. Previously the card vanished even though the predator was still in range.
+- climb(): when the player climbs away from a ground predator and severeThreatRetainsContact() returns false, startPursuit(leaving) is now called before rememberBrokenThreat(). For climber-type predators (miacid, monitor lizard) this routes them into activePursuit instead of only the world registry. activePursuit is checked by sameTileThreats() and exposeCarelessActionToThreat(); rememberBrokenThreat() registry entries are not.
+- descend(): same fix applied symmetrically for predators that remain threatening when the player descends.
+- renderSenses(): activePursuit is now rendered as a visible pursuit card in the encounter area. When activePursuit is set alongside a currentEncounter both are shown; when activePursuit is the only active threat the card is shown alone. Card shows predator name and current distance. Previously activePursuit had no UI representation and the player had no indication a predator was still following.
+- CSS: .pursuitCard, .pursuitIcon, .pursuitName, .pursuitStatus added for the pursuit card display.
+- Syntax check: PASS.
+
 [2026-05-06 social-patch-1b-presentation | Claude]
 Presentation, guardrail, and balance patch based on turn-158 playthrough review. No new systems, no redesign.
 - Fix "0 tree-climbers join you": acceptSocialEncounter() now guards recruits.length > 0 before the join log. Zero-recruit contact shows "The group does not come any closer." instead of a broken count message.
@@ -6,7 +15,7 @@ Presentation, guardrail, and balance patch based on turn-158 playthrough review.
 - Companion poison-testing cost added: when a companion tastes poisonous food, member.poisonExposures increments and member.avoidsTurn is set (3-5 turns). Log message now includes "She/He avoids you for a while." (first exposure) or "The group becomes warier of feeding near you." (repeat). If poisonExposures >= 2 and 40% roll, maybeGroupMemberLeaves fires with "repeated food danger exposure" reason. Companion-assisted learning is preserved intact.
 - GROUP panel UI overhauled: player is now always the first row in the member list. Companion rows are wrapped in .groupMemberScroll (max-height 192px, overflow-y auto, touch-scroll enabled). Header pill shows "N total" instead of "M companions". Summary line reads "Cohesion: X · N total · You + M companions". Solo state shows "Travelling alone." CSS adds .groupMemberScroll, .groupPlayerRow, .groupPlayerIcon, .groupPlayerLabel, .groupPlayerSub. Panel height remains bounded; content scrolls rather than pushing layout.
 - game/evolution_game_v66_57.html NOT updated — archived reference version only.
-- Syntax check: PASS.
+
 
 [2026-05-06 social-patch-1a | Claude]
 Social encounter hidden state foundation (Social Patch 1A). Data and state layer only — no UI overhaul, no group-on-group, no full cue system.
