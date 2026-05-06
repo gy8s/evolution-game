@@ -1,3 +1,11 @@
+[2026-05-06 fire-sensory | Claude]
+Fire hazard directional sensory cues. No new system — extends the existing wildfire state and sensory rendering pipeline.
+- wildfireDirection(dx, dy): new helper that maps fire-to-player delta into a compass string (North, South-East, etc.) or null when fire is directly adjacent.
+- applyWildfireProximityEffects(): inner zone (dist <= radius) log now reads "Flames move through the undergrowth to the [direction]." Edge zone (dist <= r+3) reads "The air grows hot. Animals move away from the [direction]." Outer zone (dist <= r+6) reads "Smoke hangs faintly from the [direction]." All log messages are suppressed after the first per turn using environment.wildfire._lastLogTurn to prevent the repeated identical-line problem seen in the turn-399 log.
+- renderSenses(): fire sensory cues injected after the normal heardText/smellText render. Inner zone overrides both HEAR ("Dry wood cracks to [direction]. The fire is here.") and SMELL ("Scorched bark and ash from [direction]."). Edge zone overrides SMELL only ("Smoke drifts from [direction]."). Outer zone sets a faint SMELL cue ("Faint smoke from [direction]."). The injection happens after updateRemoteSenses so fire dominates when the player is genuinely in danger from the inner zone.
+- No encounter card added. No fire logic change. Game version string not updated.
+- Syntax check: PASS.
+
 [2026-05-06 predator-persistence | Claude]
 Predator encounter-state consistency — four fixes ensuring missed, fleeing, and pursuing predators remain visible and detectable. No new systems, no predator behaviour change.
 - fatalPredatorPressure() miss branch: when a ground predator misses and player.z < 2, the encounter card is no longer cleared. dangerGrace is set (giving one free turn before the next attack roll) but the predator remains as currentEncounter. Previously the card vanished even though the predator was still in range.
