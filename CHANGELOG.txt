@@ -1,3 +1,13 @@
+[2026-05-06 social-patch-1b-presentation | Claude]
+Presentation, guardrail, and balance patch based on turn-158 playthrough review. No new systems, no redesign.
+- Fix "0 tree-climbers join you": acceptSocialEncounter() now guards recruits.length > 0 before the join log. Zero-recruit contact shows "The group does not come any closer." instead of a broken count message.
+- Fix [text error] leaks: safeNarrativeText() intercepts the "[text error]" sentinel from cleanNarrative(), replaces it with "You hesitate as the forest shifts around you." in player output, and logs the original input string to a debug trace (text-error). Player-facing UI no longer shows raw error text.
+- T. belgica group size retuned: socialGroupCountDraw() distribution is now pair ~55%, 3 ~30%, 4 ~12%, 5-6 ~3%. Replaces the prior 2-3/4-5/6 split that was producing troop-sized groups too early. Engine cap and cap-clamping logic from Social Patch 1A unchanged.
+- Companion poison-testing cost added: when a companion tastes poisonous food, member.poisonExposures increments and member.avoidsTurn is set (3-5 turns). Log message now includes "She/He avoids you for a while." (first exposure) or "The group becomes warier of feeding near you." (repeat). If poisonExposures >= 2 and 40% roll, maybeGroupMemberLeaves fires with "repeated food danger exposure" reason. Companion-assisted learning is preserved intact.
+- GROUP panel UI overhauled: player is now always the first row in the member list. Companion rows are wrapped in .groupMemberScroll (max-height 192px, overflow-y auto, touch-scroll enabled). Header pill shows "N total" instead of "M companions". Summary line reads "Cohesion: X · N total · You + M companions". Solo state shows "Travelling alone." CSS adds .groupMemberScroll, .groupPlayerRow, .groupPlayerIcon, .groupPlayerLabel, .groupPlayerSub. Panel height remains bounded; content scrolls rather than pushing layout.
+- game/evolution_game_v66_57.html NOT updated — archived reference version only.
+- Syntax check: PASS.
+
 [2026-05-06 social-patch-1a | Claude]
 Social encounter hidden state foundation (Social Patch 1A). Data and state layer only — no UI overhaul, no group-on-group, no full cue system.
 - SOCIAL_ENGINE_MAX_GROUP = 10 constant added as the engine ceiling for future species. T. belgica groupSizeCap stays at 6, keeping very large groups unavailable for this species.
