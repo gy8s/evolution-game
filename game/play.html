@@ -3037,11 +3037,15 @@ let noiseLevel = 0;
 let lastCravingCueTurn = -999;
 let lastRiskMemoryCueTurn = -999;
 
+// Engine ceiling for encountered group size — future species can raise their groupSizeCap toward this.
+const SOCIAL_ENGINE_MAX_GROUP = 10;
+
 const playerSpeciesProfile = {
   species: "tree-climber",
   groupName: "tree-climber band",
   icon: "🐒",
   maxGroupSize: 5,
+  groupSizeCap: 6,       // T. belgica: encountered groups draw up to this ceiling
   baseSocialChance: 6
 };
 
@@ -6105,23 +6109,114 @@ function updateSocialGroupAfterTurn() {
   }
 }
 
+// @target [SOCIAL] Social encounter hidden state helpers
+
+// @fn computeEscalationState
+// Pure function: maps a harassmentCounter value to a named escalation tier.
+function computeEscalationState(n) {
+  if (n >= 6) return "hostile";
+  if (n >= 4) return "warning";
+  if (n >= 2) return "irritated";
+  return "calm";
+}
+
+// @fn incrementSocialHarassment
+// Call this only on confirmed intrusive actions (failed join, repeated call at group,
+// early groom attempt). Do NOT call for observe, wait, back off, or leave.
+function incrementSocialHarassment(encounter) {
+  if (!encounter || !encounter.social) return;
+  encounter.social.harassmentCounter = (encounter.social.harassmentCounter || 0) + 1;
+  const prev = encounter.social.escalationState || "calm";
+  encounter.social.escalationState = computeEscalationState(encounter.social.harassmentCounter);
+  // Disinterested groups become tense once harassment reaches "warning" tier.
+  if (encounter.social.hiddenAttitude === "disinterested" && encounter.social.escalationState === "warning") {
+    encounter.social.hiddenAttitude = "tense";
+  }
+  addDebugTrace("social-harassment-increment", {
+    counter: encounter.social.harassmentCounter,
+    escalationState: encounter.social.escalationState,
+    prevEscalation: prev,
+    hiddenAttitude: encounter.social.hiddenAttitude
+  });
+}
+
 // @target [SOCIAL] Same-species individual generation
+
+// @fn socialGroupCountDraw
+// Draws an encountered group size for the current species profile.
+// T. belgica: lone 70%; multi-member 30% weighted toward 2-3, rare at cap.
+function socialGroupCountDraw() {
+  const cap = clamp(playerSpeciesProfile.groupSizeCap || 6, 1, SOCIAL_ENGINE_MAX_GROUP);
+  if (Math.random() < 0.70) return 1;
+  // Multi-member weights: 2-3 ~60%, 4-5 ~30%, 6 ~10%, 7-10 only reachable if cap > 6
+  const roll = Math.random();
+  if (roll < 0.60) return 2 + Math.floor(Math.random() * 2);   // 2 or 3
+  if (roll < 0.90) return 4 + Math.floor(Math.random() * 2);   // 4 or 5
+  // Remaining 10%: draw from 6..cap (for T. belgica cap=6, always returns 6)
+  return 6 + Math.floor(Math.random() * Math.max(1, cap - 5));
+}
+
+// @fn socialMemberLabel
+// Produces a display label for a group member. "youngAdult" renders as "young".
+function socialMemberLabel(sex, ageClass, role) {
+  if (ageClass === "infant") return "infant";
+  const ageWord = ageClass === "youngAdult" ? "young" : ageClass;
+  return role + " " + ageWord + " " + sex;
+}
+
+// @fn socialHiddenAttitudeForCount
+// Returns a weighted hidden attitude based on encountered group size.
+function socialHiddenAttitudeForCount(count) {
+  // Weights: [receptive, disinterested, tense, hostile]
+  const w = count <= 1  ? [35, 45, 15,  5]
+           : count <= 3 ? [25, 45, 20, 10]
+           : count <= 5 ? [15, 40, 30, 15]
+           :              [ 8, 32, 38, 22];   // 6+ (T. belgica cap)
+  const attitudes = ["receptive", "disinterested", "tense", "hostile"];
+  const total = w.reduce((a, b) => a + b, 0);
+  let r = Math.random() * total;
+  for (let i = 0; i < w.length; i++) { r -= w[i]; if (r <= 0) return attitudes[i]; }
+  return "disinterested";
+}
 
 // @fn createSameSpeciesEncounter
 function createSameSpeciesEncounter() {
-  const count = Math.random() < 0.7 ? 1 : 2 + Math.floor(Math.random() * 3);
+  const count = socialGroupCountDraw();
+  const AGE_CLASSES = ["infant", "juvenile", "youngAdult", "adult", "adult", "adult", "old"];
+  const ROLES = ["dominant", "protective", "peripheral", "watchful", "curious", "neutral"];
+  const TEMPERAMENTS = ["calm", "calm", "wary", "wary", "tolerant", "aggressive"];
   const members = [];
   for (let i = 0; i < count; i++) {
+    const sex = Math.random() < 0.5 ? "female" : "male";
+    const ageClass = AGE_CLASSES[Math.floor(Math.random() * AGE_CLASSES.length)];
+    // First member skewed toward dominant/protective; later members more peripheral
+    const rolePool = i === 0
+      ? ["dominant", "dominant", "protective", "watchful", "neutral"]
+      : ROLES;
+    const role = rolePool[Math.floor(Math.random() * rolePool.length)];
+    const temperament = TEMPERAMENTS[Math.floor(Math.random() * TEMPERAMENTS.length)];
+    const displayLabel = socialMemberLabel(sex, ageClass, role);
     members.push({
       id: "social_" + player.turn + "_" + i + "_" + Math.floor(Math.random() * 9999),
       species: player.species,
-      sex: Math.random() < 0.5 ? "male" : "female",
+      sex,
+      ageClass,
+      role,
+      temperament,
+      displayLabel,
       size: clamp(player.size + (Math.random() * 2 - 1), 3, 8),
-      fitness: clamp(60 + Math.round(Math.random() * 35), 40, 100),
-      temperament: Math.random() < 0.65 ? "cautious" : "assertive"
+      fitness: clamp(60 + Math.round(Math.random() * 35), 40, 100)
     });
   }
   const mixed = members.some(m => m.sex !== members[0].sex);
+  const hiddenAttitude = socialHiddenAttitudeForCount(count);
+  addDebugTrace("social-encounter-created", {
+    count,
+    hiddenAttitude,
+    escalationState: "calm",
+    harassmentCounter: 0,
+    memberLabels: members.map(m => m.displayLabel)
+  });
   return {
     kind: "social",
     key: "sameSpeciesGroup",
@@ -6129,9 +6224,20 @@ function createSameSpeciesEncounter() {
     icon: playerSpeciesProfile.icon,
     className: "primate",
     canInvestigate: true,
-    social: {species: player.species, members, mixed},
-    seen: count === 1 ? "Another " + player.species + " watches from nearby branches." : "A small band of " + player.species + "s moves through the same trees, alert but not immediately hostile.",
-    investigated: mixed ? "The group has a mixed sex balance and seems open to cautious contact. Food pressure will still matter." : "They are your own kind, but their posture is guarded. Same species does not always mean safe."
+    social: {
+      species: player.species,
+      members,
+      mixed,
+      hiddenAttitude,
+      harassmentCounter: 0,
+      escalationState: "calm"
+    },
+    seen: count === 1
+      ? "Another " + player.species + " watches from nearby branches."
+      : "A " + (count <= 3 ? "small" : count <= 5 ? "mid-sized" : "large") + " band of " + player.species + "s moves through the same trees, alert but not immediately hostile.",
+    investigated: mixed
+      ? "The group has a mixed sex balance and seems open to cautious contact. Food pressure will still matter."
+      : "They are your own kind, but their posture is guarded. Same species does not always mean safe."
   };
 }
 
@@ -6187,6 +6293,17 @@ function socialAcceptanceChance(encounter, mode) {
   if (player.energy < 35) chance -= 12;
   if (player.fitness < 45) chance -= 10;
   if (hasGroup()) chance -= socialGroup.members.length * 6;
+  // Hidden attitude modifier (Social Patch 1A)
+  const attitude = encounter && encounter.social && encounter.social.hiddenAttitude;
+  if (attitude === "receptive")  chance += 15;
+  if (attitude === "tense")      chance -= 15;
+  if (attitude === "hostile")    chance -= 30;
+  // disinterested: 0 delta — not joinable by default; other factors decide
+  // Escalation modifier
+  const esc = encounter && encounter.social && encounter.social.escalationState;
+  if (esc === "irritated") chance -= 5;
+  if (esc === "warning")   chance -= 12;
+  if (esc === "hostile")   chance -= 22;
   return clamp(chance, 10, 90);
 }
 
@@ -6367,6 +6484,7 @@ function acceptSocialEncounter(mode) {
   if (!accepted) {
     const tensionDamage = roll(25) ? clamp(Math.round(2 + Math.random() * 8), 2, 10) : 0;
     if (tensionDamage) player.fitness = clamp(player.fitness - tensionDamage, 0, 100);
+    incrementSocialHarassment(encounter);
     addLog("The " + encounter.name + " refuses close contact" + (tensionDamage ? " and snaps at you. Damage: " + tensionDamage + "." : "."), tensionDamage ? "threat" : "minor");
     setNarration("Your own kind can still be competitors. They keep their distance and the chance passes.");
     clearCurrentEncounter("action-cleared-before-render");
@@ -6800,6 +6918,12 @@ function callOut(signalType = "social") {
   if (handleCurrentEncounterCallReaction(signalType)) {
     render();
     return;
+  }
+
+  // Repeated calls directed at an active social encounter count as harassment.
+  // First call does not increment; second+ calls do (callStreak > 1).
+  if (currentEncounter && currentEncounter.kind === "social" && callStreak > 1) {
+    incrementSocialHarassment(currentEncounter);
   }
 
   const h = habitatAt(player.x, player.y);
@@ -7816,6 +7940,13 @@ function groom() {
   lastActionKind = "groom";
   debugLastAction = {kind: "groom", parasiteLoad: player.parasites, groupSize: groupSize()};
   if (!startTurn()) return;
+
+  // Grooming while a social encounter is active and no rapport established counts as
+  // an unsupported/too-early intrusion — the encountered group reads it as presumptuous.
+  if (currentEncounter && currentEncounter.kind === "social" &&
+      (!individualSocialState || (individualSocialState.trust || 0) < 1)) {
+    incrementSocialHarassment(currentEncounter);
+  }
 
   if ((player.parasites || 0) <= 0) {
     addLog("You groom briefly. Nothing obvious comes away.", "minor");
