@@ -1,3 +1,18 @@
+[2026-05-06 social-patch-1a | Claude]
+Social encounter hidden state foundation (Social Patch 1A). Data and state layer only — no UI overhaul, no group-on-group, no full cue system.
+- SOCIAL_ENGINE_MAX_GROUP = 10 constant added as the engine ceiling for future species. T. belgica groupSizeCap stays at 6, keeping very large groups unavailable for this species.
+- playerSpeciesProfile gains groupSizeCap: 6 field. All group-count draws now use the species cap via socialGroupCountDraw(), not a hardcoded number.
+- socialGroupCountDraw(): T. belgica distribution: lone 70%; multi-member 30% weighted 2-3 (~60%), 4-5 (~30%), 6 (~10%). Groups of 7-10 require a future species with a higher cap.
+- createSameSpeciesEncounter() rewritten. Each member now carries: sex, ageClass (infant/juvenile/youngAdult/adult/old), role (dominant/protective/peripheral/watchful/curious/neutral), temperament (calm/wary/aggressive/tolerant), displayLabel (e.g. "dominant adult female", "watchful adult male", "curious juvenile female", "infant"). First member weighted toward dominant/protective.
+- Hidden encounter attitude added: receptive / disinterested / tense / hostile. Weighted by group size; disinterested is the dominant attitude for lone and small groups. Stored as encounter.social.hiddenAttitude. Dev/debug trace only — not exposed in player UI.
+- harassmentCounter: 0 and escalationState: "calm" added to every new social encounter (encounter.social). escalationState advances through calm / irritated / warning / hostile as harassment accumulates.
+- computeEscalationState(n): pure function mapping counter value to escalation tier.
+- incrementSocialHarassment(encounter): increments counter, recomputes escalationState, escalates disinterested → tense when escalationState reaches "warning". Emits social-harassment-increment debug trace.
+- socialAcceptanceChance() extended with hidden attitude modifier (receptive +15, tense -15, hostile -30, disinterested 0) and escalation modifier (irritated -5, warning -12, hostile -22). Existing flat/binary joining logic preserved as fallback for encounters missing the new fields.
+- Three confirmed-intrusive call sites added for incrementSocialHarassment: (1) failed join/approach in acceptSocialEncounter() failure branch; (2) repeated call directed at active social encounter in callOut() (callStreak > 1 only); (3) groom() while social encounter active and no established rapport (individualSocialState.trust < 1 or no state).
+- Observe, wait, avoidSocialEncounter, backing away, and leaving do NOT increment harassment counter.
+- Syntax check: PASS.
+
 [2026-05-06 patch-death-trace-snapshot | Claude]
 trace.json now focused on death runs only, with encounter and pursuit context per step.
 - buildBotTraceJson() filtered to runs where run.death !== null (death runs only). Survival-run terminal steps were low-value; death steps are where behaviour matters.
