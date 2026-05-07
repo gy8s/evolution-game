@@ -3024,6 +3024,7 @@ let lastNarration = "In a warm forest of tangled branches and dripping leaves, s
 let groupSceneNotice = null;
 let heardText = "The forest is never silent. Small things move beyond sight.";
 let smellText = "The wet forest air is thick with leaf rot, bark, and your own scent.";
+let nearbyRecentSocial = null;
 let lastActionKind = "wait";
 let debugLog = [];
 let debugTrace = [];
@@ -9039,6 +9040,13 @@ function move(dx, dy, actionText) {
     const leaving = currentEncounter;
     if (carcass && carcass.portions > 0) persistCarcassAt(oldX, oldY, oldZ, carcass);
     restoreUnconsumedPersistentEncounter(leaving);
+
+    if (leaving && leaving.kind === "social") {
+      const groupDesc = leaving.social && leaving.social.members && leaving.social.members.length > 1 ? leaving.name : "lone " + player.species;
+      addLog(`The ${groupDesc} falls behind as you move away. The contact passes.`, "minor");
+      nearbyRecentSocial = {encounter: leaving, x: oldX, y: oldY, z: oldZ, expiresAfterTurn: player.turn + 4};
+    }
+
     clearCurrentEncounter("move-to-new-tile", {clearQueue: true});
     carcass = null;
 
@@ -9047,6 +9055,13 @@ function move(dx, dy, actionText) {
       currentEncounter = leaving;
     } else {
       rememberBrokenThreat(leaving, oldX, oldY, oldZ, "move-contact-broken");
+    }
+
+    if (!currentEncounter && nearbyRecentSocial && nearbyRecentSocial.expiresAfterTurn >= player.turn &&
+        player.x === nearbyRecentSocial.x && player.y === nearbyRecentSocial.y && player.z === nearbyRecentSocial.z) {
+      currentEncounter = nearbyRecentSocial.encounter;
+      nearbyRecentSocial = null;
+      addLog(`The ${currentEncounter.name} is still nearby. You have another chance.`, "minor");
     }
 
     if (player.dead) { render(); return; }
@@ -11076,6 +11091,7 @@ function clearRunLogsForNewGame() {
 
 // @fn resetGameForPlayer
 function resetGameForPlayer(reason = "manual restart") {
+  nearbyRecentSocial = null;
   clearRunLogsForNewGame();
   Object.assign(player, {
     x: 50,
@@ -11476,6 +11492,7 @@ function summariseCurrentBotRun(reason) {
 }
 
 function resetGameForBot(reason = "bot auto-reset") {
+  nearbyRecentSocial = null;
   botState.resets += 1;
   clearRunLogsForNewGame();
   Object.assign(player, {
