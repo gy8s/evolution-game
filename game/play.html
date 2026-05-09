@@ -572,6 +572,7 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
             <button id="groom" type="button">Groom</button>
             <button id="callOut" type="button">Call</button>
             <button id="leaveGroup">Leave group</button>
+            <button id="courtCompanion" type="button">Court</button>
           </div>
 
           <div class="small keyHint">
@@ -6421,6 +6422,107 @@ function attemptMating() {
   render();
 }
 
+// @fn canCourtGroupMember
+function canCourtGroupMember() {
+  if (!hasGroup() || !isPlayerMature()) return null;
+  if ((player.matingCount || 0) >= 5) return null;
+  if (player.fitness < 50 || player.energy < 40) return null;
+  if (activePursuit) return null;
+  if ((player.turn - (player.lastMatingTurn || -999)) < 8) return null;
+  const oppSex = player.sex === "female" ? "male" : "female";
+  const matable = ["youngAdult", "adult", "old"];
+  return socialGroup.members.find(
+    m => m.sex === oppSex && matable.includes(m.ageClass) && !m.matedThisRun
+  ) || null;
+}
+
+// @fn attemptGroupMating
+function attemptGroupMating() {
+  if (player.dead) return;
+  lastActionKind = "court";
+  if (!startTurn()) return;
+
+  const mate = canCourtGroupMember();
+
+  addDebugTrace("mating-eligibility-check", {
+    source: "group",
+    playerSex: player.sex,
+    playerSize: player.size,
+    playerMature: isPlayerMature(),
+    playerFitness: player.fitness,
+    playerEnergy: player.energy,
+    matingCount: player.matingCount,
+    lastMatingTurn: player.lastMatingTurn,
+    cohesion: socialGroup.cohesion,
+    hasEligibleMate: !!mate
+  });
+
+  if (!isPlayerMature()) {
+    addLog(`Turn ${player.turn}: You are not mature enough for this.`, "minor");
+    setNarration("You are not mature enough for this. Survival is the priority for now.");
+    render();
+    return;
+  }
+  if ((player.matingCount || 0) >= 5) {
+    addLog(`Turn ${player.turn}: You have already reached your mating goal.`, "minor");
+    render();
+    return;
+  }
+  if (player.fitness < 50 || player.energy < 40) {
+    addLog(`Turn ${player.turn}: You are too depleted to pursue courtship right now.`, "minor");
+    setNarration("Courtship requires reserves you do not have. Eat, rest, recover.");
+    render();
+    return;
+  }
+  if (!mate) {
+    addLog(`Turn ${player.turn}: There is no compatible companion to court right now.`, "minor");
+    render();
+    return;
+  }
+
+  const chance = clamp(35 + Math.round((socialGroup.cohesion || 0) * 0.25), 15, 70);
+
+  const roll_result = debugRoll("mating-attempt", chance, {
+    source: "group",
+    playerSex: player.sex,
+    targetSex: mate.sex,
+    targetAgeClass: mate.ageClass,
+    targetLabel: mate.displayLabel,
+    cohesion: socialGroup.cohesion,
+    chance,
+    matingCountBefore: player.matingCount
+  });
+
+  if (roll_result) {
+    mate.matedThisRun = true;
+    player.matingCount = (player.matingCount || 0) + 1;
+    player.lastMatingTurn = player.turn;
+    player.energy = clamp(player.energy - 15, 0, 100);
+    changeGroupCohesion(5, "successful mating within group", {log: false});
+    const countAfter = player.matingCount;
+    addLog(`Turn ${player.turn}: The ${mate.displayLabel || mate.sex + " " + player.species} accepts. You mate within the group. Progress: ${countAfter}/5.`, "prey");
+    if (countAfter >= 5) {
+      setNarration("Five times you have passed on what you are. The season turns. There is a kind of continuity here.");
+      addLog(`Turn ${player.turn}: Mating goal complete. Five successful matings.`, "prey");
+      addDebugTrace("mating-goal-complete", {matingCount: countAfter, turn: player.turn, source: "group"});
+    } else {
+      setNarration("The bond within the group deepens briefly. The others shift around you, aware.");
+    }
+    addDebugTrace("mating-success", {source: "group", playerSex: player.sex, targetSex: mate.sex, targetLabel: mate.displayLabel, cohesion: socialGroup.cohesion, chance, matingCountAfter: countAfter});
+  } else {
+    player.energy = clamp(player.energy - 8, 0, 100);
+    const cohesionBefore = socialGroup.cohesion;
+    changeGroupCohesion(-8, "rejected courtship within group", {log: false});
+    const msg = cohesionBefore >= 60
+      ? "The companion moves aside. Not now — the timing is wrong."
+      : "Your approach is ignored. The group tension shifts slightly.";
+    addLog(`Turn ${player.turn}: ${msg}`, "minor");
+    setNarration(msg);
+    addDebugTrace("mating-failure", {source: "group", playerSex: player.sex, targetSex: mate.sex, targetLabel: mate.displayLabel, cohesion: socialGroup.cohesion, chance});
+  }
+  render();
+}
+
 // @fn leaveGroup
 function leaveGroup() {
   if (player.dead || !hasGroup()) return;
@@ -11566,6 +11668,7 @@ function getRandomBotActions() {
   if (player.z < layers.length - 1 && layerAllowedAt(player.x, player.y, player.z + 1)) add("climb", "climb up", climb, "movement");
   if (player.z > 0 && layerAllowedAt(player.x, player.y, player.z - 1)) add("descend", "descend", descend, "movement");
   if (hasGroup()) add("leave-group", "leave group", leaveGroup, "social");
+  if (canCourtGroupMember()) add("court-companion", "court group companion", attemptGroupMating, "social");
 
   const moves = [[-1,-1,"northwest"],[0,-1,"north"],[1,-1,"northeast"],[-1,0,"west"],[1,0,"east"],[-1,1,"southwest"],[0,1,"south"],[1,1,"southeast"]];
   for (const [dx, dy, label] of moves) {
@@ -12670,6 +12773,8 @@ function renderButtons() {
   if (callButton) callButton.disabled = disabled;
   const leaveButton = document.getElementById("leaveGroup");
   if (leaveButton) leaveButton.disabled = disabled || !hasGroup();
+  const courtCompanionButton = document.getElementById("courtCompanion");
+  if (courtCompanionButton) courtCompanionButton.disabled = disabled || !canCourtGroupMember();
   updateBotStatus();
 }
 function renderLayers() {
@@ -14978,6 +15083,8 @@ const downloadBotCompactButton = document.getElementById("downloadBotCompact");
 if (downloadBotCompactButton) downloadBotCompactButton.addEventListener("click", downloadBotReportCompact);
 initBotRepoConfig();
 document.getElementById("leaveGroup").addEventListener("click", leaveGroup);
+const courtCompanionEl = document.getElementById("courtCompanion");
+if (courtCompanionEl) courtCompanionEl.addEventListener("click", attemptGroupMating);
 const groomButton = document.getElementById("groom");
 if (groomButton) groomButton.addEventListener("click", groom);
 const lookAroundButton = document.getElementById("lookAround");
