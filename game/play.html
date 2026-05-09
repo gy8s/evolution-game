@@ -6311,6 +6311,7 @@ function canAttemptMating(encounter) {
 function attemptMating() {
   if (player.dead) return;
   if (!currentEncounter || currentEncounter.kind !== "social") return;
+  lastActionKind = "court";
   if (!startTurn()) return;
 
   const encounter = currentEncounter;

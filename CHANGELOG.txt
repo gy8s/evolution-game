@@ -9,6 +9,7 @@ First-pass mating progression mechanic. No pregnancy, offspring, or genetic syst
 - bindCardActionButtons(): cardMateButton wired to attemptMating().
 - getRandomBotActions(): mate-social action added to bot pool when social encounter present and canAttemptMating() true.
 - topSocialStat: mating progress chip appended — "♥ N/5" — using existing socialChip class.
+- Codex P2 fix: lastActionKind = "court" set before startTurn() in attemptMating(). Without this, mating inherited the previous action's metabolism profile. "court" falls through to energyCost: 1 (ordinary action baseline) in actionMetabolismProfile().
 - Syntax check: PASS.
 
 [2026-05-09 group-safety | Claude]
