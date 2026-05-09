@@ -1,3 +1,13 @@
+[2026-05-09 group-mating | Claude]
+Within-group mating — companion courtship path. Complements the existing encounter-mating system. Shares the same matingCount/lastMatingTurn state and goal.
+- canCourtGroupMember(): returns first eligible group companion (opposite sex, youngAdult/adult/old, not matedThisRun) when all gates pass: hasGroup(), isPlayerMature(), matingCount < 5, fitness >= 50, energy >= 40, no activePursuit, 8-turn cooldown clear. Returns null otherwise.
+- attemptGroupMating(): sets lastActionKind = "court", calls startTurn(). Chance = clamp(35 + round(cohesion * 0.25), 15, 70) — familiarity base 35%, cohesion scales up to 70%. Success: member.matedThisRun = true, matingCount++, lastMatingTurn set, energy -15, cohesion +5, log with progress fraction, goal-complete at 5/5. Failure: energy -8, cohesion -8, cohesion-keyed rejection message. Debug traces use source: "group" alongside standard mating-attempt/success/failure/goal-complete keys.
+- HTML: <button id="courtCompanion"> added to action row alongside Leave group.
+- updateActionButtonStates(): courtCompanion disabled when canCourtGroupMember() returns null.
+- Event listener: courtCompanionEl → attemptGroupMating().
+- Bot pool: court-companion action added when canCourtGroupMember() is truthy.
+- Syntax check: PASS.
+
 [2026-05-09 mating-progression | Claude]
 First-pass mating progression mechanic. No pregnancy, offspring, or genetic systems. No save/load added (game is in-memory only).
 - player state: matingCount (default 0) and lastMatingTurn (default -999) added to player object literal, resetGameForPlayer(), and resetGameForBot(). Both fields reset on new run.
