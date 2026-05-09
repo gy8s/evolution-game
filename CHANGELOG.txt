@@ -1,3 +1,14 @@
+[2026-05-09 god-mode-qa-recovery | Claude]
+God Mode toggle + QA Back 1 turn death-screen recovery. Developer/QA tool only; no effect on normal gameplay unless explicitly toggled on.
+- godModeEnabled (default false) and qaBackSnapshot (default null) added as top-level state variables.
+- takeQABackSnapshot(): called at the top of startTurn() when godModeEnabled is true. Deep-clones (JSON.parse/stringify) the full restorable game state before any turn effects resolve: player, waterState, currentEncounter, tileEncounterQueue, carcass, interruptedFood, nearbyEntities, persistentEntities, worldRegistry, nextRegistryId, exploredTiles (serialised as Array.from), nextEntityId, nextInstanceId, knownMapEntities, staticTileContents, consumedStaticTileKeys, burnedTiles, dangerGrace, recentPredatorWarning, activePursuit, investigationText, investigationEncounterRef, lastLookText, lastLookTurn, lastNarration, groupSceneNotice, heardText, smellText, nearbyRecentSocial, lastActionKind, lastDamageContext, debugLastAction, callStreak, lastCallTurn, socialGroup, noiseLevel, lastCravingCueTurn, lastRiskMemoryCueTurn, individualSocialState, lastHabitatKey, environment, timeState. debugLog and debugTrace are intentionally excluded so death records are preserved.
+- restoreQABackSnapshot(): writes all snapshotted values back; exploredTiles restored via new Set(array); environment/timeState/player restored via Object.assign (all are const objects). Adds qa-back-used debug trace with originalDeathContext, restoredTurn, restoredPosition, godModeEnabled:true. Adds visible log line "QA Back used: restored state before fatal action.". Calls hideDeathModal() then render().
+- HTML: God Mode toggle button (id=godModeToggle) added to Developer / QA Tools below the bot panel. Shows "God Mode: OFF" / "God Mode: ON"; orange outline when on.
+- HTML: deathModalQABack button added to death modal .deathModalActions (display:none by default). deathModalQANote small text note added below actions.
+- showDeathModal(): sets deathModalQABack and deathModalQANote visibility based on godModeEnabled && qaBackSnapshot.
+- Event listeners: deathModalQABack calls restoreQABackSnapshot() guarded by godModeEnabled && qaBackSnapshot. godModeToggle flips godModeEnabled and updates button text/outline.
+- Syntax check: PASS.
+
 [2026-05-09 group-mating-fix | Claude]
 Mobile layout fix: courtCompanion button now hidden (display:none) when no eligible companion is present; shown only when canCourtGroupMember() returns a truthy member. Previously the button was always visible (just disabled), adding an 8th button to the vertical-controls row and breaking the mobile layout. Pattern now matches the encounter-card Court button which only renders when canAttemptMating() is true.
 - Syntax check: PASS.
