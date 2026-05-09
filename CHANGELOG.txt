@@ -1,3 +1,50 @@
+[2026-05-09 investigation-knowledge-progression | Claude]
+Run-level investigation knowledge progression system. Repeated investigation of encounter types builds long-term natural-history knowledge. Full unlock at 30 valid investigations across at least 15 separate entities produces a natural-history popup.
+
+Core system:
+- player.knowledgeByEncounterKey: new run-level store, keyed by encounter type key (e.g. "climbingHunter"). Each record holds: investigations (0-30), unlockedTier (0-5), investigatedInstanceIds (per-entity count map). Initialised with player.knowledgeByEncounterKey = player.knowledgeByEncounterKey || {} alongside existing knowledge stores, so existing saves without this field do not crash.
+- KNOWLEDGE_MAX = 30, KNOWLEDGE_PER_ENTITY_CAP = 2. Configurable constants.
+- KNOWLEDGE_TIERS: threshold/tier/label array. Tier 1 at 1 investigation (noticed), Tier 2 at 5 (familiar), Tier 3 at 10 (understood), Tier 4 at 20 (expert), Tier 5 at 30 (natural-historian).
+
+New helper functions (inserted after classLearningGain):
+- getEncounterTypeKey(e): returns e.key || e.name || "unknown" — the type-level key, not the instance key.
+- getEncounterInstanceId(e): returns e.instanceId, then origin-based key, then type key — uniquely identifies the individual entity instance for the per-entity cap.
+- ensureEncounterTypeKnowledge(typeKey): initialises and returns the type-level knowledge record.
+- computeKnowledgeTier(count): maps investigation count to the correct KNOWLEDGE_TIERS entry.
+- tryAddEncounterTypeKnowledge(e): core logic. Checks per-entity cap (KNOWLEDGE_PER_ENTITY_CAP = 2); if hit, emits investigation-knowledge-cap-reached trace and returns {gained:false, reason:"entity-cap"}. If type already at KNOWLEDGE_MAX returns {gained:false, reason:"type-max"}. Otherwise increments investigatedInstanceIds and investigations, emits investigation-knowledge-gained trace, checks for tier crossing, emits investigation-knowledge-tier-unlocked trace if tier changes. Returns {gained, tierUnlocked}.
+- investigationKnowledgeTierText(e, tier): returns encounter-specific knowledgeTierText[tier-1] if present, else generic tier text.
+- showNaturalHistoryPopup(e): populates and opens #nhModal with naturalHistory sections (fieldNote, behaviour, ecology, gameplayInsight, scienceNote). Emits natural-history-unlocked debug trace.
+
+investigate() modification:
+- After classLearningGain(e), calls tryAddEncounterTypeKnowledge(e).
+- If gained: logs "Knowledge gained: <name> N/30." in "knowledge" class. If tier unlocked, logs tier text in "knowledge-tier" class. If investigations reach KNOWLEDGE_MAX, calls showNaturalHistoryPopup(e).
+- Slot is in the successful investigation path only (after existing entity/ceiling cap checks), so the per-entity cap in the new system aligns exactly with the existing k.encounterInvestigations >= 2 check.
+
+Debug traces added:
+- investigation-knowledge-gained: encounterKey, name, instanceId, prevCount, newCount, perEntityCount, prevTier, newTier, threshold.
+- investigation-knowledge-cap-reached: encounterKey, name, instanceId, perEntityCount, cap.
+- investigation-knowledge-tier-unlocked: encounterKey, name, tier, label, threshold, count.
+- natural-history-unlocked: encounterKey, name, naturalHistory.
+
+UI:
+- #nhModal: new fixed-position modal (z-index 10060) with .nhModalCard, .nhModalHeader, .nhModalBody, .nhModalClose. Scrollable body for long entries. Dismiss via Close button, backdrop click, or Escape key.
+- .knowledge log CSS class (green), .knowledge-tier (yellow/bold) for progress lines in event log.
+- nhModalClose and nhModal backdrop click bound in event listeners. Escape key handling extended to close nhModal.
+
+Encounter data:
+- naturalHistory block (title, fieldNote, behaviour, ecology, gameplayInsight, scienceNote) added to: climbingHunter, groundCarnivore, gastornis, constrictor, pakicetus, leptictidium, darwinius, godinotia, lesmesodon.
+- knowledgeTierText array (5 entries) added to same encounters, plus additional investigationDetails entries where previously absent.
+- Data-only additions; no encounter behaviour or stat changes.
+
+Acceptance:
+- Same entity 1st/2nd investigation: global knowledge +1 each. 3rd: no gain (existing ceiling already returns diminishing text before new code runs).
+- Different entities of same type continue the shared counter.
+- Tier unlock messages fire at 1, 5, 10, 20, 30.
+- Natural history popup fires at 30.
+- Existing saves without knowledgeByEncounterKey do not crash.
+- Danger/reaction logic in investigate() is unchanged; knowledge tracking fires after, not instead of, existing risk checks.
+- Syntax check: PASS.
+
 [2026-05-09 god-mode-qa-recovery | Claude]
 God Mode toggle + QA Back 1 turn death-screen recovery. Developer/QA tool only; no effect on normal gameplay unless explicitly toggled on.
 - godModeEnabled (default false) and qaBackSnapshot (default null) added as top-level state variables.

@@ -369,6 +369,18 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
 .deathModalActions button { height: 42px; font-size: 14px; font-weight: bold; }
 #deathModalRestart { background: #7b2424; border-color: #ff8f8f; color: #fff3ee; }
 #deathModalStay { background: #251313; border-color: #8b4a4a; color: #f3c8c0; }
+.nhModal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 10060; padding: 18px; background: rgba(0, 20, 10, 0.82); }
+.nhModal.open { display: flex; }
+.nhModalCard { width: min(94vw, 560px); background: #071209; border: 2px solid #4a9a62; box-shadow: 0 0 0 1px #1a3c22 inset, 0 18px 70px rgba(0,0,0,.75); border-radius: 10px; color: #e8f0d8; overflow: hidden; max-height: 88vh; display: flex; flex-direction: column; }
+.nhModalHeader { display: flex; align-items: center; gap: 10px; background: #1b4a2b; color: #c8f0a0; padding: 12px 14px; font-size: 16px; font-weight: bold; text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid #2d6b3e; flex: 0 0 auto; }
+.nhModalTitle { flex: 1 1 auto; }
+.nhModalBody { padding: 14px; overflow-y: auto; flex: 1 1 auto; }
+.nhModalSection { margin-bottom: 12px; }
+.nhModalSection strong { display: block; color: #9bea72; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
+.nhModalSection p { margin: 0; line-height: 1.5; color: #cfdcba; font-size: 15px; }
+.nhModalClose { margin: 0 14px 14px; width: calc(100% - 28px); height: 38px; font-size: 14px; font-weight: bold; background: #1b4a2b; border-color: #4a9a62; color: #c8f0a0; flex: 0 0 auto; }
+.knowledge { color: #9bea72; }
+.knowledge-tier { color: #d9c747; font-weight: bold; }
 /* === MOBILE: @media (max-width: 980px) === */
 @media (max-width: 980px) {
   body { padding: 10px; }
@@ -745,6 +757,16 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
         <button id="mapOverlayClose" class="mapOverlayClose" type="button">Close</button>
       </div>
       <div id="mapOverlayBody" class="mapOverlayBody"></div>
+    </div>
+  </div>
+
+  <div id="nhModal" class="nhModal" aria-hidden="true">
+    <div class="nhModalCard" role="dialog" aria-modal="true" aria-labelledby="nhModalTitle">
+      <div class="nhModalHeader">
+        <span class="nhModalTitle" id="nhModalTitle">Natural History Unlocked</span>
+      </div>
+      <div id="nhModalBody" class="nhModalBody"></div>
+      <button id="nhModalClose" class="nhModalClose" type="button">Close</button>
     </div>
   </div>
 
@@ -1296,7 +1318,22 @@ const encounters = {
       "Its body is not fast in the branches, but at the margin it owns the angle of attack.",
       "The safest answer is distance from the waterline, not a contest beside it."
     ],
-    investigated: "A water-edge hunter. It is less dangerous away from the bank, but deadly if you enter its line."
+    investigated: "A water-edge hunter. It is less dangerous away from the bank, but deadly if you enter its line.",
+    knowledgeTierText: [
+      "You observe the Pakicetus-like hunter moving along the waterline.",
+      "You notice it watches the bank, not the forest — it is waiting for the moment an animal drinks.",
+      "You understand its territory is the margin. Distance from water is distance from danger.",
+      "You have watched it enough to predict when it will hold position and when it will move.",
+      "Full knowledge: the Pakicetus-like water hunter."
+    ],
+    naturalHistory: {
+      title: "Pakicetus-like water hunter",
+      fieldNote: "This animal holds an extraordinary place in evolutionary history: it is close to the transition between fully terrestrial mammals and what would eventually become whales. At this stage it is still a land predator, but one with special competence at the water margin.",
+      behaviour: "Ambushes at the waterline. It waits for animals drinking or crossing the bank and attacks when their attention is divided. Away from the water's edge it is slower and less threatening.",
+      ecology: "A semiaquatic ambush predator. Its ecological role is to control access to water sources, forcing terrestrial animals to approach carefully and briefly. Other predators may compete for its kills.",
+      gameplayInsight: "The waterline is the danger zone. Drinking quickly, from a position of cover, with awareness of the bank is the only way to manage this threat. The further from the bank, the safer you are.",
+      scienceNote: "Pakicetus was a terrestrial mammal of the early-to-middle Eocene, closely related to early cetacean ancestors. It was not yet aquatic but had features linking it to the whale lineage. Its discovery helped confirm that whales evolved from land-dwelling even-toed ungulates rather than from a separate lineage."
+    }
   },
 
   frog: {
@@ -1331,7 +1368,28 @@ const encounters = {
     dangerProfile: "minor", temperament: "skittish", canInvestigate: true,
     fitness: 55, size: 4, speed: 75, agility: 70, aggression: 5, food: 20,
     poison: null,
-    seen: "A long-legged small mammal bounds through the undergrowth in quick, nervous hops."
+    seen: "A long-legged small mammal bounds through the undergrowth in quick, nervous hops.",
+    investigationDetails: [
+      "The long hind legs are the key feature. It moves in sudden bounding bursts rather than smooth running.",
+      "It pauses between hops to sample the air. Its sensory organs are the real survival tool.",
+      "This is bipedal locomotion in a mammal that predates most familiar bipeds by tens of millions of years."
+    ],
+    investigated: "A bipedal hopper: fast, small, and built for sudden directional changes.",
+    knowledgeTierText: [
+      "You watch the Leptictidium-like hopper with growing interest.",
+      "You notice its pause pattern — a second of stillness between bursts tells you when to move.",
+      "You understand that pursuit is nearly useless. It reacts faster than a chase can adapt.",
+      "You have studied the hopper's routes and know which cover it uses most.",
+      "Full knowledge: the Leptictidium-like hopper."
+    ],
+    naturalHistory: {
+      title: "Leptictidium-like hopper",
+      fieldNote: "This small mammal runs on two legs. In the Eocene, that is not a primate behaviour — it is an entirely separate evolutionary experiment in bipedality. The long hind limbs give it a burst speed in the undergrowth that makes most pursuit futile.",
+      behaviour: "A nervous, highly mobile forager that samples the air frequently and changes direction unpredictably. It does not fight. It survives by being harder to catch than it looks.",
+      ecology: "A ground-level insectivore and small animal predator. It lives in the same habitat zones as many of your other encounters but occupies a fast-moving niche that few predators can exploit efficiently.",
+      gameplayInsight: "Difficult to catch even when healthy. Better to wait for it to return to a known feeding spot than to pursue it directly. Good food if you can manage the ambush.",
+      scienceNote: "Leptictidium was an Eocene leptictidan found in the Messel fossil beds of Germany. It was genuinely bipedal, with long hind limbs and a long balancing tail. Its ecological role and diet remain partly debated — it may have been omnivorous, eating insects, lizards, and plant matter."
+    }
   },
 
   gastornis: {
@@ -1346,7 +1404,22 @@ const encounters = {
       "The beak turns side to side as it searches the leaf litter. Small animals survive this by not being on the floor when it arrives.",
       "The huge bird is not unbeatable in the abstract. For you, here, now, it is the wrong scale of problem."
     ],
-    investigated: "Too large to fight and too dangerous to test on the ground. Climb, hide, or leave."
+    investigated: "Too large to fight and too dangerous to test on the ground. Climb, hide, or leave.",
+    knowledgeTierText: [
+      "You watch Gastornis from the branches with careful attention.",
+      "You recognise how it searches: beak sweeping the litter, not looking up.",
+      "You understand its weakness — it cannot climb, and open forest floor is where it wins.",
+      "You have observed Gastornis enough to time its movements and judge its attention.",
+      "Full knowledge: Gastornis."
+    ],
+    naturalHistory: {
+      title: "Gastornis",
+      fieldNote: "Gastornis is not hunting the way a mammal carnivore hunts. It is a dominant, territorial ground animal that controls space by mass and presence. On the forest floor, smaller animals reorganise their behaviour around it.",
+      behaviour: "Territorial and ground-dominant. It does not pursue vertically. Its threat is the floor itself: the animal reshapes which routes smaller animals will risk.",
+      ecology: "A megafaunal bird of the Eocene forests, found across Europe and North America. It may have been primarily herbivorous, using its beak to crack hard seeds and nuts rather than to catch prey, though its size and presence alone made it dangerous.",
+      gameplayInsight: "Stay off the ground when it is present. It cannot follow you into the branches. The danger window is crossing open ground or descending while it is nearby.",
+      scienceNote: "Gastornis (formerly often called Diatryma) was a large flightless bird standing nearly two metres tall. Long thought to be a carnivore, recent isotope analysis suggests it was likely herbivorous, feeding on tough vegetation and seeds. It was one of the dominant large animals of the early Eocene before placental mammals expanded into its ecological role."
+    }
   },
 
   nuts: {
@@ -1650,7 +1723,28 @@ const encounters = {
     dangerProfile: "predator", temperament: "hunter", pursuitType: "ground",
     canInvestigate: true, fitness: 80, size: 16, speed: 60, agility: 50, aggression: 70, food: 50,
     poison: null,
-    seen: "A small carnivorous mammal slips through the undergrowth with its nose low."
+    seen: "A small carnivorous mammal slips through the undergrowth with its nose low.",
+    investigationDetails: [
+      "It moves with its nose low and its head swinging. It is tracking, not patrolling.",
+      "Smaller than a large predator, but fast enough to close ground quickly once it commits.",
+      "It stops and tests the air when it senses something. It uses smell more than sight."
+    ],
+    investigated: "A small cursorial predator. Quick, committed once it locks on, and less effective in branches.",
+    knowledgeTierText: [
+      "You observe the Lesmesodon-like creodont moving through the undergrowth.",
+      "You notice it navigates by smell more than sight — it will locate you from downwind.",
+      "You understand its main weakness: it cannot follow you into the upper canopy.",
+      "You have watched it enough to know its patrol patterns in this part of the forest.",
+      "Full knowledge: the Lesmesodon-like creodont."
+    ],
+    naturalHistory: {
+      title: "Lesmesodon-like creodont",
+      fieldNote: "Creodonts were the dominant carnivorous mammals of the Eocene before modern carnivores displaced them. This small example is fast and committed once it has a scent trail. On the ground, it is a serious threat; in the branches, it loses its advantage.",
+      behaviour: "A nose-led pursuit predator. It identifies targets by smell and commits to pursuit quickly. It does not give up easily once it has a track.",
+      ecology: "A mid-level ground predator competing with other carnivorans and creodonts of similar size. It fills a role between apex predators and opportunistic feeders — fast enough to take prey but not dominant enough to displace larger animals from kills.",
+      gameplayInsight: "Smell is your liability near this animal. Moving downwind, staying in the branches, and not lingering on the ground are your primary defences.",
+      scienceNote: "Creodonts were an order of carnivorous placental mammals that were dominant predators through much of the Palaeogene. Once thought to be direct ancestors of modern Carnivora, they are now considered an independent lineage that went extinct by the late Miocene, outcompeted by modern carnivore families."
+    }
   },
 
   darwinius: {
@@ -1659,7 +1753,28 @@ const encounters = {
     fitness: 70, size: 7, speed: 45, agility: 75, aggression: 25, food: 30,
     poison: null,
     seen: "Another primate-like climber moves through the branches, watching you as much as the forest.",
-    cardDetail: "It keeps to cover and tests your reactions before deciding whether to close distance or vanish."
+    cardDetail: "It keeps to cover and tests your reactions before deciding whether to close distance or vanish.",
+    investigationDetails: [
+      "It reads your posture before you get close. Its attention is on your movements, not on foraging.",
+      "You notice forward-facing eyes and a grasping grip like yours. This is a relative, distantly.",
+      "It has a resting route through the branches that it returns to. You are beginning to predict it."
+    ],
+    investigated: "A primate relative. Aware, cautious, and capable in the branches.",
+    knowledgeTierText: [
+      "You observe the Darwinius-like primate with careful attention.",
+      "You notice it tests your posture before committing to any movement near you.",
+      "You understand that its caution is ecological intelligence — it does not waste energy on unnecessary risk.",
+      "You have watched it enough to know its preferred routes and resting spots.",
+      "Full knowledge: the Darwinius-like primate."
+    ],
+    naturalHistory: {
+      title: "Darwinius-like primate",
+      fieldNote: "This is an animal recognisably like you in body plan: forward-facing eyes, grasping hands, arboreal agility. It occupies similar ecological space and treats you with the same calculation you apply to it.",
+      behaviour: "Cautious and intelligent. It does not react to encounters with automatic flee or fight — it reads the situation and adjusts. Observing it is observing something that is also observing you.",
+      ecology: "A small arboreal primate of the Eocene, feeding on fruit, insects, and small animals. It shares habitat with you and competes for some of the same food sources.",
+      gameplayInsight: "Not a direct threat unless provoked. It can become a rival for food in the same patch and may attract predators with its own movement and calls.",
+      scienceNote: "Darwinius masillae, known as 'Ida', is one of the most complete Eocene primate fossils, found at the Messel Pit in Germany. It was briefly and controversially claimed as a direct human ancestor; the scientific consensus places it in the strepsirrhine lineage (lemur relatives) rather than the haplorhine lineage that leads to monkeys, apes, and humans."
+    }
   },
 
   europolemur: {
@@ -1675,7 +1790,28 @@ const encounters = {
     dangerProfile: "rival", temperament: "defensive", canInvestigate: true,
     fitness: 65, size: 6, speed: 45, agility: 75, aggression: 22, food: 28,
     poison: null,
-    seen: "A small agile primate relative pauses in the foliage, tense and alert."
+    seen: "A small agile primate relative pauses in the foliage, tense and alert.",
+    investigationDetails: [
+      "Small, quick, and watching. It does not stay in one place long enough to be studied easily.",
+      "You notice it favours fruit-bearing branches and avoids open exposure even more than you do.",
+      "It is watching what you watch. When you look toward danger, it follows your attention."
+    ],
+    investigated: "Small, quick primate relative. Nervous and food-competitive.",
+    knowledgeTierText: [
+      "You watch the Godinotia-like primate from a careful distance.",
+      "You notice it shadows your movement slightly, using you as an early warning system.",
+      "You understand it treats your presence as information — your reactions tell it where to be.",
+      "You have watched it enough to predict which branches it prefers when resting.",
+      "Full knowledge: the Godinotia-like primate."
+    ],
+    naturalHistory: {
+      title: "Godinotia-like primate",
+      fieldNote: "A small arboreal primate navigating the same canopy as you, competing for overlapping food, and using your alertness as part of its own threat-detection system. It is neither ally nor predator — it is a neighbour with shared interests.",
+      behaviour: "Fast, cautious, and aware of other animals' reactions. It moves frequently and rarely settles. Its presence in a food patch signals the area is viable and not immediately threatened.",
+      ecology: "An Eocene primate related to the adapid group. Feeds primarily on fruit and insects. Its foraging range overlaps with yours and with other primate relatives.",
+      gameplayInsight: "Not aggressive unless cornered. Its presence near fruit is a useful signal that the food is safe. Its sudden departure from an area is worth noticing.",
+      scienceNote: "Godinotia is an Eocene adapid primate from the Messel deposits. Adapids were a diverse group of early primates that have sometimes been considered lemur ancestors, though their exact phylogenetic position is still discussed. They were ecologically important herbivores and insectivores of the European Eocene."
+    }
   },
 
   woodpeckerBird: {
@@ -1970,19 +2106,69 @@ const encounters = {
       "Its head is already angled towards you. If you close badly, it can seize and coil before you can pull free.",
       "It is food only in theory. The practical lesson is distance, height, and not giving it another turn beside you."
     ],
-    investigated: "At this size it is not prey; it is a trap with muscle. In branches, one bad approach can become a coil you cannot escape."
+    investigated: "At this size it is not prey; it is a trap with muscle. In branches, one bad approach can become a coil you cannot escape.",
+    knowledgeTierText: [
+      "You watch the large constrictor carefully, learning to distinguish it from vine.",
+      "You notice that the head turns slowly, tracking without committing.",
+      "You understand its hunting method: stillness, patience, then a single decisive movement.",
+      "You have watched the large constrictor enough to know exactly how close is too close.",
+      "Full knowledge: the large constrictor."
+    ],
+    naturalHistory: {
+      title: "Large constrictor",
+      fieldNote: "The constrictor does not need to be faster than you. It needs to be close enough once, and patient enough to wait for that moment. In branches, the closing distance is much shorter than on the ground.",
+      behaviour: "An ambush predator that relies on stillness and disguise. It does not pursue over long distances. Its threat is the space between you and it, which it reduces incrementally.",
+      ecology: "A top arboreal ambush predator. Large enough to take significant prey. Its presence drives smaller animals to change feeding routes and resting choices within its territory.",
+      gameplayInsight: "Distance and route choice are your defences. The constrictor cannot sprint, but it does not need to. Multiple investigations of the same individual dramatically increase reaction risk.",
+      scienceNote: "Large non-venomous constrictors have existed since the Cretaceous. Eocene giant snakes included relatives of modern boas and pythons. Titanoboa, the largest snake ever recorded, lived in the Palaeocene of South America — a world with different constraints than the Eocene Messel forests."
+    }
   },
   groundCarnivore: {
     kind: "animal", name: "mesonychid-like ground predator", icon: "🐺", className: "predator",
     dangerProfile: "fatal", temperament: "hunter", canInvestigate: true,
     pursuitType: "ground", fitness: 100, size: 55, speed: 82, agility: 35, aggression: 94, food: 150,
-    seen: "A long-jawed ground predator moves between the trees below. On the ground, and even in low scrub, you are not built to survive it."
+    seen: "A long-jawed ground predator moves between the trees below. On the ground, and even in low scrub, you are not built to survive it.",
+    knowledgeTierText: [
+      "You observe the mesonychid-like predator from a safe distance.",
+      "You note its stride — long, covering ground faster than its bulk suggests.",
+      "You understand that it owns the forest floor. Its weakness is vertical space.",
+      "You have watched it long enough to know it rarely looks up unless forced to.",
+      "Full knowledge: the mesonychid-like ground predator."
+    ],
+    naturalHistory: {
+      title: "Mesonychid-like ground predator",
+      fieldNote: "This is the animal that made the Eocene forest floor dangerous for anything that could not climb. It is built for distance and force rather than precision, which means open ground is its domain and the canopy is your advantage.",
+      behaviour: "A pursuit hunter. It does not ambush — it identifies prey and closes the distance with sustained speed. On uneven ground it is slower; on open paths it is overwhelming.",
+      ecology: "A dominant carnivore of the Eocene forest floor. It competes with other large predators and will displace smaller hunters from kills. Its presence on the ground reshapes where other animals feed and move.",
+      gameplayInsight: "There is no winning in direct encounter. Your survival depends entirely on being where it cannot follow: branches, canopy, vertical distance. If it has already closed, options are gone.",
+      scienceNote: "Mesonychids were hoofed, wolf-sized carnivores that were apex predators of the Eocene. They were once thought to be ancestors of whales; molecular evidence has since clarified the lineage. Their teeth were adapted for crushing bone and flesh, unlike any modern carnivore."
+    }
   },
   climbingHunter: {
     kind: "animal", name: "miacid-like climbing hunter", icon: "🐈", className: "predator",
     dangerProfile: "predator", temperament: "hunter", canInvestigate: true,
     pursuitType: "climber", fitness: 95, size: 24, speed: 72, agility: 86, aggression: 86, food: 95,
-    seen: "A miacid-like hunter moves with sudden precision. Low branches will not save you, and even canopy routes only buy distance."
+    seen: "A miacid-like hunter moves with sudden precision. Low branches will not save you, and even canopy routes only buy distance.",
+    investigationDetails: [
+      "You study the way it distributes weight before committing to a branch. There is no wasted movement.",
+      "You notice a pause before it repositions — a brief recalculation, not hesitation. It is reading the gaps in the canopy.",
+      "You understand now that it does not need to be faster than you on every branch. It only needs the right angle once."
+    ],
+    knowledgeTierText: [
+      "You notice the miacid-like hunter with sharper eyes than before.",
+      "You recognise the stiff pause before it springs — the moment its weight shifts forward.",
+      "You understand that low branches only slow it; they do not stop it.",
+      "You have watched this hunter long enough to know where its patience ends.",
+      "Full knowledge: the miacid-like climbing hunter."
+    ],
+    naturalHistory: {
+      title: "Miacid-like climbing hunter",
+      fieldNote: "The miacid-like climbing hunter fills the same uneasy space later occupied by small carnivorans: a tree-capable predator, fast enough to punish hesitation and patient enough to follow. It does not need to be the fastest animal in the canopy. It only needs to be faster than its quarry at the moment that matters.",
+      behaviour: "It hunts by repositioning rather than charging. It reads branch structure and uses angles of attack that cut off retreat. Repeated investigation will reveal a characteristic pre-spring pause as it locks its footing.",
+      ecology: "An apex predator of the mid-canopy. It can move through all arboreal layers and will follow prey from undergrowth to emergent canopy. Ground pursuit is slower, but it does not easily abandon a chase.",
+      gameplayInsight: "Distance and vertical movement buy time, not safety. Moving to higher layers gives more options, but this animal can follow. Your best survival window is the moment before it commits.",
+      scienceNote: "Miacids were small carnivoraforms of the Eocene, among the earliest mammals with the body plan that would lead to modern carnivores. Whether they were primarily arboreal is debated, but their retractile-adjacent claws and flexible limbs suggest significant climbing ability."
+    }
   }
 };
 
@@ -2870,6 +3056,7 @@ player.knownFoods = player.knownFoods || {};
 player.classKnowledge = player.classKnowledge || {};
 player.tileMemory = player.tileMemory || {};
 player.riskMemory = player.riskMemory || {};
+player.knowledgeByEncounterKey = player.knowledgeByEncounterKey || {};
 
 // ---------------------------------------------------------------------------
 // [STATE] DYNAMIC WORLD STATE
@@ -3048,6 +3235,17 @@ let callStreak = 0;
 let lastCallTurn = -999;
 let godModeEnabled = false;
 let qaBackSnapshot = null;
+
+const KNOWLEDGE_MAX = 30;
+const KNOWLEDGE_PER_ENTITY_CAP = 2;
+const KNOWLEDGE_TIERS = [
+  { threshold: 0,  tier: 0, label: "unknown" },
+  { threshold: 1,  tier: 1, label: "noticed" },
+  { threshold: 5,  tier: 2, label: "familiar" },
+  { threshold: 10, tier: 3, label: "understood" },
+  { threshold: 20, tier: 4, label: "expert" },
+  { threshold: 30, tier: 5, label: "natural-historian" }
+];
 
 let socialGroup = {
   members: [],
@@ -10263,6 +10461,143 @@ function classLearningGain(e) {
   }
 }
 
+// @target [INVESTIGATION] Encounter Type Key (for run-level knowledge tracking)
+function getEncounterTypeKey(e) {
+  if (!e) return "unknown";
+  return e.key || e.name || "unknown";
+}
+
+// @target [INVESTIGATION] Encounter Instance Id (for per-entity cap)
+function getEncounterInstanceId(e) {
+  if (!e) return "unknown";
+  if (e.instanceId) return e.instanceId;
+  if (e.origin) return `${e.key || e.name}_${e.origin.x}_${e.origin.y}_${e.origin.z}`;
+  return e.key || e.name || "unknown";
+}
+
+// @target [INVESTIGATION] Ensure Encounter Type Knowledge
+function ensureEncounterTypeKnowledge(typeKey) {
+  if (!player.knowledgeByEncounterKey) player.knowledgeByEncounterKey = {};
+  if (!player.knowledgeByEncounterKey[typeKey]) {
+    player.knowledgeByEncounterKey[typeKey] = {
+      investigations: 0,
+      unlockedTier: 0,
+      investigatedInstanceIds: {}
+    };
+  }
+  return player.knowledgeByEncounterKey[typeKey];
+}
+
+// @target [INVESTIGATION] Compute Knowledge Tier
+function computeKnowledgeTier(count) {
+  let tier = KNOWLEDGE_TIERS[0];
+  for (const t of KNOWLEDGE_TIERS) {
+    if (count >= t.threshold) tier = t;
+  }
+  return tier;
+}
+
+// @target [INVESTIGATION] Try Add Encounter Type Knowledge
+function tryAddEncounterTypeKnowledge(e) {
+  if (!e) return { gained: false, reason: "no-encounter" };
+  const typeKey = getEncounterTypeKey(e);
+  const instanceId = getEncounterInstanceId(e);
+  const tk = ensureEncounterTypeKnowledge(typeKey);
+  const perEntityCount = tk.investigatedInstanceIds[instanceId] || 0;
+
+  if (perEntityCount >= KNOWLEDGE_PER_ENTITY_CAP) {
+    addDebugTrace("investigation-knowledge-cap-reached", {
+      encounterKey: typeKey, name: e.name, instanceId,
+      perEntityCount, cap: KNOWLEDGE_PER_ENTITY_CAP
+    });
+    return { gained: false, reason: "entity-cap" };
+  }
+
+  if (tk.investigations >= KNOWLEDGE_MAX) {
+    return { gained: false, reason: "type-max" };
+  }
+
+  const prevCount = tk.investigations;
+  const prevTier = computeKnowledgeTier(prevCount);
+  tk.investigatedInstanceIds[instanceId] = perEntityCount + 1;
+  tk.investigations += 1;
+  const newCount = tk.investigations;
+  const newTier = computeKnowledgeTier(newCount);
+
+  addDebugTrace("investigation-knowledge-gained", {
+    encounterKey: typeKey, name: e.name, instanceId,
+    prevCount, newCount,
+    perEntityCount: tk.investigatedInstanceIds[instanceId],
+    prevTier: prevTier.label, newTier: newTier.label,
+    threshold: KNOWLEDGE_MAX
+  });
+
+  if (newTier.tier > prevTier.tier) {
+    tk.unlockedTier = newTier.tier;
+    addDebugTrace("investigation-knowledge-tier-unlocked", {
+      encounterKey: typeKey, name: e.name,
+      tier: newTier.tier, label: newTier.label,
+      threshold: newTier.threshold, count: newCount
+    });
+    return { gained: true, tierUnlocked: newTier };
+  }
+
+  return { gained: true, tierUnlocked: null };
+}
+
+// @target [INVESTIGATION] Investigation Knowledge Tier Text
+function investigationKnowledgeTierText(e, tier) {
+  if (!e || !tier) return "";
+  if (e.knowledgeTierText && Array.isArray(e.knowledgeTierText)) {
+    const idx = Math.min(tier.tier - 1, e.knowledgeTierText.length - 1);
+    if (idx >= 0 && e.knowledgeTierText[idx]) return e.knowledgeTierText[idx];
+  }
+  const name = e.name || "creature";
+  const generic = {
+    1: `You pay closer attention to the ${name} than before.`,
+    2: `You are beginning to read the ${name}'s habits.`,
+    3: `You understand something about how the ${name} operates here.`,
+    4: `Long observation has given you a clear picture of the ${name}.`,
+    5: `Your knowledge of the ${name} is now as complete as it can be.`
+  };
+  return generic[tier.tier] || "";
+}
+
+// @target [INVESTIGATION] Show Natural History Popup
+function showNaturalHistoryPopup(e) {
+  if (!e) return;
+  const modal = document.getElementById("nhModal");
+  const body = document.getElementById("nhModalBody");
+  const titleEl = document.getElementById("nhModalTitle");
+  if (!modal || !body || !titleEl) return;
+
+  const nh = e.naturalHistory || {};
+  const name = nh.title || e.name || "creature";
+  titleEl.textContent = `Natural History Unlocked: ${name}`;
+
+  const sections = [
+    { label: "Field Note", key: "fieldNote" },
+    { label: "Behaviour", key: "behaviour" },
+    { label: "Ecology", key: "ecology" },
+    { label: "Danger to you", key: "gameplayInsight" },
+    { label: "Science note", key: "scienceNote" }
+  ];
+
+  const rendered = sections
+    .filter(s => nh[s.key])
+    .map(s => `<div class="nhModalSection"><strong>${s.label}</strong><p>${nh[s.key]}</p></div>`)
+    .join("");
+
+  body.innerHTML = rendered || `<div class="nhModalSection"><p>Your sustained observation of the <em>${name}</em> over many encounters has built a detailed understanding of its place in this world.</p></div>`;
+
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+
+  addDebugTrace("natural-history-unlocked", {
+    encounterKey: getEncounterTypeKey(e), name: e.name, naturalHistory: cloneDebug(nh)
+  });
+}
+
 // @target [INVESTIGATION] Investigation Diminishing Text
 function investigationDiminishingText(e, ceiling) {
   const className = knowledgeClassFor(e);
@@ -10531,6 +10866,21 @@ function investigate() {
   k.encounterInvestigations += 1;
   k.level = Math.min(k.level + 1, ceiling);
   classLearningGain(e);
+
+  const knowledgeResult = tryAddEncounterTypeKnowledge(e);
+  if (knowledgeResult.gained) {
+    const tk = ensureEncounterTypeKnowledge(getEncounterTypeKey(e));
+    const kCount = tk.investigations;
+    const eName = e.name || "creature";
+    addLog(`Knowledge gained: ${eName} ${kCount}/${KNOWLEDGE_MAX}.`, "knowledge");
+    if (knowledgeResult.tierUnlocked) {
+      const tierText = investigationKnowledgeTierText(e, knowledgeResult.tierUnlocked);
+      if (tierText) addLog(tierText, "knowledge-tier");
+    }
+    if (kCount >= KNOWLEDGE_MAX) {
+      showNaturalHistoryPopup(e);
+    }
+  }
 
   revealSubtypeIfKnown(e, k.level);
 
@@ -15175,6 +15525,15 @@ const showWorldMapButton = document.getElementById("showWorldMap");
 if (showWorldMapButton) showWorldMapButton.addEventListener("click", () => setActiveMapView("world"));
 const mapOverlayClose = document.getElementById("mapOverlayClose");
 if (mapOverlayClose) mapOverlayClose.addEventListener("click", closeMapOverlay);
+const nhModalClose = document.getElementById("nhModalClose");
+if (nhModalClose) nhModalClose.addEventListener("click", () => {
+  const nhModal = document.getElementById("nhModal");
+  if (nhModal) { nhModal.classList.remove("open"); nhModal.setAttribute("aria-hidden", "true"); }
+});
+const nhModal = document.getElementById("nhModal");
+if (nhModal) nhModal.addEventListener("click", event => {
+  if (event.target === nhModal) { nhModal.classList.remove("open"); nhModal.setAttribute("aria-hidden", "true"); }
+});
 const mapOverlay = document.getElementById("mapOverlay");
 if (mapOverlay) {
   mapOverlay.addEventListener("click", event => {
@@ -15200,7 +15559,15 @@ if (godModeToggle) godModeToggle.addEventListener("click", () => {
   godModeToggle.style.outline = godModeEnabled ? "2px solid #f90" : "";
 });
 document.addEventListener("keydown", event => {
-  if (event.key === "Escape") { closeMapOverlay(); closeCallChoiceOverlay(); }
+  if (event.key === "Escape") {
+    closeMapOverlay();
+    closeCallChoiceOverlay();
+    const nhModalEl = document.getElementById("nhModal");
+    if (nhModalEl && nhModalEl.classList.contains("open")) {
+      nhModalEl.classList.remove("open");
+      nhModalEl.setAttribute("aria-hidden", "true");
+    }
+  }
 });
 
 document.getElementById("northwest").addEventListener("click", () => move(-1, -1, "northwest"));
