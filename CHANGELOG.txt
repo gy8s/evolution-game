@@ -1,3 +1,7 @@
+[2026-05-09 group-mating-fix | Claude]
+Mobile layout fix: courtCompanion button now hidden (display:none) when no eligible companion is present; shown only when canCourtGroupMember() returns a truthy member. Previously the button was always visible (just disabled), adding an 8th button to the vertical-controls row and breaking the mobile layout. Pattern now matches the encounter-card Court button which only renders when canAttemptMating() is true.
+- Syntax check: PASS.
+
 [2026-05-09 group-mating | Claude]
 Within-group mating — companion courtship path. Complements the existing encounter-mating system. Shares the same matingCount/lastMatingTurn state and goal.
 - canCourtGroupMember(): returns first eligible group companion (opposite sex, youngAdult/adult/old, not matedThisRun) when all gates pass: hasGroup(), isPlayerMature(), matingCount < 5, fitness >= 50, energy >= 40, no activePursuit, 8-turn cooldown clear. Returns null otherwise.

@@ -12774,7 +12774,11 @@ function renderButtons() {
   const leaveButton = document.getElementById("leaveGroup");
   if (leaveButton) leaveButton.disabled = disabled || !hasGroup();
   const courtCompanionButton = document.getElementById("courtCompanion");
-  if (courtCompanionButton) courtCompanionButton.disabled = disabled || !canCourtGroupMember();
+  if (courtCompanionButton) {
+    const eligibleMate = !disabled && canCourtGroupMember();
+    courtCompanionButton.style.display = eligibleMate ? "" : "none";
+    courtCompanionButton.disabled = !eligibleMate;
+  }
   updateBotStatus();
 }
 function renderLayers() {
