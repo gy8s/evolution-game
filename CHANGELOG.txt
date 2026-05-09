@@ -1,3 +1,10 @@
+[2026-05-09 group-safety | Claude]
+Group size cap raised and companion intercept added to fatal predator death roll.
+- playerSpeciesProfile.maxGroupSize: raised from 5 to 10, matching SOCIAL_ENGINE_MAX_GROUP. The engine ceiling was already 10; the player's own species profile was the binding constraint. Difficulty of reaching and maintaining large groups is preserved by existing mechanics (conservative acceptance rolls, cohesion decay, stress events).
+- exposeCarelessActionToThreat(): death roll now uses groupedChance = clamp(round(chance * socialSafetyModifier()), 15, 99) instead of bare chance. With one companion the fatal chance drops from 98% to ~86%; with five companions (12% per member, floor 0.40) it floors near ~39%. This matches the existing pressure-damage branch which already applied socialSafetyModifier().
+- exposeCarelessActionToThreat(): companion intercept block added inside the death-roll-passes branch, before die(). If socialGroup.members.length > 0, an intercept roll is made: interceptChance = clamp(members.length * 18 + round(cohesion * 0.15), 10, 70). On success, a companion (preferring role "protective" if present, otherwise random) is removed from the group, losses and cohesion penalties are applied, the player takes reduced injury (counterDamage * 0.45 clamped to 20-50), and die() is skipped. Log and narration lines confirm the sacrifice. The threat becomes currentEncounter and dangerGrace is set. No intercept = die() runs as before.
+- Syntax check: PASS.
+
 [2026-05-06 social-persist | Claude]
 Social encounter short-duration tile hold and movement feedback. No new encounter generation, no balance change.
 - nearbyRecentSocial: new module-level variable {encounter, x, y, z, expiresAfterTurn}. Null-safe; cleared on resetGameForPlayer() and resetGameForBot().

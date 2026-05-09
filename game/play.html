@@ -3056,7 +3056,7 @@ const playerSpeciesProfile = {
   species: "tree-climber",
   groupName: "tree-climber band",
   icon: "🐒",
-  maxGroupSize: 5,
+  maxGroupSize: 10,
   groupSizeCap: 6,       // T. belgica: encountered groups draw up to this ceiling
   baseSocialChance: 6
 };
@@ -7134,10 +7134,31 @@ function exposeCarelessActionToThreat(actionLabel, target, opts = {}) {
     : 65;
   const chance = clamp(base + Math.round((threat.aggression || 50) * 0.08) - (player.z >= 2 && threat.pursuitType === "ground" ? 60 : 0), 25, 99);
 
-  if (debugRoll("careless action near predator", chance, {actionLabel, target: cloneDebug(target), threat: cloneDebug(threat), chance})) {
+  const groupedChance = clamp(Math.round(chance * socialSafetyModifier()), 15, 99);
+  if (debugRoll("careless action near predator", groupedChance, {actionLabel, target: cloneDebug(target), threat: cloneDebug(threat), chance: groupedChance})) {
     stressGroupForRisk(`${actionLabel} beside ${threat.name}`, threat.dangerProfile === "fatal" ? 4 : 3, {directHit: true});
     const message = `You focus on the ${targetName} while the ${threat.name} is close. The mistake gives it the opening it needs.`;
     addLog(`Turn ${player.turn}: ${message}`, "death");
+    if (socialGroup.members.length > 0) {
+      const interceptChance = clamp(socialGroup.members.length * 18 + Math.round((socialGroup.cohesion || 0) * 0.15), 10, 70);
+      const protectiveIndex = socialGroup.members.findIndex(m => m.role === "protective");
+      const interceptorIdx = protectiveIndex !== -1 ? protectiveIndex : Math.floor(Math.random() * socialGroup.members.length);
+      const interceptor = socialGroup.members[interceptorIdx];
+      if (roll(interceptChance)) {
+        socialGroup.members.splice(interceptorIdx, 1);
+        socialGroup.losses = (socialGroup.losses || 0) + 1;
+        socialGroup.cohesion = clamp((socialGroup.cohesion || 0) - 30, 0, 100);
+        const escapeInjury = clamp(Math.round(counterDamage(threat) * 0.45), 20, 50);
+        player.fitness = clamp(player.fitness - escapeInjury, 1, 100);
+        addLog(`The ${interceptor.displayLabel || interceptor.name || player.species} throws itself into the attack. You scramble free as the ${threat.name} takes the companion. Fitness -${escapeInjury}.`, "death");
+        setNarration(`One of your group absorbs the fatal attack. You escape, but the loss shakes the group badly.`);
+        stressGroupForRisk(`companion taken by ${threat.name}`, 5, {directHit: false});
+        currentEncounter = threat;
+        dangerGrace = true;
+        render();
+        return true;
+      }
+    }
     die(`The ${threat.name} takes you while you are distracted by the ${targetName}.`, {source: "careless-action-near-predator", action: actionLabel, predator: threat.name, target: targetName, encounter: cloneDebug(threat)});
     return true;
   }
