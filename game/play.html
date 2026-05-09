@@ -2847,7 +2847,9 @@ const player = {
   undergrowthExposure: 0,
   parasiteExposure: {undergrowth: 0, carcass: 0},
   lastCarcassAge: 0,
-  alcohol: null
+  alcohol: null,
+  matingCount: 0,
+  lastMatingTurn: -999
 };
 
 // Explicitly initialise learning/memory stores.
@@ -6276,6 +6278,147 @@ function sameSpeciesSocialChance() {
   if (h.visibility > 1.25) chance += 1;
   if (hasGroup()) chance -= socialGroup.members.length * 1.5;
   return clamp(chance, 2, 9);
+}
+
+// @fn isPlayerMature
+function isPlayerMature() {
+  return player.size >= 5.3;
+}
+
+// @fn findCompatibleMateInEncounter
+function findCompatibleMateInEncounter(encounter) {
+  if (!encounter || !encounter.social || !encounter.social.members) return null;
+  const oppSex = player.sex === "female" ? "male" : "female";
+  const matable = ["youngAdult", "adult", "old"];
+  return encounter.social.members.find(
+    m => m.sex === oppSex && matable.includes(m.ageClass) && !m.matedThisRun
+  ) || null;
+}
+
+// @fn canAttemptMating
+function canAttemptMating(encounter) {
+  if (!encounter || encounter.kind !== "social") return false;
+  if (!isPlayerMature()) return false;
+  if ((player.matingCount || 0) >= 5) return false;
+  if (player.fitness < 50 || player.energy < 40) return false;
+  if (activePursuit) return false;
+  if (encounter.social && encounter.social.matedThisRun) return false;
+  if ((player.turn - (player.lastMatingTurn || -999)) < 8) return false;
+  return !!findCompatibleMateInEncounter(encounter);
+}
+
+// @fn attemptMating
+function attemptMating() {
+  if (player.dead) return;
+  if (!currentEncounter || currentEncounter.kind !== "social") return;
+  lastActionKind = "court";
+  if (!startTurn()) return;
+
+  const encounter = currentEncounter;
+  const attitude = (encounter.social && encounter.social.hiddenAttitude) || "disinterested";
+
+  addDebugTrace("mating-eligibility-check", {
+    playerSex: player.sex,
+    playerSize: player.size,
+    playerMature: isPlayerMature(),
+    playerFitness: player.fitness,
+    playerEnergy: player.energy,
+    matingCount: player.matingCount,
+    lastMatingTurn: player.lastMatingTurn,
+    attitude,
+    matedThisRun: !!(encounter.social && encounter.social.matedThisRun),
+    activePursuit: !!activePursuit
+  });
+
+  if (!isPlayerMature()) {
+    addLog(`Turn ${player.turn}: You are not mature enough for this.`, "minor");
+    setNarration("You are not mature enough for this. Survival is the priority for now.");
+    render();
+    return;
+  }
+  if ((player.matingCount || 0) >= 5) {
+    addLog(`Turn ${player.turn}: You have already reached your mating goal.`, "minor");
+    render();
+    return;
+  }
+  if (player.fitness < 50 || player.energy < 40) {
+    addLog(`Turn ${player.turn}: You are too depleted to pursue courtship right now.`, "minor");
+    setNarration("Courtship requires reserves you do not have. Eat, rest, recover.");
+    render();
+    return;
+  }
+  if (activePursuit) {
+    addLog(`Turn ${player.turn}: A predator is close. This is not the time.`, "minor");
+    render();
+    return;
+  }
+  if (encounter.social && encounter.social.matedThisRun) {
+    addLog(`Turn ${player.turn}: This individual is not receptive again.`, "minor");
+    render();
+    return;
+  }
+  if ((player.turn - (player.lastMatingTurn || -999)) < 8) {
+    addLog(`Turn ${player.turn}: You need more time to recover before trying again.`, "minor");
+    render();
+    return;
+  }
+
+  const mate = findCompatibleMateInEncounter(encounter);
+  if (!mate) {
+    addLog(`Turn ${player.turn}: There is no compatible individual here.`, "minor");
+    render();
+    return;
+  }
+
+  let chance = attitude === "receptive" ? 52
+    : attitude === "tense" ? 22
+    : attitude === "hostile" ? 5
+    : 15; // disinterested
+  if (hasGroup()) chance += Math.round((socialGroup.cohesion || 0) * 0.1);
+  chance = clamp(chance, 3, 75);
+
+  const roll_result = debugRoll("mating-attempt", chance, {
+    playerSex: player.sex,
+    playerSize: player.size,
+    targetSex: mate.sex,
+    targetAgeClass: mate.ageClass,
+    targetLabel: mate.displayLabel,
+    attitude,
+    chance,
+    matingCountBefore: player.matingCount
+  });
+
+  if (roll_result) {
+    mate.matedThisRun = true;
+    if (encounter.social) encounter.social.matedThisRun = true;
+    player.matingCount = (player.matingCount || 0) + 1;
+    player.lastMatingTurn = player.turn;
+    player.energy = clamp(player.energy - 15, 0, 100);
+    const countAfter = player.matingCount;
+    addLog(`Turn ${player.turn}: The ${mate.displayLabel || mate.sex + " " + player.species} accepts your approach. You mate. Progress: ${countAfter}/5.`, "prey");
+    if (countAfter >= 5) {
+      setNarration("Five times you have passed on what you are. The season turns. There is a kind of continuity here.");
+      addLog(`Turn ${player.turn}: Mating goal complete. Five successful matings.`, "prey");
+      addDebugTrace("mating-goal-complete", {matingCount: countAfter, turn: player.turn});
+    } else {
+      setNarration("For a moment, survival becomes continuity. The encounter settles into brief acceptance before the group moves on.");
+    }
+    addDebugTrace("mating-success", {playerSex: player.sex, targetSex: mate.sex, targetLabel: mate.displayLabel, attitude, chance, matingCountAfter: countAfter});
+  } else {
+    player.energy = clamp(player.energy - 8, 0, 100);
+    incrementSocialHarassment(encounter);
+    const rejectionMsg = attitude === "receptive"
+      ? "The approach does not land as you hoped. The moment passes."
+      : attitude === "hostile"
+      ? "The rejection is immediate and aggressive. You pull back."
+      : attitude === "tense"
+      ? "Your advance is met with clear displeasure. The group shifts away."
+      : "The individual turns away. No interest here.";
+    addLog(`Turn ${player.turn}: ${rejectionMsg}`, "minor");
+    setNarration(rejectionMsg);
+    addDebugTrace("mating-failure", {playerSex: player.sex, targetSex: mate.sex, targetLabel: mate.displayLabel, attitude, chance, harassmentCounter: encounter.social && encounter.social.harassmentCounter});
+  }
+  render();
 }
 
 // @fn leaveGroup
@@ -11142,7 +11285,9 @@ function resetGameForPlayer(reason = "manual restart") {
     undergrowthExposure: 0,
     parasiteExposure: {undergrowth: 0, carcass: 0},
     lastCarcassAge: 0,
-    alcohol: null
+    alcohol: null,
+    matingCount: 0,
+    lastMatingTurn: -999
   });
   lastHabitatKey = "primary";
   waterState = {inWater: false, turns: 0};
@@ -11392,6 +11537,7 @@ function getRandomBotActions() {
       add("join-social", "join/invite social group", () => acceptSocialEncounter("join"), "social");
       add("attack-social", "attack same-species encounter", attackSocialEncounter, "social");
       add("avoid-social", "avoid social group", avoidSocialEncounter, "social");
+      if (canAttemptMating(currentEncounter)) add("mate-social", "court/attempt mating", attemptMating, "social");
     } else {
       if (currentEncounter.canInvestigate) add("investigate", `investigate ${currentEncounter.name}`, investigate, "encounter");
       if (currentEncounter.kind === "animal") add("attack", `attack ${currentEncounter.name}`, attack, "encounter");
@@ -11544,7 +11690,9 @@ function resetGameForBot(reason = "bot auto-reset") {
     undergrowthExposure: 0,
     parasiteExposure: {undergrowth: 0, carcass: 0},
     lastCarcassAge: 0,
-    alcohol: null
+    alcohol: null,
+    matingCount: 0,
+    lastMatingTurn: -999
   });
   lastHabitatKey = "primary";
   waterState = {inWater: false, turns: 0};
@@ -13925,6 +14073,7 @@ function render() {
     <span class="socialChip" title="Sex"><span class="socialIcon">${player.sex === "female" ? "♀" : "♂"}</span><span>${player.sex}</span></span>
     <span class="socialChip" title="Group size"><span class="socialIcon">👥</span><span>${groupSize()}</span></span>
     <span class="socialChip" title="Group cohesion"><span class="socialIcon">◆</span><span>${Math.round(socialGroup.cohesion)}</span></span><span class="socialChip" title="Group losses"><span class="socialIcon">☠</span><span>${socialGroup.losses || 0}</span></span>
+    <span class="socialChip" title="Mating progress"><span class="socialIcon">♥</span><span>${player.matingCount || 0}/5</span></span>
   `;
   const mapFootnote = document.getElementById("mapFootnote");
   if (mapFootnote) mapFootnote.textContent = `Turn ${player.turn} · X ${player.x}, Y ${player.y}`;
@@ -14359,6 +14508,9 @@ function encounterActionsHtml(e) {
       html += `<button type="button" id="cardSocialAttackButton" class="dangerButton">Attack</button>`;
       html += `<button type="button" id="cardAvoidButton" class="dangerButton">Avoid</button>`;
     }
+    if (canAttemptMating(e)) {
+      html += `<button type="button" id="cardMateButton" class="eatButton">Court</button>`;
+    }
   }
 
   if (e.kind === "animal") {
@@ -14461,6 +14613,14 @@ function bindCardActionButtons() {
     avoidButton.onclick = function(event) {
       event.preventDefault();
       avoidSocialEncounter();
+    };
+  }
+
+  const mateButton = document.getElementById("cardMateButton");
+  if (mateButton) {
+    mateButton.onclick = function(event) {
+      event.preventDefault();
+      attemptMating();
     };
   }
 

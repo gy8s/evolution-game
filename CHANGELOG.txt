@@ -1,3 +1,17 @@
+[2026-05-09 mating-progression | Claude]
+First-pass mating progression mechanic. No pregnancy, offspring, or genetic systems. No save/load added (game is in-memory only).
+- player state: matingCount (default 0) and lastMatingTurn (default -999) added to player object literal, resetGameForPlayer(), and resetGameForBot(). Both fields reset on new run.
+- isPlayerMature(): returns true when player.size >= 5.3. Requires approximately 3 growth cycles (~90 turns of energy >= 75 and hydration >= 45). Expandable to a full lifeStage system later.
+- findCompatibleMateInEncounter(encounter): finds first opposite-sex, non-juvenile (youngAdult/adult/old), not-yet-mated member in a social encounter. Returns null if none.
+- canAttemptMating(encounter): eligibility gate — mature, matingCount < 5, fitness >= 50, energy >= 40, no activePursuit, encounter is social, not matedThisRun, cooldown of 8 turns since last mating, compatible member exists.
+- attemptMating(): core mating action. Checks eligibility with early returns and player-facing messages ("You are not mature enough for this.", "You are too depleted...", etc.). Chance derived from hiddenAttitude: receptive 52%, disinterested 15%, tense 22%, hostile 5%; boosted by round(cohesion * 0.1) if player has a group; clamped 3–75. On success: matingCount++, mate.matedThisRun = true, encounter.social.matedThisRun = true, lastMatingTurn set, energy -15, log message with progress fraction, goal-complete log + debug trace at 5/5. On failure: energy -8, incrementSocialHarassment() called (uses existing harassment/escalation system), attitude-keyed rejection message. Debug traces on every call: mating-eligibility-check, mating-attempt, mating-success / mating-failure, mating-goal-complete.
+- encounterActionsHtml(): "Court" button (class eatButton, id cardMateButton) added to social encounter card when canAttemptMating() returns true.
+- bindCardActionButtons(): cardMateButton wired to attemptMating().
+- getRandomBotActions(): mate-social action added to bot pool when social encounter present and canAttemptMating() true.
+- topSocialStat: mating progress chip appended — "♥ N/5" — using existing socialChip class.
+- Codex P2 fix: lastActionKind = "court" set before startTurn() in attemptMating(). Without this, mating inherited the previous action's metabolism profile. "court" falls through to energyCost: 1 (ordinary action baseline) in actionMetabolismProfile().
+- Syntax check: PASS.
+
 [2026-05-09 group-safety | Claude]
 Group size cap raised and companion intercept added to fatal predator death roll.
 - playerSpeciesProfile.maxGroupSize: raised from 5 to 10, matching SOCIAL_ENGINE_MAX_GROUP. The engine ceiling was already 10; the player's own species profile was the binding constraint. Difficulty of reaching and maintaining large groups is preserved by existing mechanics (conservative acceptance rolls, cohesion decay, stress events).
