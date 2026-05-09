@@ -7148,6 +7148,7 @@ function exposeCarelessActionToThreat(actionLabel, target, opts = {}) {
         socialGroup.members.splice(interceptorIdx, 1);
         socialGroup.losses = (socialGroup.losses || 0) + 1;
         socialGroup.cohesion = clamp((socialGroup.cohesion || 0) - 30, 0, 100);
+        if (!socialGroup.members.length) { socialGroup.cohesion = 0; socialGroup.turnsTogether = 0; }
         const escapeInjury = clamp(Math.round(counterDamage(threat) * 0.45), 20, 50);
         player.fitness = clamp(player.fitness - escapeInjury, 1, 100);
         addLog(`The ${interceptor.displayLabel || interceptor.name || player.species} throws itself into the attack. You scramble free as the ${threat.name} takes the companion. Fitness -${escapeInjury}.`, "death");
