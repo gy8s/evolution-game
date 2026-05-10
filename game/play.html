@@ -17349,7 +17349,11 @@ if (fjClose) fjClose.addEventListener("click", () => {
 if (fjModal) fjModal.addEventListener("click", event => {
   if (event.target === fjModal) { fjModal.classList.remove("open"); fjModal.setAttribute("aria-hidden", "true"); }
   const row = event.target.closest(".fjEntryRow[data-fjtk]");
-  if (row) showEncounterJournalEntry(row.dataset.fjtk);
+  if (row) {
+    fjModal.classList.remove("open");
+    fjModal.setAttribute("aria-hidden", "true");
+    showEncounterJournalEntry(row.dataset.fjtk);
+  }
 });
 
 const fjJournalBtn = document.getElementById("fjJournalBtn");
