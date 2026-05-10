@@ -1,3 +1,48 @@
+[2026-05-10 roguelike-profile-saves | Claude]
+Profile-based local save system. Players select or create a profile before each session, can save and resume active runs, and accumulate run history and stats per profile.
+
+Data model (localStorage):
+- evolutionGameProfiles_v1: master profiles store. schemaVersion 1. Each profile holds profileId, name, createdAt, lastPlayedAt, buildId, buildCompatible, stats (totalRuns, completedRuns, deaths, wins, bestTurn, bestMatingCount, bestKnowledgeUnlocks), activeRun (or null), runHistory (max 20 entries).
+- evolutionGameActiveProfileId_v1: last-active profile ID, persists across page loads.
+- Corrupt data backed up to evolutionGameProfiles_corruptBackup_<timestamp> before returning a fresh store.
+
+Profile startup modal:
+- Shown on every page load before the game world is generated.
+- Lists all saved profiles with active-run summaries and run history previews.
+- Buttons: New Profile (prompt for name), Resume Run (if active run exists), Play / Start New Run.
+- Pre-selects last-used profile. Cannot be dismissed without a selection.
+- Build mismatch between saved profile and current GAME_VERSION shown inline as [build mismatch] with a confirm dialog before resuming.
+
+Active run save/resume:
+- profileCaptureState() serialises full game state: all 6 world grid arrays (terrain, altitude, landform, habitat, muddyShallows, lianaBridges at 100x100), player object, all dynamic-state globals (waterState, currentEncounter, tileEncounterQueue, carcass, interruptedFood, nearbyEntities, persistentEntities, worldRegistry, staticTileContents, consumedStaticTileKeys, burnedTiles, activePursuit, socialGroup, environment, timeState, investigationText, lastNarration, heardText, smellText, callStreak, etc.), debugTrace capped to 200 entries, visible log capped to 150 entries.
+- profileRestoreState() restores all globals in-place; world arrays written cell-by-cell (avoids const reassignment). exploredTiles restored as new Set().
+- Size warning logged if serialised state exceeds 4 MB.
+- Save active run: "Save Active Run" button in Developer / QA tools. Logs turn and KB size.
+- Resume active run: "Resume Active Run" button in Developer / QA tools, or "Resume Run" in startup modal.
+- Note: Math.random() state is not capturable; future encounters after resume are newly random.
+
+Death handling:
+- profileOnRunEnd("death") called from die() before maybePromptRestartAfterDeath(). Converts activeRun to runHistory entry, updates profile stats, clears activeRun.
+- runHistory entry includes: runId, buildId, startedAt, endedAt, outcome, turnsSurvived, deathCause, deathContextSource, matingCount, matingGoal, maxGroupSize (at run-end), finalSize, finalLifeStage, knowledgeUnlockCount, seed (run ID), usedGodMode, qaBackUses.
+
+Win handling:
+- onWinAchieved() called when matingCount reaches 5 (both attemptMating and attemptGroupMating paths). Shows win modal once per run (guarded by winAchievedThisRun flag).
+- Win modal: "Record Win & Continue" calls profileOnRunEnd("win"), logs win, sets winAchievedThisRun = true; "Keep Playing" dismisses.
+
+QA / God Mode tracking:
+- runGodModeUsed = true set when God Mode is enabled during a run; stored in runHistory entry.
+- runQaBackUses++ incremented in restoreQABackSnapshot(); count stored in runHistory entry.
+
+Profile panel in Developer / QA tools (above bot panel):
+- Shows: current profile name, totalRuns, deaths, wins, bestTurn.
+- Buttons: New Profile, Load Profile, Rename, Delete, Save Active Run, Resume Active Run, Start New Run.
+- Run history list: last 5 runs with outcome (win/death/abandoned), turn count, mating progress, death cause.
+
+New globals: currentProfileId, currentRunId, runGodModeUsed, runQaBackUses, runMaxGroupSize, runStartedAt, winAchievedThisRun.
+New constants: PROFILE_STORE_KEY, ACTIVE_PROFILE_KEY_STORE, PROFILE_LOG_CAP (150), PROFILE_TRACE_CAP (200).
+Debug traces added: profile-build-mismatch, profile-save-error, profile-save-capture-error, profile-save-write-error, profile-resume-error, profile-run-saved, profile-run-resumed, profile-new-run, qa-back-used (runQaBackUses++ added).
+Startup sequence changed: validateEncounterData() then profileShowStartupModal() then initGame(). initGame() calls generateTerrain/generateHabitats/seedClayDeposits/reconcileCurrentTileState or restores saved state.
+
 [2026-05-09 investigation-knowledge-progression | Claude]
 Run-level investigation knowledge progression system. Repeated investigation of encounter types builds long-term natural-history knowledge. Full unlock at 30 valid investigations across at least 15 separate entities produces a natural-history popup.
 
