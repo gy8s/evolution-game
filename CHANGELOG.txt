@@ -1,3 +1,17 @@
+[2026-05-10 roguelike-profile-saves-fix2 | Claude]
+Fix mid-run profile switch not resetting run-tracking globals.
+
+Switching profiles mid-run via the Load Profile button now calls profileStartNewRun() after setting currentProfileId, instead of only nulling currentRunId and runStartedAt. This ensures runGodModeUsed, runQaBackUses, runMaxGroupSize, and winAchievedThisRun are all reset to clean state for the new profile — previously, a god-mode-used flag from an abandoned run could contaminate the attribution of the next run on the newly loaded profile.
+
+Addresses Codex P2 on PR #65.
+
+[2026-05-10 roguelike-profile-saves-fix | Claude]
+Two bug fixes on the profile save system.
+
+Death modal fix: profileOnRunEnd("death") was called inside die(), before maybePromptRestartAfterDeath(). Any uncaught error in profileOnRunEnd could silently prevent the death modal from showing. Also, calling it at die() time was wrong when QA Back was in play — each QA-Back-reversed death was being recorded as a separate run entry. Fix: removed profileOnRunEnd("death") from die(). It is now called from deathModalRestart (Restart button) and deathModalStay (Stay button) with a try/catch guard. QA Back (deathModalQABack) does not call it — reverted deaths are not recorded.
+
+God Mode run handling: runs where usedGodMode=true or qaBackUses>0 are now tracked separately. profileUpdateStats no longer increments totalRuns or deaths for these runs; instead it increments a new godModeRuns counter. profileDefaultStats now includes godModeRuns: 0. Best-turn/mating/knowledge records still update from god mode runs. Run history entries for god mode runs show an amber [GM] badge in both the dev-panel history list and the startup modal last-run preview. The profile label in the dev panel shows "GM runs: N" when non-zero.
+
 [2026-05-10 nh-progressive-reveal | Claude]
 Investigation knowledge popup redesigned as progressive field notes system.
 

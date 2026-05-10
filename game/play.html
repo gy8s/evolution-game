@@ -4214,8 +4214,10 @@ function profileLoadStore() {
 function profileSaveStore(data) {
   try {
     localStorage.setItem(PROFILE_STORE_KEY, JSON.stringify(data));
+    return true;
   } catch (e) {
     addDebugTrace("profile-save-error", {error: String(e)});
+    return false;
   }
 }
 
@@ -4224,7 +4226,7 @@ function profileEmptyStore() {
 }
 
 function profileDefaultStats() {
-  return {totalRuns: 0, completedRuns: 0, deaths: 0, wins: 0, bestTurn: 0, bestMatingCount: 0, bestKnowledgeUnlocks: 0};
+  return {totalRuns: 0, completedRuns: 0, deaths: 0, wins: 0, godModeRuns: 0, bestTurn: 0, bestMatingCount: 0, bestKnowledgeUnlocks: 0};
 }
 
 function profileCreateNew(name) {
@@ -4431,12 +4433,21 @@ function profileBuildRunSummary(outcome) {
   };
 }
 
+function profileRunIsGodMode(summary) {
+  return !!(summary.usedGodMode || summary.qaBackUses > 0);
+}
+
 function profileUpdateStats(profile, summary) {
   const s = profile.stats;
-  s.totalRuns = (s.totalRuns || 0) + 1;
-  if (summary.outcome === "death") s.deaths = (s.deaths || 0) + 1;
-  if (summary.outcome === "win") { s.wins = (s.wins || 0) + 1; s.completedRuns = (s.completedRuns || 0) + 1; }
-  if (summary.outcome === "abandoned") s.completedRuns = (s.completedRuns || 0) + 1;
+  const gm = profileRunIsGodMode(summary);
+  if (gm) {
+    s.godModeRuns = (s.godModeRuns || 0) + 1;
+  } else {
+    s.totalRuns = (s.totalRuns || 0) + 1;
+    if (summary.outcome === "death") s.deaths = (s.deaths || 0) + 1;
+    if (summary.outcome === "win") { s.wins = (s.wins || 0) + 1; s.completedRuns = (s.completedRuns || 0) + 1; }
+    if (summary.outcome === "abandoned") s.completedRuns = (s.completedRuns || 0) + 1;
+  }
   if (summary.turnsSurvived > (s.bestTurn || 0)) s.bestTurn = summary.turnsSurvived;
   if (summary.matingCount > (s.bestMatingCount || 0)) s.bestMatingCount = summary.matingCount;
   if (summary.knowledgeUnlockCount > (s.bestKnowledgeUnlocks || 0)) s.bestKnowledgeUnlocks = summary.knowledgeUnlockCount;
@@ -4493,6 +4504,8 @@ function profileSaveActiveRun() {
     lastSavedAt: new Date().toISOString(),
     buildId: GAME_VERSION,
     seed: currentRunId,
+    runGodModeUsed,
+    runQaBackUses,
     summary: {
       turn: player.turn,
       x: player.x,
@@ -4510,13 +4523,14 @@ function profileSaveActiveRun() {
   profile.lastPlayedAt = new Date().toISOString();
   profile.buildId = GAME_VERSION;
 
-  try {
-    profileSaveStore(store);
+  const saved = profileSaveStore(store);
+  if (saved) {
     addLog(`Run saved at turn ${player.turn} (${sizeKB} KB).`, "minor");
     addDebugTrace("profile-run-saved", {turn: player.turn, sizeKB, runId: currentRunId});
-  } catch (e) {
-    addLog("Save failed — localStorage write error.", "minor");
-    addDebugTrace("profile-save-write-error", {error: String(e)});
+  } else {
+    addLog("Save failed — localStorage write error (quota or security). Run was not persisted.", "death");
+    addDebugTrace("profile-save-write-error", {turn: player.turn, sizeKB, runId: currentRunId});
+    profile.activeRun = null;
   }
   profileUpdatePanelUI();
 }
@@ -4547,8 +4561,8 @@ function profileResumeActiveRun(profile) {
   }
   currentRunId = profile.activeRun.runId || profileGenerateId("run");
   runStartedAt = profile.activeRun.startedAt || new Date().toISOString();
-  runGodModeUsed = false;
-  runQaBackUses = 0;
+  runGodModeUsed = !!(profile.activeRun.runGodModeUsed);
+  runQaBackUses = profile.activeRun.runQaBackUses || 0;
   runMaxGroupSize = 0;
   winAchievedThisRun = false;
   clearRunLogsForNewGame();
@@ -4602,7 +4616,9 @@ function profileUpdatePanelUI() {
   const profile = store.profiles[currentProfileId];
   if (!profile) { if (label) label.textContent = "No profile active"; return; }
   const s = profile.stats;
-  if (label) label.textContent = profile.name + " | Runs: " + s.totalRuns + " | Deaths: " + s.deaths + " | Wins: " + s.wins + " | Best turn: " + s.bestTurn;
+  const gmCount = s.godModeRuns || 0;
+  const gmNote = gmCount > 0 ? " | GM runs: " + gmCount : "";
+  if (label) label.textContent = profile.name + " | Runs: " + s.totalRuns + " | Deaths: " + s.deaths + " | Wins: " + s.wins + gmNote + " | Best turn: " + s.bestTurn;
   if (histEl) {
     const recent = (profile.runHistory || []).slice(0, 5);
     if (!recent.length) {
@@ -4611,7 +4627,8 @@ function profileUpdatePanelUI() {
       histEl.innerHTML = recent.map((r, i) => {
         const cls = r.outcome === "win" ? "win" : r.outcome === "death" ? "death" : "abandoned";
         const cause = r.deathCause ? " — " + r.deathCause.slice(0, 40) : "";
-        return '<span class="' + cls + '">Run ' + (i + 1) + ': ' + r.outcome + ' | Turn ' + r.turnsSurvived + ' | Matings: ' + r.matingCount + '/5' + cause + '</span>';
+        const gmFlag = profileRunIsGodMode(r) ? ' <span style="color:#f0a840">[GM]</span>' : "";
+        return '<span class="' + cls + '">Run ' + (i + 1) + ': ' + r.outcome + gmFlag + ' | Turn ' + r.turnsSurvived + ' | Matings: ' + r.matingCount + '/5' + cause + '</span>';
       }).join("<br>");
     }
   }
@@ -4654,7 +4671,8 @@ function profileShowStartupModal(onChoiceMade) {
           runText = '<div class="profileEntryRun profileEntryRunActive">Active run: Turn ' + (sm.turn || 0) + ' | Matings: ' + (sm.matingCount || 0) + '/5 | Group: ' + (sm.groupSize || 0) + '</div>';
         } else if ((p.runHistory || []).length) {
           const last = p.runHistory[0];
-          runText = '<div class="profileEntryRun">Last: ' + last.outcome + ' | Turn ' + last.turnsSurvived + '</div>';
+          const gmTag = profileRunIsGodMode(last) ? ' <span style="color:#f0a840">[GM]</span>' : "";
+          runText = '<div class="profileEntryRun">Last: ' + last.outcome + gmTag + ' | Turn ' + last.turnsSurvived + '</div>';
         } else {
           runText = '<div class="profileEntryRun">No runs yet.</div>';
         }
@@ -13309,7 +13327,6 @@ function die(message, context = null) {
   addLog(`Turn ${player.turn}: ${message}`, "death");
   setNarration(deathNarrationFor(message, deathContext));
   render();
-  profileOnRunEnd("death");
   maybePromptRestartAfterDeath(message);
 }
 
@@ -17083,9 +17100,13 @@ const deathModalRestart = document.getElementById("deathModalRestart");
 const deathModalStay = document.getElementById("deathModalStay");
 if (deathModalRestart) deathModalRestart.addEventListener("click", () => {
   hideDeathModal();
+  try { profileOnRunEnd("death"); } catch (_) {}
   resetGameForPlayer("death modal restart");
 });
-if (deathModalStay) deathModalStay.addEventListener("click", hideDeathModal);
+if (deathModalStay) deathModalStay.addEventListener("click", () => {
+  hideDeathModal();
+  try { profileOnRunEnd("death"); } catch (_) {}
+});
 const deathModalQABack = document.getElementById("deathModalQABack");
 if (deathModalQABack) deathModalQABack.addEventListener("click", () => {
   if (godModeEnabled && qaBackSnapshot) restoreQABackSnapshot();
@@ -17169,6 +17190,9 @@ if (profileNewBtn) profileNewBtn.addEventListener("click", () => {
 });
 const profileLoadBtn = document.getElementById("profileLoadBtn");
 if (profileLoadBtn) profileLoadBtn.addEventListener("click", () => {
+  if (!player.dead && player.turn > 0) {
+    if (!window.confirm("Switch profile? The current run is in progress. It will not be saved automatically.")) return;
+  }
   const store = profileLoadStore();
   const profiles = Object.values(store.profiles);
   if (!profiles.length) { addLog("No profiles saved.", "minor"); return; }
@@ -17178,6 +17202,7 @@ if (profileLoadBtn) profileLoadBtn.addEventListener("click", () => {
   const idx = parseInt(input, 10) - 1;
   if (isNaN(idx) || idx < 0 || idx >= profiles.length) { addLog("Invalid choice.", "minor"); return; }
   currentProfileId = profiles[idx].profileId;
+  profileStartNewRun();
   try { localStorage.setItem(ACTIVE_PROFILE_KEY_STORE, currentProfileId); } catch (_) {}
   profileUpdatePanelUI();
   addLog("Profile \"" + profiles[idx].name + "\" loaded.", "minor");
