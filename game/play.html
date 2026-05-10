@@ -15,6 +15,7 @@ body.time-dusk { --bg: #120e08; --panel: #1d190d; --panel2: #2b2410; --border: #
 body.time-night { --bg: #02080d; --panel: #07111a; --panel2: #0b1823; --border: #24425c; --text: #d8e8f4; --muted: #aebfcb; --accent: #8fb8ff; --tile-explored: #17415a; --tile-unexplored: #071b28; --water: #0a3c78; --map-filter: brightness(0.58) saturate(0.75) hue-rotate(18deg); --scene-glow: inset 0 0 42px rgba(74, 120, 190, 0.14); }
 body.time-dawn { --bg: #061014; --panel: #0d1c1a; --panel2: #142a25; --border: #416b5c; --text: #e1f2e8; --muted: #c4ded1; --accent: #b8e78d; --map-filter: brightness(0.9) saturate(0.9) hue-rotate(8deg); --scene-glow: inset 0 0 32px rgba(160, 220, 180, 0.10); }
 body.storm-major { --bg: #090b0d; --panel: #111417; --panel2: #1a1e22; --border: #4b535c; --text: #eef1f3; --muted: #c2c9cf; --accent: #c6ced6; --tile-explored: #3f5154; --tile-unexplored: #12191c; --map-filter: brightness(0.62) saturate(0.65) contrast(1.08); --scene-glow: inset 0 0 56px rgba(80, 88, 96, 0.24); --layer-tint: rgba(60, 66, 72, 0.28); --layer-name-colour: #d0d5da; }
+body.wildfire-active { --bg: #160a01; --panel: #1c0e02; --panel2: #231204; --border: #6b3510; --text: #f5e8d8; --muted: #d4a87a; --accent: #e8b460; --tile-explored: #5c3010; --tile-unexplored: #1a0b02; --map-filter: brightness(0.65) saturate(1.4) hue-rotate(10deg) contrast(1.05); --scene-glow: inset 0 0 56px rgba(180, 90, 20, 0.28); --layer-tint: rgba(160, 70, 15, 0.22); --layer-name-colour: #f0c090; }
 body.dead-theme { --bg: #160202; --panel: #230707; --panel2: #351010; --border: #8a2f2f; --text: #ffe3e3; --muted: #e4b5b5; --accent: #ff5a5a; --tile-explored: #7a2424; --tile-unexplored: #250707; --water: #3a2432; --map-filter: grayscale(0.35) sepia(0.45) hue-rotate(310deg) brightness(0.75) saturate(1.6); --scene-glow: inset 0 0 54px rgba(255, 20, 20, 0.22); --layer-tint: rgba(120, 0, 0, 0.25); --layer-name-colour: #ff8a8a; }
 body.dead-theme h1, body.dead-theme .creatureName, body.dead-theme .stat strong { color: #ff8a8a; }
 body.dead-theme .titlebar, body.dead-theme .senseHeader, body.dead-theme .timePhase { background: #ff5a5a; color: #220505; }
@@ -5215,7 +5216,7 @@ function ensureNarrativeString(input) {
 }
 
 function containsCodeLikeText(str) {
-  return /const |let |function |return |=>|&&|\|\||\{|\}/.test(str);
+  return /const [a-zA-Z_$]|function [a-zA-Z_$]|=>|&&|\|\||\{|\}/.test(str);
 }
 
 function cleanNarrative(str) {
@@ -10623,7 +10624,7 @@ function passiveThreatCheck(actionText) {
   if (e.name.includes("Gastornis") && player.z === 0) {
     const moving = lastActionKind === "move" || lastActionKind === "climb";
     const attackChance = moving ? immediateFatalAttackChance(e, "movement") - 18 : immediateFatalAttackChance(e, "vertical");
-    addDebugTrace("fatal predator strike", {predator: e.name, context: "gastornis-ground", attackChance: clamp(attackChance, 5, 90), lastActionKind, warned: cloneDebug(recentPredatorWarning)});
+    addDebugTrace("predator-attack-roll", {predator: e.name, context: "gastornis-ground", attackChance: clamp(attackChance, 5, 90), lastActionKind, warned: cloneDebug(recentPredatorWarning)});
     if (roll(clamp(attackChance, 5, 90))) {
       const fitnessBefore = player.fitness;
       lastDamageContext = {source: "gastornis", predator: e.name, encounter: cloneDebug(e), fitnessBefore, fitnessAfter: 0, attackChance: clamp(attackChance, 5, 90), lastActionKind, warning: cloneDebug(recentPredatorWarning)};
@@ -10715,7 +10716,7 @@ function fatalPredatorPressure(e) {
 
   attackChance = clamp(attackChance * socialSafetyModifier(), 5, 95);
 
-  if (debugRoll("fatal predator strike", attackChance, {
+  if (debugRoll("predator-attack-roll", attackChance, {
     predator: e.name,
     pursuitType: e.pursuitType,
     moving,
@@ -15168,7 +15169,7 @@ function compactWorldRegistrySummary(report) {
 
   const fmtCounts = obj => Object.entries(obj).sort((a,b) => b[1]-a[1]).map(([k,v]) => `${k}: ${v}`).join(" | ") || "none";
   const near = entries.filter(rec => rec && Number.isFinite(rec.x) && Number.isFinite(rec.y) && Math.max(Math.abs(rec.x - player.x), Math.abs(rec.y - player.y)) <= 8);
-  const carcasses = entries.filter(rec => rec && (rec.kind === "carcass" || rec.carcassAge !== undefined));
+  const carcasses = entries.filter(rec => rec && rec.kind === "carcass");
   const abnormal = entries.filter(rec => rec && (rec.flagged || rec.error || rec.warning || rec.state === "orphaned" || rec.state === "invalid"));
   const currentIds = new Set();
   if (currentEncounter) {
