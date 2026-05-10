@@ -1,6 +1,6 @@
 [2026-05-10 wildfire-smell-priority | Claude]
 Wildfire outer-zone smell no longer masks predator or threat scents.
-Previously, entering the outer wildfire ring (wdist <= radius + 6) unconditionally overwrote the smell display with "Faint smoke from …", overriding any predator, rival, or other scent already set this render. Now the outer-zone smoke cue is only applied when smellText is the neutral default ("The wet forest air is thick with leaf rot, bark, and your own scent."). Inner-zone and core-fire smoke cues are unchanged and still override as before, since those represent immediate danger.
+Previously, entering the outer wildfire ring (wdist <= radius + 6) unconditionally overwrote the smell display with "Faint smoke from …", overriding any predator, rival, or other scent already set this render. Now uses smellIsAmbientText() which checks against all 11 possible randomAmbientSmell() outputs (not just the single old default string), so the outer-zone smoke cue fires correctly for every ambient condition including rain, mist, still air, and night. Also adds AMBIENT_SMELL_STRINGS constant for maintainability. Inner-zone and core-fire smoke cues are unchanged and still override as before, since those represent immediate danger.
 
 [2026-05-10 roguelike-profile-saves-fix2 | Claude]
 Fix mid-run profile switch not resetting run-tracking globals.

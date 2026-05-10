@@ -7613,6 +7613,24 @@ function randomAmbientSmell() {
   ]);
 }
 
+const AMBIENT_SMELL_STRINGS = new Set([
+  "Sleep dulls even strong scent.",
+  "Night air holds scent close and heavy.",
+  "Heavy rain washes scent from the air.",
+  "Wet bark and leaf mould dull the scent trail.",
+  "Mist holds scent low among the leaves.",
+  "The air is still; scent gathers close to where it began.",
+  "Still air keeps scent low and close; little carries far.",
+  "Wet leaves, bark, and fungal rot fill the air.",
+  "The humid forest carries too many scents to trust.",
+  "Sweet rot carries faintly on the air — fruit, fungus, or something already opened.",
+  "The air is warm and green, heavy with plant life."
+]);
+
+function smellIsAmbientText(text) {
+  return AMBIENT_SMELL_STRINGS.has(text);
+}
+
 // Checks the exact current tile.
 // Static tile contents are checked first so persistent resources are not lost.
 /**
@@ -16387,8 +16405,7 @@ function renderSenses() {
     } else if (wdist <= wr + 3) {
       smellTextEl.innerHTML = formatCueText(`Smoke drifts from ${wdirStr}. Something burns nearby.`);
     } else if (wdist <= wr + 6) {
-      const defaultSmell = "The wet forest air is thick with leaf rot, bark, and your own scent.";
-      if (!smellText || smellText === defaultSmell) {
+      if (!smellText || smellIsAmbientText(smellText)) {
         smellTextEl.innerHTML = formatCueText(`Faint smoke from ${wdirStr}.`);
       }
     }
