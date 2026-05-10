@@ -1,3 +1,29 @@
+[2026-05-10 nh-progressive-reveal | Claude]
+Investigation knowledge popup redesigned as progressive field notes system.
+
+Field notes (i) button:
+- Appears on encounter cards once investigations >= 10 (KNOWLEDGE_INFO_UNLOCK). Only shown if the encounter has naturalHistory content.
+- Button label: ⓘ with tooltip "Field Notes (N/5 sections unlocked)".
+- Positioned inline in the creature name row.
+- Clicking opens the Field Notes popup showing only unlocked sections.
+
+Progressive section unlock (KNOWLEDGE_NH_THRESHOLDS = [10, 14, 18, 22, 26]):
+- 10 investigations: Field Note unlocked. Log message: "Field notes on the X are now accessible. Tap ⓘ to read them."
+- 14 investigations: Behaviour unlocked. Log: "Your field notes on the X have expanded."
+- 18 investigations: Ecology unlocked. Same log.
+- 22 investigations: Danger to you (gameplayInsight) unlocked. Same log.
+- 26 investigations: Science note unlocked. Same log.
+- Sections not yet unlocked are simply absent from the popup — no placeholder text.
+
+Popup changes:
+- Title changed from "Natural History Unlocked: X" to "Field Notes: X" with inline progress badge "N/5 sections".
+- Auto-trigger at KNOWLEDGE_MAX (30) removed — popup is now player-initiated only via the (i) button.
+- showNaturalHistoryPopup() reads current investigation count from player.knowledgeByEncounterKey to determine which sections to render.
+
+New constants: KNOWLEDGE_INFO_UNLOCK = 10, KNOWLEDGE_NH_THRESHOLDS = [10, 14, 18, 22, 26].
+New CSS: .nhInfoBtn, .nhModalProgress.
+Debug trace: "natural-history-popup" (replaces "natural-history-unlocked").
+
 [2026-05-10 quick-fixes-v2 | Claude]
 Four small correctness fixes.
 
