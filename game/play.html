@@ -12280,6 +12280,13 @@ function showFieldJournal(highlightTypeKey) {
     }
   }
 
+  const targetEntry = highlightTypeKey ? journal[highlightTypeKey] : null;
+  const targetTab = (targetEntry && targetEntry.category) || null;
+  if (targetTab) {
+    modal.querySelectorAll(".fjTab").forEach(t => {
+      t.classList.toggle("active", t.dataset.fjtab === targetTab);
+    });
+  }
   const activeTabEl = modal.querySelector(".fjTab.active");
   const activeTab = (activeTabEl && activeTabEl.dataset.fjtab) || "fauna";
   renderTab(activeTab);
