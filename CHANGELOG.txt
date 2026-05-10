@@ -1,3 +1,6 @@
+[2026-05-10 natural-history-all-encounters | Claude]
+Fix: player.knowledgeByEncounterKey now cleared on new run. Added knowledgeByEncounterKey: {} to the Object.assign reset block in both resetGameForPlayer() and resetGameForBot(), so investigation knowledge does not carry over between runs. naturalHistory content for all encounters: pending follow-up commit.
+
 [2026-05-10 roguelike-profile-saves | Claude]
 Profile-based local save system. Players select or create a profile before each session, can save and resume active runs, and accumulate run history and stats per profile.
 
