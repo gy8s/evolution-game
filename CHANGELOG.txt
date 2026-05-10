@@ -1,5 +1,7 @@
 [2026-05-10 natural-history-all-encounters | Claude]
-Fix: player.knowledgeByEncounterKey now cleared on new run. Added knowledgeByEncounterKey: {} to the Object.assign reset block in both resetGameForPlayer() and resetGameForBot(), so investigation knowledge does not carry over between runs. naturalHistory content for all encounters: pending follow-up commit.
+Fix: player.knowledgeByEncounterKey now cleared on new run. Added knowledgeByEncounterKey: {} to the Object.assign reset block in both resetGameForPlayer() and resetGameForBot(), so investigation knowledge does not carry over between runs.
+
+naturalHistory content added for all 108 remaining encounters (previously only 9 of 117 had content). Covers all animal, carcass, forage, nest, and remedy encounters. Each entry has: title, fieldNote, behaviour, ecology, gameplayInsight, scienceNote. Content is Eocene-grounded with palaeontological accuracy for named genera.
 
 [2026-05-10 roguelike-profile-saves | Claude]
 Profile-based local save system. Players select or create a profile before each session, can save and resume active runs, and accumulate run history and stats per profile.
