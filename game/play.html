@@ -385,26 +385,20 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
 .nhInfoBtn:hover { background: #2d6b3e; }
 .fjModal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 10060; padding: 18px; background: rgba(0, 20, 10, 0.82); }
 .fjModal.open { display: flex; }
-.fjCard { width: min(96vw, 600px); background: #071209; border: 2px solid #4a9a62; box-shadow: 0 0 0 1px #1a3c22 inset, 0 18px 70px rgba(0,0,0,.75); border-radius: 10px; color: #e8f0d8; overflow: hidden; max-height: 90vh; display: flex; flex-direction: column; }
-.fjHeader { background: #1b4a2b; color: #c8f0a0; padding: 10px 14px 0; flex: 0 0 auto; border-bottom: 1px solid #2d6b3e; }
-.fjHeaderTitle { font-size: 15px; font-weight: bold; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
-.fjTabs { display: flex; gap: 4px; }
-.fjTab { padding: 5px 14px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: .04em; background: transparent; border: 1px solid #2d6b3e; border-bottom: none; color: #6db87a; border-radius: 4px 4px 0 0; cursor: pointer; }
-.fjTab.active { background: #071209; color: #c8f0a0; border-color: #4a9a62; }
-.fjBody { padding: 12px 14px; overflow-y: auto; flex: 1 1 auto; }
-.fjEmpty { color: #6db87a; font-style: italic; font-size: 14px; padding: 12px 0; }
-.fjEntry { border: 1px solid #1a3c22; border-radius: 6px; margin-bottom: 10px; overflow: hidden; }
-.fjEntry.fjHighlight { border-color: #4a9a62; }
-.fjEntryHead { display: flex; align-items: center; justify-content: space-between; background: #0d1b0f; padding: 7px 10px; cursor: pointer; }
-.fjEntryName { font-weight: bold; font-size: 14px; color: #c8f0a0; }
-.fjEntryBadge { font-size: 11px; color: #6db87a; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
-.fjEntryBody { padding: 8px 10px; background: #071209; border-top: 1px solid #1a3c22; display: none; }
-.fjEntry.expanded .fjEntryBody { display: block; }
-.fjSection { margin-bottom: 8px; }
-.fjSection strong { display: block; color: #9bea72; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px; }
-.fjSection p { margin: 0; line-height: 1.5; color: #cfdcba; font-size: 14px; }
-.fjLocked { color: #3d5a3d; font-size: 13px; font-style: italic; }
+.fjCard { width: min(96vw, 480px); background: #071209; border: 2px solid #4a9a62; box-shadow: 0 0 0 1px #1a3c22 inset, 0 18px 70px rgba(0,0,0,.75); border-radius: 10px; color: #e8f0d8; overflow: hidden; max-height: 90vh; display: flex; flex-direction: column; }
+.fjHeader { background: #1b4a2b; color: #c8f0a0; padding: 10px 14px; flex: 0 0 auto; border-bottom: 1px solid #2d6b3e; font-size: 15px; font-weight: bold; text-transform: uppercase; letter-spacing: .04em; }
+.fjBody { padding: 8px 0; overflow-y: auto; flex: 1 1 auto; }
+.fjGroup { margin-bottom: 2px; }
+.fjGroupHeader { padding: 5px 14px 3px; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: .08em; color: #4a9a62; }
+.fjEntryRow { display: flex; align-items: center; justify-content: space-between; padding: 7px 14px; cursor: pointer; border-left: 2px solid transparent; }
+.fjEntryRow:hover { background: #0d1e10; border-left-color: #4a9a62; }
+.fjEntryRowName { font-size: 14px; color: #c8f0a0; }
+.fjEntryRowCount { font-size: 11px; color: #6db87a; white-space: nowrap; margin-left: 8px; }
+.fjEntryRow.fjEntryRowNH .fjEntryRowName { color: #9bea72; }
 .fjClose { margin: 0 14px 14px; width: calc(100% - 28px); height: 38px; font-size: 14px; font-weight: bold; background: #1b4a2b; border-color: #4a9a62; color: #c8f0a0; flex: 0 0 auto; border-style: solid; border-width: 1px; border-radius: 5px; cursor: pointer; }
+.fjJournalBtn { font-size: 11px; padding: 2px 8px; background: rgba(0,0,0,0.25); border: 1px solid #8aaa30; color: #162111; border-radius: 4px; cursor: pointer; line-height: 1.5; font-weight: bold; }
+.fjJournalBtn:hover { background: rgba(0,0,0,0.4); }
+#playerTitlebar { display: flex; align-items: center; justify-content: space-between; }
 .knowledge { color: #9bea72; }
 .knowledge-tier { color: #d9c747; font-weight: bold; }
 /* === MOBILE: @media (max-width: 980px) === */
@@ -574,7 +568,7 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
     </div>
 
     <div class="panel">
-      <div class="titlebar">Player</div>
+      <div class="titlebar" id="playerTitlebar">Player<button type="button" id="fjJournalBtn" class="fjJournalBtn">Journal</button></div>
 
       <div class="hudGrid">
         <div class="vitalsRow">
@@ -762,7 +756,6 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
             <button class="debugButton" type="button" id="profileSaveBtn">Save Active Run</button>
             <button class="debugButton" type="button" id="profileResumeBtn">Resume Active Run</button>
             <button class="debugButton" type="button" id="profileNewRunBtn">Start New Run</button>
-            <button class="debugButton" type="button" id="profileJournalBtn">Field Journal</button>
           </div>
           <div class="profileHistoryList" id="profileHistoryList"></div>
         </div>
@@ -871,14 +864,7 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
 
   <div id="fjModal" class="fjModal" aria-hidden="true">
     <div class="fjCard" role="dialog" aria-modal="true" aria-labelledby="fjTitle">
-      <div class="fjHeader">
-        <div class="fjHeaderTitle" id="fjTitle">Field Journal</div>
-        <div class="fjTabs">
-          <button type="button" class="fjTab active" data-fjtab="fauna">Fauna</button>
-          <button type="button" class="fjTab" data-fjtab="flora">Flora</button>
-          <button type="button" class="fjTab" data-fjtab="misc">Misc</button>
-        </div>
-      </div>
+      <div class="fjHeader" id="fjTitle">Field Journal</div>
       <div id="fjBody" class="fjBody"></div>
       <button id="fjClose" class="fjClose" type="button">Close</button>
     </div>
@@ -12230,14 +12216,80 @@ function showNaturalHistoryPopup(e) {
   });
 }
 
-// @target [INVESTIGATION] Show Field Journal
-function showFieldJournal(highlightTypeKey) {
-  const modal = document.getElementById("fjModal");
-  const body = document.getElementById("fjBody");
-  if (!modal || !body) return;
+// @target [INVESTIGATION] Field Journal Groups
+const FJ_GROUPS = [
+  "Predators", "Constrictors & snakes", "Reptiles", "Birds",
+  "Primates & relatives", "Other mammals", "Amphibians",
+  "Insects", "Arachnids & myriapods", "Freshwater & crustaceans",
+  "Fruit & berries", "Flowers", "Fungi & plants", "Water & mineral",
+  "Nests", "Carcasses", "Other"
+];
+
+const FJ_GROUP_MAP = {
+  groundCarnivore: "Predators", climbingHunter: "Predators", gastornis: "Predators",
+  masillaraptor: "Predators", eagle: "Predators", bergisuchus: "Predators",
+  constrictor: "Constrictors & snakes", smallConstrictor: "Constrictors & snakes",
+  pitviper: "Constrictors & snakes", smallSnake: "Constrictors & snakes",
+  defensiveSnake: "Constrictors & snakes",
+  crocodile: "Reptiles", monitorLizard: "Reptiles", gecko: "Reptiles",
+  anoleLizard: "Reptiles", iguana: "Reptiles", eurheloderma: "Reptiles", turtle: "Reptiles",
+  owl: "Birds", ramphastos: "Birds", woodpeckerBird: "Birds", hummingbird: "Birds",
+  messelornis: "Birds", smallBird: "Birds",
+  rivalPrimate: "Primates & relatives", darwinius: "Primates & relatives",
+  europolemur: "Primates & relatives", godinotia: "Primates & relatives",
+  pakicetus: "Other mammals", leptictidium: "Other mammals", eurotamandua: "Other mammals",
+  eomanis: "Other mammals", hyracotherium: "Other mammals", coryphodon: "Other mammals",
+  fruitBat: "Other mammals", heterohyus: "Other mammals", kopidodon: "Other mammals",
+  amphiperatherium: "Other mammals", lesmesodon: "Other mammals",
+  hedgehogLikeInsectivore: "Other mammals", smallMammal: "Other mammals",
+  frog: "Amphibians", poisonDartFrog: "Amphibians", toad: "Amphibians", treeFrog: "Amphibians",
+  largeInsect: "Insects", antTrail: "Insects", antSwarm: "Insects", wasp: "Insects",
+  mantis: "Insects", dragonfly: "Insects", titanomyrma: "Insects",
+  titanomyrmaSwarm: "Insects", katydid: "Insects", grasshopper: "Insects",
+  cricket: "Insects", cicada: "Insects", leafInsect: "Insects", stickInsect: "Insects",
+  moth: "Insects", butterfly: "Insects", shieldBug: "Insects", plantHopper: "Insects",
+  cockroach: "Insects", orchidBee: "Insects", woodGrub: "Insects", caterpillar: "Insects",
+  scorpion: "Arachnids & myriapods", tarantula: "Arachnids & myriapods",
+  orbWeaver: "Arachnids & myriapods", centipede: "Arachnids & myriapods",
+  millipede: "Arachnids & myriapods",
+  freshwaterMussels: "Freshwater & crustaceans", freshwaterCrayfish: "Freshwater & crustaceans",
+  treeCrab: "Freshwater & crustaceans",
+  fallenFruit: "Fruit & berries", redBerries: "Fruit & berries",
+  purpleBerries: "Fruit & berries", laurelDrupe: "Fruit & berries",
+  palmFruit: "Fruit & berries", nypaFruit: "Fruit & berries",
+  vitisBerries: "Fruit & berries", menispermBerry: "Fruit & berries",
+  arilFruit: "Fruit & berries", custardAppleFruit: "Fruit & berries",
+  resinousFruit: "Fruit & berries", soapberryFruit: "Fruit & berries",
+  podFruit: "Fruit & berries", pandanusFruit: "Fruit & berries",
+  stranglerFigFruit: "Fruit & berries", canopyFruit: "Fruit & berries", nuts: "Fruit & berries",
+  magnoliaFlowers: "Flowers", hibiscusFlowers: "Flowers", roseFamilyBlossoms: "Flowers",
+  citrusBlossoms: "Flowers", bananaTypeFlowers: "Flowers", palmFlowers: "Flowers",
+  paleMushroom: "Fungi & plants", brownMushroom: "Fungi & plants", bitterLeaves: "Fungi & plants",
+  rainPuddle: "Water & mineral", bromeliadPool: "Water & mineral", clayDeposit: "Water & mineral",
+  antNest: "Nests", waspNest: "Nests", beehive: "Nests",
+  termiteMound: "Nests", termiteSwarm: "Nests", birdNest: "Nests", largeGroundNest: "Nests",
+  smallCarcass: "Carcasses", largeCarcass: "Carcasses", predatorLeftovers: "Carcasses",
+  snail: "Other", slug: "Other"
+};
+
+function getEncounterGroup(typeKey) {
+  return FJ_GROUP_MAP[typeKey] || "Other";
+}
+
+// @target [INVESTIGATION] Show Encounter Journal Entry (single creature window)
+function showEncounterJournalEntry(typeKey) {
+  if (!typeKey) return;
+  const modal = document.getElementById("nhModal");
+  const body = document.getElementById("nhModalBody");
+  const titleEl = document.getElementById("nhModalTitle");
+  if (!modal || !body || !titleEl) return;
 
   const journal = player.knowledgeByEncounterKey || {};
-  const entries = Object.values(journal);
+  const tk = journal[typeKey];
+  const count = tk ? (tk.investigations || 0) : 0;
+  const name = (tk && tk.name) || typeKey;
+  const nh = encounters[typeKey] && encounters[typeKey].naturalHistory;
+
   const nhSections = [
     { label: "Field Note", key: "fieldNote" },
     { label: "Behaviour", key: "behaviour" },
@@ -12246,52 +12298,80 @@ function showFieldJournal(highlightTypeKey) {
     { label: "Science note", key: "scienceNote" }
   ];
 
-  function renderTab(tab) {
-    const filtered = entries.filter(tk => tk.category === tab);
-    if (!filtered.length) {
-      body.innerHTML = `<div class="nhModalSection"><p>No ${tab} entries yet.</p></div>`;
-      return;
-    }
-    const sorted = filtered.slice().sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-    body.innerHTML = sorted.map(tk => {
-      const isHighlight = highlightTypeKey && tk.typeKey === highlightTypeKey;
-      const count = tk.investigations || 0;
-      const unlockedSections = nhSections.filter((s, i) => count >= (KNOWLEDGE_NH_THRESHOLDS[i] || Infinity));
-      const nhText = (function() {
-        if (!unlockedSections.length) return "";
-        const eData = encounters[tk.typeKey];
-        if (!eData || !eData.naturalHistory) return "";
-        return unlockedSections.map(s => `<div class="nhModalSection"><strong>${s.label}</strong><p>${eData.naturalHistory[s.key] || ""}</p></div>`).join("");
-      })();
-      const progressLabel = count >= KNOWLEDGE_MAX ? "Complete" : `${count}/${KNOWLEDGE_MAX}`;
-      return `<div class="fjEntry${isHighlight ? " fjHighlight" : ""}" data-fjtk="${tk.typeKey}">
-        <div class="fjEntryHead" onclick="this.parentElement.classList.toggle('expanded')">
-          <span>${tk.name || tk.typeKey}</span>
-          <span style="font-size:11px;color:#6db87a">${progressLabel}</span>
-        </div>
-        <div class="fjEntryBody">
-          ${nhText || `<div class="nhModalSection"><p>Investigate more to unlock field notes.</p></div>`}
-        </div>
-      </div>`;
+  titleEl.textContent = name;
+  const oldBadge = titleEl.querySelector(".nhModalProgress");
+  if (oldBadge) oldBadge.remove();
+  if (count < KNOWLEDGE_MAX) {
+    const badge = document.createElement("span");
+    badge.className = "nhModalProgress";
+    const unlockedCount = KNOWLEDGE_NH_THRESHOLDS.filter(t => count >= t).length;
+    badge.textContent = count < KNOWLEDGE_INFO_UNLOCK
+      ? `${count} inv.`
+      : `${unlockedCount}/${nhSections.length} sections`;
+    titleEl.appendChild(badge);
+  }
+
+  let html = "";
+  if (!nh || count < KNOWLEDGE_INFO_UNLOCK) {
+    const needed = KNOWLEDGE_INFO_UNLOCK - count;
+    html = `<div class="nhModalSection"><p>${needed > 0
+      ? `Investigate ${needed} more time${needed === 1 ? "" : "s"} to unlock field notes.`
+      : "Field notes unlocked — keep investigating to reveal more sections."}</p></div>`;
+  } else {
+    html = nhSections
+      .filter((s, i) => count >= KNOWLEDGE_NH_THRESHOLDS[i] && nh[s.key])
+      .map(s => `<div class="nhModalSection"><strong>${s.label}</strong><p>${nh[s.key]}</p></div>`)
+      .join("") || `<div class="nhModalSection"><p>Continue investigating to expand your field notes.</p></div>`;
+  }
+  html += `<div class="nhModalSection" style="border-top:1px solid #1a3c22;margin-top:8px;padding-top:8px"><p style="font-size:12px;color:#6db87a">${count}/${KNOWLEDGE_MAX} investigations recorded</p></div>`;
+
+  body.innerHTML = html;
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+}
+
+// @target [INVESTIGATION] Show Field Journal (index)
+function showFieldJournal() {
+  const modal = document.getElementById("fjModal");
+  const body = document.getElementById("fjBody");
+  if (!modal || !body) return;
+
+  const journal = player.knowledgeByEncounterKey || {};
+  const entries = Object.values(journal);
+
+  if (!entries.length) {
+    body.innerHTML = `<p style="padding:12px 14px;color:#6db87a;font-style:italic">No encounters recorded yet. Investigate creatures and plants to build your journal.</p>`;
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+    return;
+  }
+
+  const grouped = {};
+  for (const tk of entries) {
+    const g = getEncounterGroup(tk.typeKey);
+    if (!grouped[g]) grouped[g] = [];
+    grouped[g].push(tk);
+  }
+
+  const html = FJ_GROUPS
+    .filter(g => grouped[g])
+    .map(g => {
+      const rows = grouped[g]
+        .slice()
+        .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
+        .map(tk => {
+          const count = tk.investigations || 0;
+          const hasNotes = !!(encounters[tk.typeKey] && encounters[tk.typeKey].naturalHistory && count >= KNOWLEDGE_INFO_UNLOCK);
+          const label = count >= KNOWLEDGE_MAX ? "✓" : `${count}`;
+          return `<div class="fjEntryRow${hasNotes ? " fjEntryRowNH" : ""}" data-fjtk="${tk.typeKey}">
+            <span class="fjEntryRowName">${tk.name || tk.typeKey}</span>
+            <span class="fjEntryRowCount">${label}</span>
+          </div>`;
+        }).join("");
+      return `<div class="fjGroup"><div class="fjGroupHeader">${g}</div>${rows}</div>`;
     }).join("");
-    if (highlightTypeKey) {
-      const el = body.querySelector(`[data-fjtk="${highlightTypeKey}"]`);
-      if (el) { el.classList.add("expanded"); el.scrollIntoView({block: "nearest"}); }
-    }
-  }
 
-  const targetEntry = highlightTypeKey ? journal[highlightTypeKey] : null;
-  const targetTab = (targetEntry && targetEntry.category) || null;
-  if (targetTab) {
-    modal.querySelectorAll(".fjTab").forEach(t => {
-      t.classList.toggle("active", t.dataset.fjtab === targetTab);
-    });
-  }
-  const activeTabEl = modal.querySelector(".fjTab.active");
-  const activeTab = (activeTabEl && activeTabEl.dataset.fjtab) || "fauna";
-  renderTab(activeTab);
-  modal._fjRenderTab = renderTab;
-
+  body.innerHTML = html;
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
 }
@@ -17256,7 +17336,7 @@ if (nhModal) nhModal.addEventListener("click", event => {
 });
 document.addEventListener("click", event => {
   if (event.target && event.target.id === "nhInfoBtn" && currentEncounter) {
-    showFieldJournal(getEncounterTypeKey(currentEncounter));
+    showEncounterJournalEntry(getEncounterTypeKey(currentEncounter));
   }
 });
 
@@ -17268,17 +17348,16 @@ if (fjClose) fjClose.addEventListener("click", () => {
 });
 if (fjModal) fjModal.addEventListener("click", event => {
   if (event.target === fjModal) { fjModal.classList.remove("open"); fjModal.setAttribute("aria-hidden", "true"); }
-});
-if (fjModal) fjModal.addEventListener("click", event => {
-  const tab = event.target.closest("[data-fjtab]");
-  if (!tab) return;
-  fjModal.querySelectorAll(".fjTab").forEach(t => t.classList.remove("active"));
-  tab.classList.add("active");
-  if (fjModal._fjRenderTab) fjModal._fjRenderTab(tab.dataset.fjtab);
+  const row = event.target.closest(".fjEntryRow[data-fjtk]");
+  if (row) {
+    fjModal.classList.remove("open");
+    fjModal.setAttribute("aria-hidden", "true");
+    showEncounterJournalEntry(row.dataset.fjtk);
+  }
 });
 
-const profileJournalBtn = document.getElementById("profileJournalBtn");
-if (profileJournalBtn) profileJournalBtn.addEventListener("click", () => showFieldJournal());
+const fjJournalBtn = document.getElementById("fjJournalBtn");
+if (fjJournalBtn) fjJournalBtn.addEventListener("click", () => showFieldJournal());
 const mapOverlay = document.getElementById("mapOverlay");
 if (mapOverlay) {
   mapOverlay.addEventListener("click", event => {
