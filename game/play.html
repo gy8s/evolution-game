@@ -16387,7 +16387,10 @@ function renderSenses() {
     } else if (wdist <= wr + 3) {
       smellTextEl.innerHTML = formatCueText(`Smoke drifts from ${wdirStr}. Something burns nearby.`);
     } else if (wdist <= wr + 6) {
-      smellTextEl.innerHTML = formatCueText(`Faint smoke from ${wdirStr}.`);
+      const defaultSmell = "The wet forest air is thick with leaf rot, bark, and your own scent.";
+      if (!smellText || smellText === defaultSmell) {
+        smellTextEl.innerHTML = formatCueText(`Faint smoke from ${wdirStr}.`);
+      }
     }
   }
 
