@@ -1,3 +1,10 @@
+[2026-05-10 roguelike-profile-saves-fix2 | Claude]
+Fix mid-run profile switch not resetting run-tracking globals.
+
+Switching profiles mid-run via the Load Profile button now calls profileStartNewRun() after setting currentProfileId, instead of only nulling currentRunId and runStartedAt. This ensures runGodModeUsed, runQaBackUses, runMaxGroupSize, and winAchievedThisRun are all reset to clean state for the new profile — previously, a god-mode-used flag from an abandoned run could contaminate the attribution of the next run on the newly loaded profile.
+
+Addresses Codex P2 on PR #65.
+
 [2026-05-10 roguelike-profile-saves-fix | Claude]
 Two bug fixes on the profile save system.
 

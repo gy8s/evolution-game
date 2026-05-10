@@ -17202,8 +17202,7 @@ if (profileLoadBtn) profileLoadBtn.addEventListener("click", () => {
   const idx = parseInt(input, 10) - 1;
   if (isNaN(idx) || idx < 0 || idx >= profiles.length) { addLog("Invalid choice.", "minor"); return; }
   currentProfileId = profiles[idx].profileId;
-  currentRunId = null;
-  runStartedAt = null;
+  profileStartNewRun();
   try { localStorage.setItem(ACTIVE_PROFILE_KEY_STORE, currentProfileId); } catch (_) {}
   profileUpdatePanelUI();
   addLog("Profile \"" + profiles[idx].name + "\" loaded.", "minor");
