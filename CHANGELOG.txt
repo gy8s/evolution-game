@@ -1,3 +1,13 @@
+[2026-05-10 field-journal-ui-v2 | Claude]
+Field Journal UI redesign: individual encounter windows, grouped index, main UI placement.
+
+- (i) button on encounter cards now opens a single-creature entry window (showEncounterJournalEntry) via the existing nhModal. Shows the creature's name, investigation count, and all unlocked naturalHistory sections. No longer opens the full journal index.
+- Field Journal index (showFieldJournal) redesigned as a compact scrollable list with sensible biological groupings: Predators / Constrictors & snakes / Reptiles / Birds / Primates & relatives / Other mammals / Amphibians / Insects / Arachnids & myriapods / Freshwater & crustaceans / Fruit & berries / Flowers / Fungi & plants / Water & mineral / Nests / Carcasses / Other. Entries with field notes unlocked are highlighted. Clicking any entry opens the single-creature window.
+- Field Journal button moved from the Developer/QA tools panel to the Player titlebar (top-right of the player panel) — always visible in the main UI, non-obstructive.
+- Removed tab (Fauna/Flora/Misc) navigation from fjModal; replaced with continuous grouped scroll.
+- getEncounterGroup(typeKey): new helper mapping all encounter keys to their display group.
+- FJ_GROUP_MAP / FJ_GROUPS: ordered group definitions covering all current encounter types.
+
 [2026-05-10 field-journal | Claude]
 Persistent Field Journal system: cross-run encounter knowledge tracking and modal.
 
