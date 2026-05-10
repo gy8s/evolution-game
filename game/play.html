@@ -12095,10 +12095,13 @@ function showNaturalHistoryPopup(e) {
   ];
 
   const unlockedCount = KNOWLEDGE_NH_THRESHOLDS.filter(t => count >= t).length;
-  const progressLabel = unlockedCount < sections.length
-    ? `<span class="nhModalProgress">${unlockedCount}/${sections.length} sections</span>`
-    : "";
-  titleEl.innerHTML = `Field Notes: ${name}${progressLabel}`;
+  titleEl.textContent = `Field Notes: ${name}`;
+  if (unlockedCount < sections.length) {
+    const badge = document.createElement("span");
+    badge.className = "nhModalProgress";
+    badge.textContent = `${unlockedCount}/${sections.length} sections`;
+    titleEl.appendChild(badge);
+  }
 
   const rendered = sections
     .filter((s, i) => count >= KNOWLEDGE_NH_THRESHOLDS[i] && nh[s.key])
