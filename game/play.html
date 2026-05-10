@@ -482,6 +482,40 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
 .mapIcon { display: inline-flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 0.68rem; line-height: 1; text-shadow: 0 1px 2px #000; }
 .mapIconThreat { color: #ffd76a; font-weight: 900; }
 
+/* ===== PROFILE SAVE SYSTEM ===== */
+.profileModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9000;align-items:center;justify-content:center;}
+.profileModal.open{display:flex;}
+.profileModalCard{background:#161a16;border:1px solid #4a6a4a;border-radius:6px;padding:22px 24px;max-width:500px;width:94vw;max-height:88vh;overflow-y:auto;color:#ccc;}
+.profileModalHeader{font-size:1.05em;font-weight:bold;color:#d9c747;margin-bottom:14px;border-bottom:1px solid #3a4a3a;padding-bottom:8px;}
+.profileModalBody{margin-bottom:4px;}
+.profileEntry{border:1px solid #3a4a3a;border-radius:4px;padding:9px 12px;margin-bottom:7px;cursor:pointer;background:#1e281e;}
+.profileEntry:hover{border-color:#7a9a7a;background:#253025;}
+.profileEntry.selected{border-color:#d9c747;}
+.profileEntryName{font-weight:bold;color:#d9c747;}
+.profileEntryMeta{font-size:.8em;color:#888;margin-top:2px;}
+.profileEntryRun{font-size:.8em;margin-top:4px;color:#999;}
+.profileEntryRunActive{color:#7dc87d;}
+.profileModalActions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px;border-top:1px solid #3a4a3a;padding-top:10px;}
+.profileModalActions button{padding:6px 13px;border-radius:4px;border:1px solid #555;background:#252a25;color:#bbb;cursor:pointer;font-size:.88em;}
+.profileModalActions button:hover{border-color:#999;background:#2e362e;}
+.profileModalActions button.primary{border-color:#d9c747;color:#d9c747;}
+.winModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.76);z-index:8000;align-items:center;justify-content:center;}
+.winModal.open{display:flex;}
+.winModalCard{background:#161a16;border:1px solid #5a9a5a;border-radius:6px;padding:24px;max-width:400px;width:90vw;color:#ccc;text-align:center;}
+.winModalHeader{font-size:1.1em;font-weight:bold;color:#7dc87d;margin-bottom:10px;}
+.winModalMessage{font-size:.88em;color:#aaa;margin-bottom:15px;line-height:1.5;}
+.winModalActions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+.winModalActions button{padding:8px 16px;border-radius:4px;border:1px solid #555;background:#252a25;color:#bbb;cursor:pointer;}
+.winModalActions button.primary{border-color:#7dc87d;color:#7dc87d;}
+.profilePanel{padding:8px 0 10px;border-bottom:1px solid #3a4a3a;margin-bottom:10px;}
+.profilePanel strong{display:block;margin-bottom:5px;}
+.profilePanelRow{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:5px;}
+.profileCurrentLabel{font-size:.82em;color:#bbb;flex:1 1 100%;}
+.profileHistoryList{font-size:.78em;color:#999;margin-top:5px;line-height:1.75;}
+.profileHistoryList .win{color:#7dc87d;}
+.profileHistoryList .death{color:#e07070;}
+.profileHistoryList .abandoned{color:#888;}
+
 </style>
 </head>
 <!-- [HTML] visible page structure and UI containers -->
@@ -687,6 +721,25 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
           Use this after something looks wrong, then upload the text file with the bug report.
         </div>
 
+        <div class="profilePanel" id="profilePanel">
+          <strong>Profile</strong>
+          <div class="profilePanelRow">
+            <span class="profileCurrentLabel" id="profileCurrentLabel">No profile active</span>
+          </div>
+          <div class="profilePanelRow">
+            <button class="debugButton" type="button" id="profileNewBtn">New Profile</button>
+            <button class="debugButton" type="button" id="profileLoadBtn">Load Profile</button>
+            <button class="debugButton" type="button" id="profileRenameBtn">Rename</button>
+            <button class="debugButton" type="button" id="profileDeleteBtn">Delete</button>
+          </div>
+          <div class="profilePanelRow">
+            <button class="debugButton" type="button" id="profileSaveBtn">Save Active Run</button>
+            <button class="debugButton" type="button" id="profileResumeBtn">Resume Active Run</button>
+            <button class="debugButton" type="button" id="profileNewRunBtn">Start New Run</button>
+          </div>
+          <div class="profileHistoryList" id="profileHistoryList"></div>
+        </div>
+
         <div class="botPanel">
           <strong>Bot test mode</strong>
           <div class="botControls">
@@ -734,6 +787,25 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
         <button id="deathModalQABack" type="button" style="display:none">QA Back 1 turn</button>
       </div>
       <div id="deathModalQANote" style="display:none;font-size:0.78em;color:#aaa;margin-top:6px;text-align:center;">God Mode only: restores the state before the fatal action.</div>
+    </div>
+  </div>
+
+  <div id="profileModal" class="profileModal" aria-hidden="true">
+    <div class="profileModalCard" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+      <div class="profileModalHeader" id="profileModalTitle">Evolution — Select Profile</div>
+      <div id="profileModalBody" class="profileModalBody"></div>
+      <div class="profileModalActions" id="profileModalActions"></div>
+    </div>
+  </div>
+
+  <div id="winModal" class="winModal" aria-hidden="true">
+    <div class="winModalCard" role="dialog" aria-modal="true">
+      <div class="winModalHeader">Mating Goal Complete</div>
+      <div id="winModalMessage" class="winModalMessage"></div>
+      <div class="winModalActions">
+        <button id="winModalClaim" class="primary" type="button">Record Win &amp; Continue</button>
+        <button id="winModalContinue" type="button">Keep Playing</button>
+      </div>
     </div>
   </div>
 
@@ -3236,6 +3308,569 @@ let lastCallTurn = -999;
 let godModeEnabled = false;
 let qaBackSnapshot = null;
 
+// ===== PROFILE SAVE SYSTEM =====
+
+const PROFILE_STORE_KEY = "evolutionGameProfiles_v1";
+const ACTIVE_PROFILE_KEY_STORE = "evolutionGameActiveProfileId_v1";
+const PROFILE_LOG_CAP = 150;
+const PROFILE_TRACE_CAP = 200;
+
+let currentProfileId = null;
+let currentRunId = null;
+let runGodModeUsed = false;
+let runQaBackUses = 0;
+let runMaxGroupSize = 0;
+let runStartedAt = null;
+let winAchievedThisRun = false;
+
+function profileGenerateId(prefix) {
+  return prefix + "_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
+}
+
+function profileLoadStore() {
+  try {
+    const raw = localStorage.getItem(PROFILE_STORE_KEY);
+    if (!raw) return profileEmptyStore();
+    const data = JSON.parse(raw);
+    if (!data || typeof data !== "object") throw new Error("bad-format");
+    return data;
+  } catch (e) {
+    try {
+      const raw = localStorage.getItem(PROFILE_STORE_KEY);
+      if (raw) localStorage.setItem("evolutionGameProfiles_corruptBackup_" + Date.now(), raw.slice(0, 100000));
+    } catch (_) {}
+    return profileEmptyStore();
+  }
+}
+
+function profileSaveStore(data) {
+  try {
+    localStorage.setItem(PROFILE_STORE_KEY, JSON.stringify(data));
+  } catch (e) {
+    addDebugTrace("profile-save-error", {error: String(e)});
+  }
+}
+
+function profileEmptyStore() {
+  return {schemaVersion: 1, profiles: {}};
+}
+
+function profileDefaultStats() {
+  return {totalRuns: 0, completedRuns: 0, deaths: 0, wins: 0, bestTurn: 0, bestMatingCount: 0, bestKnowledgeUnlocks: 0};
+}
+
+function profileCreateNew(name) {
+  const store = profileLoadStore();
+  const profileId = profileGenerateId("profile");
+  const now = new Date().toISOString();
+  store.profiles[profileId] = {
+    profileId,
+    name: name || "Profile 1",
+    createdAt: now,
+    lastPlayedAt: now,
+    buildId: GAME_VERSION,
+    buildCompatible: true,
+    stats: profileDefaultStats(),
+    activeRun: null,
+    runHistory: []
+  };
+  profileSaveStore(store);
+  currentProfileId = profileId;
+  try { localStorage.setItem(ACTIVE_PROFILE_KEY_STORE, profileId); } catch (_) {}
+  return store.profiles[profileId];
+}
+
+function profileGetActive() {
+  if (!currentProfileId) return null;
+  const store = profileLoadStore();
+  return store.profiles[currentProfileId] || null;
+}
+
+function profileCheckBuildCompatibility(profile) {
+  if (!profile) return {compatible: false};
+  const savedBuild = profile.buildId || "";
+  const localBuild = GAME_VERSION;
+  const compatible = savedBuild === localBuild;
+  if (!compatible) addDebugTrace("profile-build-mismatch", {savedBuild, localBuild, profileId: profile.profileId});
+  return {compatible, savedBuild, localBuild};
+}
+
+function profileCaptureWorldArrays() {
+  return {
+    terrain: terrain.map(row => row.slice()),
+    altitude: altitude.map(row => row.slice()),
+    landform: landform.map(row => row.slice()),
+    habitat: habitat.map(row => row.slice()),
+    muddyShallows: muddyShallows.map(row => row.slice()),
+    lianaBridges: lianaBridges.map(row => row.slice())
+  };
+}
+
+function profileCaptureState() {
+  const logEl = document.getElementById("log");
+  const logLines = logEl ? Array.from(logEl.querySelectorAll("p")).slice(-PROFILE_LOG_CAP).map(p => ({
+    text: p.textContent,
+    className: p.className
+  })) : [];
+
+  return {
+    worldArrays: profileCaptureWorldArrays(),
+    player: JSON.parse(JSON.stringify(player)),
+    waterState: JSON.parse(JSON.stringify(waterState)),
+    currentEncounter: currentEncounter ? JSON.parse(JSON.stringify(currentEncounter)) : null,
+    tileEncounterQueue: JSON.parse(JSON.stringify(tileEncounterQueue)),
+    carcass: carcass ? JSON.parse(JSON.stringify(carcass)) : null,
+    interruptedFood: interruptedFood ? JSON.parse(JSON.stringify(interruptedFood)) : null,
+    nearbyEntities: JSON.parse(JSON.stringify(nearbyEntities)),
+    persistentEntities: JSON.parse(JSON.stringify(persistentEntities)),
+    worldRegistry: JSON.parse(JSON.stringify(worldRegistry)),
+    nextRegistryId,
+    exploredTiles: Array.from(exploredTiles),
+    nextEntityId,
+    nextInstanceId,
+    knownMapEntities: JSON.parse(JSON.stringify(knownMapEntities)),
+    staticTileContents: JSON.parse(JSON.stringify(staticTileContents)),
+    consumedStaticTileKeys: JSON.parse(JSON.stringify(consumedStaticTileKeys)),
+    burnedTiles: JSON.parse(JSON.stringify(burnedTiles)),
+    dangerGrace,
+    recentPredatorWarning: recentPredatorWarning ? JSON.parse(JSON.stringify(recentPredatorWarning)) : null,
+    activePursuit: activePursuit ? JSON.parse(JSON.stringify(activePursuit)) : null,
+    investigationText,
+    investigationEncounterRef,
+    lastLookText,
+    lastLookTurn,
+    lastNarration,
+    groupSceneNotice: groupSceneNotice ? JSON.parse(JSON.stringify(groupSceneNotice)) : null,
+    heardText,
+    smellText,
+    nearbyRecentSocial: nearbyRecentSocial ? JSON.parse(JSON.stringify(nearbyRecentSocial)) : null,
+    lastActionKind,
+    lastDamageContext: lastDamageContext ? JSON.parse(JSON.stringify(lastDamageContext)) : null,
+    debugLastAction: debugLastAction ? JSON.parse(JSON.stringify(debugLastAction)) : null,
+    callStreak,
+    lastCallTurn,
+    socialGroup: JSON.parse(JSON.stringify(socialGroup)),
+    noiseLevel,
+    lastCravingCueTurn,
+    lastRiskMemoryCueTurn,
+    individualSocialState: individualSocialState ? JSON.parse(JSON.stringify(individualSocialState)) : null,
+    lastHabitatKey,
+    environment: JSON.parse(JSON.stringify(environment)),
+    timeState: {phase: timeState.phase, phaseTurn: timeState.phaseTurn, sleepTurnsRemaining: timeState.sleepTurnsRemaining},
+    debugTrace: debugTrace.slice(-PROFILE_TRACE_CAP),
+    logLines
+  };
+}
+
+function profileRestoreState(state) {
+  if (state.worldArrays) {
+    for (let xi = 0; xi < WORLD_SIZE; xi++) {
+      for (let yi = 0; yi < WORLD_SIZE; yi++) {
+        terrain[xi][yi] = state.worldArrays.terrain[xi][yi];
+        altitude[xi][yi] = state.worldArrays.altitude[xi][yi];
+        landform[xi][yi] = state.worldArrays.landform[xi][yi];
+        habitat[xi][yi] = state.worldArrays.habitat[xi][yi];
+        muddyShallows[xi][yi] = state.worldArrays.muddyShallows[xi][yi];
+        lianaBridges[xi][yi] = state.worldArrays.lianaBridges[xi][yi];
+      }
+    }
+  }
+
+  Object.assign(player, state.player);
+  waterState = state.waterState;
+  currentEncounter = state.currentEncounter;
+  tileEncounterQueue = state.tileEncounterQueue;
+  carcass = state.carcass;
+  interruptedFood = state.interruptedFood;
+  nearbyEntities = state.nearbyEntities;
+  persistentEntities = state.persistentEntities;
+  worldRegistry = state.worldRegistry;
+  nextRegistryId = state.nextRegistryId;
+  exploredTiles = new Set(state.exploredTiles);
+  nextEntityId = state.nextEntityId;
+  nextInstanceId = state.nextInstanceId;
+  knownMapEntities = state.knownMapEntities;
+  staticTileContents = state.staticTileContents;
+  consumedStaticTileKeys = state.consumedStaticTileKeys;
+  burnedTiles = state.burnedTiles;
+  dangerGrace = state.dangerGrace;
+  recentPredatorWarning = state.recentPredatorWarning;
+  activePursuit = state.activePursuit;
+  investigationText = state.investigationText;
+  investigationEncounterRef = state.investigationEncounterRef;
+  lastLookText = state.lastLookText;
+  lastLookTurn = state.lastLookTurn;
+  lastNarration = state.lastNarration;
+  groupSceneNotice = state.groupSceneNotice;
+  heardText = state.heardText;
+  smellText = state.smellText;
+  nearbyRecentSocial = state.nearbyRecentSocial;
+  lastActionKind = state.lastActionKind;
+  lastDamageContext = state.lastDamageContext;
+  debugLastAction = state.debugLastAction;
+  callStreak = state.callStreak;
+  lastCallTurn = state.lastCallTurn;
+  socialGroup = state.socialGroup;
+  noiseLevel = state.noiseLevel;
+  lastCravingCueTurn = state.lastCravingCueTurn;
+  lastRiskMemoryCueTurn = state.lastRiskMemoryCueTurn;
+  individualSocialState = state.individualSocialState;
+  lastHabitatKey = state.lastHabitatKey;
+  Object.assign(environment, state.environment);
+  timeState.phase = state.timeState.phase;
+  timeState.phaseTurn = state.timeState.phaseTurn;
+  timeState.sleepTurnsRemaining = state.timeState.sleepTurnsRemaining;
+  if (Array.isArray(state.debugTrace)) debugTrace = state.debugTrace;
+
+  const logEl = document.getElementById("log");
+  if (logEl && Array.isArray(state.logLines)) {
+    logEl.innerHTML = "";
+    state.logLines.forEach(entry => {
+      const p = document.createElement("p");
+      p.textContent = entry.text;
+      if (entry.className) p.className = entry.className;
+      logEl.appendChild(p);
+    });
+  }
+}
+
+function profileKnowledgeCount() {
+  return Object.keys(player.knowledgeByEncounterKey || {}).length;
+}
+
+function profileBuildRunSummary(outcome) {
+  const sz = (socialGroup.members || []).length;
+  if (sz > runMaxGroupSize) runMaxGroupSize = sz;
+  const dc = player.deathContext;
+  return {
+    runId: currentRunId || profileGenerateId("run"),
+    buildId: GAME_VERSION,
+    startedAt: runStartedAt || new Date().toISOString(),
+    endedAt: new Date().toISOString(),
+    outcome,
+    turnsSurvived: player.turn,
+    deathCause: dc ? String(dc.message || "") : "",
+    deathContextSource: dc && dc.context ? String(dc.context.source || "") : "",
+    matingCount: player.matingCount || 0,
+    matingGoal: 5,
+    maxGroupSize: runMaxGroupSize,
+    finalSize: player.size,
+    finalLifeStage: typeof isPlayerMature === "function" ? (isPlayerMature() ? "adult" : "juvenile") : "unknown",
+    knowledgeUnlockCount: profileKnowledgeCount(),
+    seed: currentRunId || "",
+    usedGodMode: runGodModeUsed,
+    qaBackUses: runQaBackUses
+  };
+}
+
+function profileUpdateStats(profile, summary) {
+  const s = profile.stats;
+  s.totalRuns = (s.totalRuns || 0) + 1;
+  if (summary.outcome === "death") s.deaths = (s.deaths || 0) + 1;
+  if (summary.outcome === "win") { s.wins = (s.wins || 0) + 1; s.completedRuns = (s.completedRuns || 0) + 1; }
+  if (summary.outcome === "abandoned") s.completedRuns = (s.completedRuns || 0) + 1;
+  if (summary.turnsSurvived > (s.bestTurn || 0)) s.bestTurn = summary.turnsSurvived;
+  if (summary.matingCount > (s.bestMatingCount || 0)) s.bestMatingCount = summary.matingCount;
+  if (summary.knowledgeUnlockCount > (s.bestKnowledgeUnlocks || 0)) s.bestKnowledgeUnlocks = summary.knowledgeUnlockCount;
+}
+
+function profileOnRunEnd(outcome) {
+  if (!currentProfileId) return;
+  const store = profileLoadStore();
+  const profile = store.profiles[currentProfileId];
+  if (!profile) return;
+  const summary = profileBuildRunSummary(outcome);
+  profile.runHistory = profile.runHistory || [];
+  profile.runHistory.unshift(summary);
+  if (profile.runHistory.length > 20) profile.runHistory.length = 20;
+  profileUpdateStats(profile, summary);
+  profile.activeRun = null;
+  profile.lastPlayedAt = new Date().toISOString();
+  profileSaveStore(store);
+  runGodModeUsed = false;
+  runQaBackUses = 0;
+  runMaxGroupSize = 0;
+  runStartedAt = null;
+  winAchievedThisRun = false;
+  currentRunId = null;
+  profileUpdatePanelUI();
+}
+
+function profileSaveActiveRun() {
+  if (!currentProfileId) { addLog("No active profile — create one in Developer / QA tools.", "minor"); return; }
+  if (player.dead) { addLog("Cannot save: current run has ended.", "minor"); return; }
+  const store = profileLoadStore();
+  const profile = store.profiles[currentProfileId];
+  if (!profile) return;
+  let state;
+  try { state = profileCaptureState(); } catch (e) {
+    addLog("Save failed — could not capture state.", "minor");
+    addDebugTrace("profile-save-capture-error", {error: String(e)});
+    return;
+  }
+  let stateJson;
+  try { stateJson = JSON.stringify(state); } catch (e) {
+    addLog("Save failed — state could not be serialised.", "minor");
+    return;
+  }
+  const sizeKB = Math.round(stateJson.length / 1024);
+  if (sizeKB > 4000) addLog(`Save state is large (${sizeKB} KB). localStorage may reject it.`, "minor");
+
+  if (!currentRunId) currentRunId = profileGenerateId("run");
+  if (!runStartedAt) runStartedAt = new Date().toISOString();
+
+  profile.activeRun = {
+    runId: currentRunId,
+    startedAt: runStartedAt,
+    lastSavedAt: new Date().toISOString(),
+    buildId: GAME_VERSION,
+    seed: currentRunId,
+    summary: {
+      turn: player.turn,
+      x: player.x,
+      y: player.y,
+      z: player.z,
+      layer: typeof layers !== "undefined" ? (layers[player.z] || player.z) : player.z,
+      dead: player.dead,
+      matingCount: player.matingCount,
+      groupSize: (socialGroup.members || []).length,
+      lifeStage: typeof isPlayerMature === "function" ? (isPlayerMature() ? "adult" : "juvenile") : "unknown",
+      sex: player.sex
+    },
+    state
+  };
+  profile.lastPlayedAt = new Date().toISOString();
+  profile.buildId = GAME_VERSION;
+
+  try {
+    profileSaveStore(store);
+    addLog(`Run saved at turn ${player.turn} (${sizeKB} KB).`, "minor");
+    addDebugTrace("profile-run-saved", {turn: player.turn, sizeKB, runId: currentRunId});
+  } catch (e) {
+    addLog("Save failed — localStorage write error.", "minor");
+    addDebugTrace("profile-save-write-error", {error: String(e)});
+  }
+  profileUpdatePanelUI();
+}
+
+function profileStartNewRun() {
+  currentRunId = profileGenerateId("run");
+  runStartedAt = new Date().toISOString();
+  runGodModeUsed = false;
+  runQaBackUses = 0;
+  runMaxGroupSize = 0;
+  winAchievedThisRun = false;
+  addDebugTrace("profile-new-run", {profileId: currentProfileId || "none", runId: currentRunId});
+}
+
+function profileResumeActiveRun(profile) {
+  if (!profile || !profile.activeRun || !profile.activeRun.state) {
+    addLog("No active run to resume.", "minor");
+    return false;
+  }
+  const compat = profileCheckBuildCompatibility(profile);
+  if (!compat.compatible) {
+    const ok = window.confirm(
+      "This profile was saved on build:\n" + compat.savedBuild +
+      "\n\nCurrent build:\n" + compat.localBuild +
+      "\n\nLoading may not be fully compatible. Continue?"
+    );
+    if (!ok) return false;
+  }
+  currentRunId = profile.activeRun.runId || profileGenerateId("run");
+  runStartedAt = profile.activeRun.startedAt || new Date().toISOString();
+  runGodModeUsed = false;
+  runQaBackUses = 0;
+  runMaxGroupSize = 0;
+  winAchievedThisRun = false;
+  clearRunLogsForNewGame();
+  try {
+    profileRestoreState(profile.activeRun.state);
+  } catch (e) {
+    addLog("Resume failed — state could not be restored.", "minor");
+    addDebugTrace("profile-resume-error", {error: String(e)});
+    return false;
+  }
+  addLog("Run resumed at turn " + player.turn + ".", "minor");
+  addDebugTrace("profile-run-resumed", {runId: currentRunId, turn: player.turn});
+  render();
+  profileUpdatePanelUI();
+  return true;
+}
+
+// ===== WIN MODAL =====
+
+function showWinModal() {
+  const modal = document.getElementById("winModal");
+  const msg = document.getElementById("winModalMessage");
+  if (!modal) return;
+  if (msg) msg.textContent = "You have completed 5 successful matings. Your lineage continues. You can record this as a win on your profile, or keep playing.";
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+}
+
+function hideWinModal() {
+  const modal = document.getElementById("winModal");
+  if (modal) { modal.classList.remove("open"); modal.setAttribute("aria-hidden", "true"); }
+}
+
+function onWinAchieved() {
+  if (winAchievedThisRun) return;
+  winAchievedThisRun = true;
+  showWinModal();
+}
+
+// ===== PROFILE PANEL UI =====
+
+function profileUpdatePanelUI() {
+  const label = document.getElementById("profileCurrentLabel");
+  const histEl = document.getElementById("profileHistoryList");
+  if (!currentProfileId) {
+    if (label) label.textContent = "No profile active";
+    if (histEl) histEl.innerHTML = "";
+    return;
+  }
+  const store = profileLoadStore();
+  const profile = store.profiles[currentProfileId];
+  if (!profile) { if (label) label.textContent = "No profile active"; return; }
+  const s = profile.stats;
+  if (label) label.textContent = profile.name + " | Runs: " + s.totalRuns + " | Deaths: " + s.deaths + " | Wins: " + s.wins + " | Best turn: " + s.bestTurn;
+  if (histEl) {
+    const recent = (profile.runHistory || []).slice(0, 5);
+    if (!recent.length) {
+      histEl.innerHTML = "<em>No runs yet.</em>";
+    } else {
+      histEl.innerHTML = recent.map((r, i) => {
+        const cls = r.outcome === "win" ? "win" : r.outcome === "death" ? "death" : "abandoned";
+        const cause = r.deathCause ? " — " + r.deathCause.slice(0, 40) : "";
+        return '<span class="' + cls + '">Run ' + (i + 1) + ': ' + r.outcome + ' | Turn ' + r.turnsSurvived + ' | Matings: ' + r.matingCount + '/5' + cause + '</span>';
+      }).join("<br>");
+    }
+  }
+}
+
+// ===== PROFILE STARTUP MODAL =====
+
+function profileShowStartupModal(onChoiceMade) {
+  const modal = document.getElementById("profileModal");
+  const body = document.getElementById("profileModalBody");
+  const actions = document.getElementById("profileModalActions");
+  if (!modal || !body || !actions) { onChoiceMade(null); return; }
+
+  const store = profileLoadStore();
+  const profileList = Object.values(store.profiles);
+  let selectedProfileId = null;
+
+  try {
+    const lastId = localStorage.getItem(ACTIVE_PROFILE_KEY_STORE);
+    if (lastId && store.profiles[lastId]) selectedProfileId = lastId;
+    else if (profileList.length === 1) selectedProfileId = profileList[0].profileId;
+  } catch (_) {}
+
+  function renderModalContent() {
+    body.innerHTML = "";
+    actions.innerHTML = "";
+
+    if (!profileList.length) {
+      body.innerHTML = "<p style='color:#999;margin:0 0 8px'>No profiles yet. Create your first profile to begin.</p>";
+    } else {
+      profileList.forEach(p => {
+        const div = document.createElement("div");
+        div.className = "profileEntry" + (selectedProfileId === p.profileId ? " selected" : "");
+        div.dataset.id = p.profileId;
+        const compat = profileCheckBuildCompatibility(p);
+        const compatWarn = compat.compatible ? "" : ' <span style="color:#f0a840">[build mismatch]</span>';
+        let runText = "";
+        if (p.activeRun) {
+          const sm = p.activeRun.summary || {};
+          runText = '<div class="profileEntryRun profileEntryRunActive">Active run: Turn ' + (sm.turn || 0) + ' | Matings: ' + (sm.matingCount || 0) + '/5 | Group: ' + (sm.groupSize || 0) + '</div>';
+        } else if ((p.runHistory || []).length) {
+          const last = p.runHistory[0];
+          runText = '<div class="profileEntryRun">Last: ' + last.outcome + ' | Turn ' + last.turnsSurvived + '</div>';
+        } else {
+          runText = '<div class="profileEntryRun">No runs yet.</div>';
+        }
+        div.innerHTML = '<div class="profileEntryName">' + p.name + compatWarn + '</div><div class="profileEntryMeta">Build: ' + (p.buildId || "").slice(0, 35) + ' | Runs: ' + ((p.stats || {}).totalRuns || 0) + '</div>' + runText;
+        div.addEventListener("click", () => { selectedProfileId = p.profileId; renderModalContent(); });
+        body.appendChild(div);
+      });
+    }
+
+    const newBtn = document.createElement("button");
+    newBtn.textContent = "New Profile";
+    newBtn.addEventListener("click", () => {
+      const name = window.prompt("Profile name:", "Profile " + (profileList.length + 1));
+      if (!name) return;
+      const newP = profileCreateNew(name.slice(0, 40));
+      store.profiles[newP.profileId] = newP;
+      profileList.push(newP);
+      selectedProfileId = newP.profileId;
+      renderModalContent();
+    });
+    actions.appendChild(newBtn);
+
+    if (selectedProfileId) {
+      const selProfile = profileList.find(p => p.profileId === selectedProfileId);
+      if (selProfile && selProfile.activeRun) {
+        const resumeBtn = document.createElement("button");
+        resumeBtn.textContent = "Resume Run";
+        resumeBtn.className = "primary";
+        resumeBtn.addEventListener("click", () => {
+          currentProfileId = selectedProfileId;
+          try { localStorage.setItem(ACTIVE_PROFILE_KEY_STORE, selectedProfileId); } catch (_) {}
+          modal.classList.remove("open");
+          modal.setAttribute("aria-hidden", "true");
+          onChoiceMade({profileId: selectedProfileId, resume: true, profile: selProfile});
+        });
+        actions.appendChild(resumeBtn);
+      }
+      const playBtn = document.createElement("button");
+      playBtn.textContent = (selProfile && selProfile.activeRun) ? "Start New Run" : "Play";
+      if (!(selProfile && selProfile.activeRun)) playBtn.className = "primary";
+      playBtn.addEventListener("click", () => {
+        currentProfileId = selectedProfileId;
+        try { localStorage.setItem(ACTIVE_PROFILE_KEY_STORE, selectedProfileId); } catch (_) {}
+        modal.classList.remove("open");
+        modal.setAttribute("aria-hidden", "true");
+        onChoiceMade({profileId: selectedProfileId, resume: false, profile: selProfile || null});
+      });
+      actions.appendChild(playBtn);
+    }
+  }
+
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+  renderModalContent();
+}
+
+// ===== GAME INIT WITH PROFILE =====
+
+function initGame(resumeChoice) {
+  generateTerrain();
+  generateHabitats();
+  lastHabitatKey = habitatKeyAt(player.x, player.y);
+  if (resumeChoice && resumeChoice.resume && resumeChoice.profile) {
+    const ok = profileResumeActiveRun(resumeChoice.profile);
+    if (!ok) {
+      seedClayDeposits();
+      reconcileCurrentTileState();
+      profileStartNewRun();
+      addLog("Resume failed. Starting new run.", "minor");
+      addLog("Prototype started. You are small, agile, and vulnerable.", "minor");
+      addLog("Controls: WASD/arrows move, Q/E/Z/C diagonals, space waits, R climbs, X descends, F attacks, I investigates, V eats/drinks, K looks, B grooms, H opens call menu, G leaves group, L sleeps.", "minor");
+      render();
+    }
+  } else {
+    seedClayDeposits();
+    reconcileCurrentTileState();
+    profileStartNewRun();
+    render();
+    addLog("Prototype started. You are small, agile, and vulnerable.", "minor");
+    addLog("Controls: WASD/arrows move, Q/E/Z/C diagonals, space waits, R climbs, X descends, F attacks, I investigates, V eats/drinks, K looks, B grooms, H opens call menu, G leaves group, L sleeps.", "minor");
+  }
+  profileUpdatePanelUI();
+}
+
 const KNOWLEDGE_MAX = 30;
 const KNOWLEDGE_PER_ENTITY_CAP = 2;
 const KNOWLEDGE_TIERS = [
@@ -3461,6 +4096,7 @@ function restoreQABackSnapshot() {
   timeState.phaseTurn = snap.timeState.phaseTurn;
   timeState.sleepTurnsRemaining = snap.timeState.sleepTurnsRemaining;
 
+  runQaBackUses++;
   addDebugTrace("qa-back-used", {
     originalDeathContext,
     restoredTurn: player.turn,
@@ -6727,6 +7363,7 @@ function attemptMating() {
       setNarration("Five times you have passed on what you are. The season turns. There is a kind of continuity here.");
       addLog(`Turn ${player.turn}: Mating goal complete. Five successful matings.`, "prey");
       addDebugTrace("mating-goal-complete", {matingCount: countAfter, turn: player.turn});
+      onWinAchieved();
     } else {
       setNarration("For a moment, survival becomes continuity. The encounter settles into brief acceptance before the group moves on.");
     }
@@ -6831,6 +7468,7 @@ function attemptGroupMating() {
       setNarration("Five times you have passed on what you are. The season turns. There is a kind of continuity here.");
       addLog(`Turn ${player.turn}: Mating goal complete. Five successful matings.`, "prey");
       addDebugTrace("mating-goal-complete", {matingCount: countAfter, turn: player.turn, source: "group"});
+      onWinAchieved();
     } else {
       setNarration("The bond within the group deepens briefly. The others shift around you, aware.");
     }
@@ -11787,6 +12425,7 @@ function die(message, context = null) {
   addLog(`Turn ${player.turn}: ${message}`, "death");
   setNarration(deathNarrationFor(message, deathContext));
   render();
+  profileOnRunEnd("death");
   maybePromptRestartAfterDeath(message);
 }
 
@@ -11915,6 +12554,8 @@ function resetGameForPlayer(reason = "manual restart") {
   addLog(`New game started: ${reason}.`, "minor");
   addLog("Prototype started. You are small, agile, and vulnerable.", "minor");
   render();
+  profileStartNewRun();
+  profileUpdatePanelUI();
 }
 
 // @fn knownWarning
@@ -15555,6 +16196,7 @@ if (deathModalQABack) deathModalQABack.addEventListener("click", () => {
 const godModeToggle = document.getElementById("godModeToggle");
 if (godModeToggle) godModeToggle.addEventListener("click", () => {
   godModeEnabled = !godModeEnabled;
+  if (godModeEnabled) runGodModeUsed = true;
   godModeToggle.textContent = godModeEnabled ? "God Mode: ON" : "God Mode: OFF";
   godModeToggle.style.outline = godModeEnabled ? "2px solid #f90" : "";
 });
@@ -15596,6 +16238,92 @@ if (downloadBotReportButton) downloadBotReportButton.addEventListener("click", d
 const downloadBotCompactButton = document.getElementById("downloadBotCompact");
 if (downloadBotCompactButton) downloadBotCompactButton.addEventListener("click", downloadBotReportCompact);
 initBotRepoConfig();
+
+// Profile panel button listeners
+const profileSaveBtn = document.getElementById("profileSaveBtn");
+if (profileSaveBtn) profileSaveBtn.addEventListener("click", profileSaveActiveRun);
+const profileResumeBtn = document.getElementById("profileResumeBtn");
+if (profileResumeBtn) profileResumeBtn.addEventListener("click", () => {
+  const store = profileLoadStore();
+  const profile = currentProfileId ? store.profiles[currentProfileId] : null;
+  if (!profile || !profile.activeRun) { addLog("No saved run on this profile to resume.", "minor"); return; }
+  if (!player.dead && player.turn > 0) {
+    if (!window.confirm("Resume saved run? Current unsaved progress will be lost.")) return;
+  }
+  profileResumeActiveRun(profile);
+});
+const profileNewRunBtn = document.getElementById("profileNewRunBtn");
+if (profileNewRunBtn) profileNewRunBtn.addEventListener("click", () => {
+  if (!player.dead) {
+    if (!window.confirm("Abandon current run and start a new one?")) return;
+    profileOnRunEnd("abandoned");
+  }
+  resetGameForPlayer("new-run-on-profile");
+});
+const profileNewBtn = document.getElementById("profileNewBtn");
+if (profileNewBtn) profileNewBtn.addEventListener("click", () => {
+  const store = profileLoadStore();
+  const count = Object.keys(store.profiles).length;
+  const name = window.prompt("New profile name:", "Profile " + (count + 1));
+  if (!name) return;
+  profileCreateNew(name.slice(0, 40));
+  profileUpdatePanelUI();
+  addLog("Profile \"" + name.slice(0, 40) + "\" created.", "minor");
+});
+const profileLoadBtn = document.getElementById("profileLoadBtn");
+if (profileLoadBtn) profileLoadBtn.addEventListener("click", () => {
+  const store = profileLoadStore();
+  const profiles = Object.values(store.profiles);
+  if (!profiles.length) { addLog("No profiles saved.", "minor"); return; }
+  const list = profiles.map((p, i) => (i + 1) + ". " + p.name + " (" + p.stats.totalRuns + " runs)").join("\n");
+  const input = window.prompt("Choose profile number:\n" + list);
+  if (!input) return;
+  const idx = parseInt(input, 10) - 1;
+  if (isNaN(idx) || idx < 0 || idx >= profiles.length) { addLog("Invalid choice.", "minor"); return; }
+  currentProfileId = profiles[idx].profileId;
+  try { localStorage.setItem(ACTIVE_PROFILE_KEY_STORE, currentProfileId); } catch (_) {}
+  profileUpdatePanelUI();
+  addLog("Profile \"" + profiles[idx].name + "\" loaded.", "minor");
+});
+const profileRenameBtn = document.getElementById("profileRenameBtn");
+if (profileRenameBtn) profileRenameBtn.addEventListener("click", () => {
+  if (!currentProfileId) { addLog("No active profile.", "minor"); return; }
+  const store = profileLoadStore();
+  const profile = store.profiles[currentProfileId];
+  if (!profile) return;
+  const newName = window.prompt("New name:", profile.name);
+  if (!newName) return;
+  profile.name = newName.slice(0, 40);
+  profileSaveStore(store);
+  profileUpdatePanelUI();
+  addLog("Profile renamed to \"" + profile.name + "\".", "minor");
+});
+const profileDeleteBtn = document.getElementById("profileDeleteBtn");
+if (profileDeleteBtn) profileDeleteBtn.addEventListener("click", () => {
+  if (!currentProfileId) { addLog("No active profile.", "minor"); return; }
+  const store = profileLoadStore();
+  const profile = store.profiles[currentProfileId];
+  if (!profile) return;
+  if (!window.confirm("Delete profile \"" + profile.name + "\"? This cannot be undone.")) return;
+  delete store.profiles[currentProfileId];
+  profileSaveStore(store);
+  currentProfileId = null;
+  try { localStorage.removeItem(ACTIVE_PROFILE_KEY_STORE); } catch (_) {}
+  profileUpdatePanelUI();
+  addLog("Profile deleted.", "minor");
+});
+
+// Win modal listeners
+const winModalClaim = document.getElementById("winModalClaim");
+if (winModalClaim) winModalClaim.addEventListener("click", () => {
+  hideWinModal();
+  profileOnRunEnd("win");
+  addLog("Win recorded on profile.", "minor");
+  winAchievedThisRun = true;
+});
+const winModalContinue = document.getElementById("winModalContinue");
+if (winModalContinue) winModalContinue.addEventListener("click", hideWinModal);
+
 document.getElementById("leaveGroup").addEventListener("click", leaveGroup);
 const courtCompanionEl = document.getElementById("courtCompanion");
 if (courtCompanionEl) courtCompanionEl.addEventListener("click", attemptGroupMating);
@@ -15665,16 +16393,11 @@ window.collectBotReport = collectBotReport;
 window.downloadBotReportCompact = downloadBotReportCompact;
 window.resetGameForPlayer = resetGameForPlayer;
 
-// Startup sequence: validate data, generate terrain, seed clay, then render.
+// Startup sequence: validate data, show profile modal, then generate world and render.
 validateEncounterData();
-generateTerrain();
-generateHabitats();
-lastHabitatKey = habitatKeyAt(player.x, player.y);
-seedClayDeposits();
-reconcileCurrentTileState();
-render();
-addLog("Prototype started. You are small, agile, and vulnerable.", "minor");
-addLog("Controls: WASD/arrows move, Q/E/Z/C diagonals, space waits, R climbs, X descends, F attacks, I investigates, V eats/drinks, K looks, B grooms, H opens call menu, G leaves group, L sleeps.", "minor");
+profileShowStartupModal(function(choice) {
+  initGame(choice);
+});
 
 
 
