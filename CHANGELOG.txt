@@ -1,3 +1,14 @@
+[2026-05-10 quick-fixes-v2 | Claude]
+Four small correctness fixes.
+
+1. Wildfire theme CSS: added body.wildfire-active CSS-variable block (amber/red palette, warm map-filter). The class is already applied to body when a wildfire is active but had no corresponding CSS definition.
+
+2. containsCodeLikeText() regex tightened: previous pattern matched bare "const " and "let " (with trailing space), falsely flagging valid narrative containing those character sequences. New pattern requires a letter/underscore/$ after "const " and "function " so only actual code identifiers trigger the guard.
+
+3. Debug trace label renamed: "fatal predator strike" → "predator-attack-roll" (two call sites in the Gastornis and general predator attack paths). Descriptive rename for clearer log filtering.
+
+4. Carcass debug-panel count fixed: filter was `rec.kind === "carcass" || rec.carcassAge !== undefined`, which included non-carcass records that happen to have a carcassAge field. Now strictly `rec.kind === "carcass"`.
+
 [2026-05-10 natural-history-all-encounters | Claude]
 Fix: player.knowledgeByEncounterKey now cleared on new run. Added knowledgeByEncounterKey: {} to the Object.assign reset block in both resetGameForPlayer() and resetGameForBot(), so investigation knowledge does not carry over between runs.
 
