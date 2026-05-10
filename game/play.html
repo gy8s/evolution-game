@@ -4214,8 +4214,10 @@ function profileLoadStore() {
 function profileSaveStore(data) {
   try {
     localStorage.setItem(PROFILE_STORE_KEY, JSON.stringify(data));
+    return true;
   } catch (e) {
     addDebugTrace("profile-save-error", {error: String(e)});
+    return false;
   }
 }
 
@@ -4502,6 +4504,8 @@ function profileSaveActiveRun() {
     lastSavedAt: new Date().toISOString(),
     buildId: GAME_VERSION,
     seed: currentRunId,
+    runGodModeUsed,
+    runQaBackUses,
     summary: {
       turn: player.turn,
       x: player.x,
@@ -4519,13 +4523,14 @@ function profileSaveActiveRun() {
   profile.lastPlayedAt = new Date().toISOString();
   profile.buildId = GAME_VERSION;
 
-  try {
-    profileSaveStore(store);
+  const saved = profileSaveStore(store);
+  if (saved) {
     addLog(`Run saved at turn ${player.turn} (${sizeKB} KB).`, "minor");
     addDebugTrace("profile-run-saved", {turn: player.turn, sizeKB, runId: currentRunId});
-  } catch (e) {
-    addLog("Save failed — localStorage write error.", "minor");
-    addDebugTrace("profile-save-write-error", {error: String(e)});
+  } else {
+    addLog("Save failed — localStorage write error (quota or security). Run was not persisted.", "death");
+    addDebugTrace("profile-save-write-error", {turn: player.turn, sizeKB, runId: currentRunId});
+    profile.activeRun = null;
   }
   profileUpdatePanelUI();
 }
@@ -4556,8 +4561,8 @@ function profileResumeActiveRun(profile) {
   }
   currentRunId = profile.activeRun.runId || profileGenerateId("run");
   runStartedAt = profile.activeRun.startedAt || new Date().toISOString();
-  runGodModeUsed = false;
-  runQaBackUses = 0;
+  runGodModeUsed = !!(profile.activeRun.runGodModeUsed);
+  runQaBackUses = profile.activeRun.runQaBackUses || 0;
   runMaxGroupSize = 0;
   winAchievedThisRun = false;
   clearRunLogsForNewGame();
@@ -17185,6 +17190,9 @@ if (profileNewBtn) profileNewBtn.addEventListener("click", () => {
 });
 const profileLoadBtn = document.getElementById("profileLoadBtn");
 if (profileLoadBtn) profileLoadBtn.addEventListener("click", () => {
+  if (!player.dead && player.turn > 0) {
+    if (!window.confirm("Switch profile? The current run is in progress. It will not be saved automatically.")) return;
+  }
   const store = profileLoadStore();
   const profiles = Object.values(store.profiles);
   if (!profiles.length) { addLog("No profiles saved.", "minor"); return; }
@@ -17194,6 +17202,8 @@ if (profileLoadBtn) profileLoadBtn.addEventListener("click", () => {
   const idx = parseInt(input, 10) - 1;
   if (isNaN(idx) || idx < 0 || idx >= profiles.length) { addLog("Invalid choice.", "minor"); return; }
   currentProfileId = profiles[idx].profileId;
+  currentRunId = null;
+  runStartedAt = null;
   try { localStorage.setItem(ACTIVE_PROFILE_KEY_STORE, currentProfileId); } catch (_) {}
   profileUpdatePanelUI();
   addLog("Profile \"" + profiles[idx].name + "\" loaded.", "minor");
