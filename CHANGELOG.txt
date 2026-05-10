@@ -1,3 +1,26 @@
+[2026-05-10 field-journal | Claude]
+Persistent Field Journal system: cross-run encounter knowledge tracking and modal.
+
+Root causes fixed:
+- knowledgeByEncounterKey was reset to {} on every new game, so all investigation progress was lost between runs.
+- tryAddEncounterTypeKnowledge had a per-entity cap (KNOWLEDGE_PER_ENTITY_CAP=2) using getEncounterInstanceId, which fell back to the encounter name — meaning all instances of a type (e.g. every large constrictor) shared one cap. After 2 investigations of any constrictor, no further knowledge ever accumulated.
+- tryAddEncounterTypeKnowledge was only called in the success path (after the k.encounterInvestigations>=2 diminishing-returns guard), so investigations during diminishing returns never contributed to the journal.
+
+Changes:
+- profileCreateNew: adds fieldJournal:{} to each new profile in localStorage.
+- profileLoadFieldJournal / profileWriteJournalEntry: new helpers to read/write fieldJournal from the active profile store.
+- profileStartNewRun: now loads player.knowledgeByEncounterKey from profileLoadFieldJournal() so journal knowledge persists across runs.
+- resetGameForPlayer / resetGameForBot: removed knowledgeByEncounterKey:{} from the Object.assign reset; instead sets player.knowledgeByEncounterKey = profileLoadFieldJournal() after the reset so cross-run data is preserved.
+- ensureEncounterTypeKnowledge: rewritten to store typeKey, name, category, firstSeen, investigations, unlockedTier — no more investigatedInstanceIds per-entity tracking.
+- tryAddEncounterTypeKnowledge: removed per-entity cap and instanceId tracking; now just increments tk.investigations and calls profileWriteJournalEntry on every gain.
+- investigate(): moved tryAddEncounterTypeKnowledge(e) to BEFORE the k.encounterInvestigations>=2 diminishing guard, so every investigation attempt (including diminishing ones) contributes to the journal. Logs "Field journal: X N/30" in both diminishing and success paths.
+- journalMarkFirstSeen(e): fires when an encounter card renders for the first time per type; records a firstSeen entry in the journal without incrementing investigations.
+- getEncounterLogCategory(e): classifies encounters into fauna/flora/misc for journal tabs.
+- showFieldJournal(optionalTypeKey): new modal function renders all journal entries grouped by tab (Fauna/Flora/Misc). Shows naturalHistory sections based on KNOWLEDGE_NH_THRESHOLDS. Highlights and expands the entry for optionalTypeKey if provided.
+- Field Journal modal (#fjModal): new HTML modal with Fauna/Flora/Misc tabs, scrollable entry list, collapsible entries, and close button/backdrop.
+- (i) button on encounter cards: now opens showFieldJournal(typeKey) instead of showNaturalHistoryPopup(). Button shows once nhTk.investigations >= KNOWLEDGE_INFO_UNLOCK (naturalHistory requirement removed — journal shows for all investigated encounters).
+- Profile panel: added "Field Journal" button that opens showFieldJournal().
+
 [2026-05-10 wildfire-smell-priority | Claude]
 Wildfire outer-zone smell no longer masks predator or threat scents.
 Previously, entering the outer wildfire ring (wdist <= radius + 6) unconditionally overwrote the smell display with "Faint smoke from …", overriding any predator, rival, or other scent already set this render. Now uses smellIsAmbientText() which checks against all 11 possible randomAmbientSmell() outputs (not just the single old default string), so the outer-zone smoke cue fires correctly for every ambient condition including rain, mist, still air, and night. Also adds AMBIENT_SMELL_STRINGS constant for maintainability. Inner-zone and core-fire smoke cues are unchanged and still override as before, since those represent immediate danger.

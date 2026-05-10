@@ -383,6 +383,28 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
 .nhModalProgress { font-size: 11px; color: #6db87a; font-weight: normal; text-transform: uppercase; letter-spacing: .04em; margin-left: 8px; }
 .nhInfoBtn { font-size: 13px; padding: 2px 7px; background: #1b4a2b; border: 1px solid #4a9a62; color: #9bea72; border-radius: 4px; cursor: pointer; line-height: 1.4; vertical-align: middle; margin-left: 6px; }
 .nhInfoBtn:hover { background: #2d6b3e; }
+.fjModal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 10060; padding: 18px; background: rgba(0, 20, 10, 0.82); }
+.fjModal.open { display: flex; }
+.fjCard { width: min(96vw, 600px); background: #071209; border: 2px solid #4a9a62; box-shadow: 0 0 0 1px #1a3c22 inset, 0 18px 70px rgba(0,0,0,.75); border-radius: 10px; color: #e8f0d8; overflow: hidden; max-height: 90vh; display: flex; flex-direction: column; }
+.fjHeader { background: #1b4a2b; color: #c8f0a0; padding: 10px 14px 0; flex: 0 0 auto; border-bottom: 1px solid #2d6b3e; }
+.fjHeaderTitle { font-size: 15px; font-weight: bold; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
+.fjTabs { display: flex; gap: 4px; }
+.fjTab { padding: 5px 14px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: .04em; background: transparent; border: 1px solid #2d6b3e; border-bottom: none; color: #6db87a; border-radius: 4px 4px 0 0; cursor: pointer; }
+.fjTab.active { background: #071209; color: #c8f0a0; border-color: #4a9a62; }
+.fjBody { padding: 12px 14px; overflow-y: auto; flex: 1 1 auto; }
+.fjEmpty { color: #6db87a; font-style: italic; font-size: 14px; padding: 12px 0; }
+.fjEntry { border: 1px solid #1a3c22; border-radius: 6px; margin-bottom: 10px; overflow: hidden; }
+.fjEntry.fjHighlight { border-color: #4a9a62; }
+.fjEntryHead { display: flex; align-items: center; justify-content: space-between; background: #0d1b0f; padding: 7px 10px; cursor: pointer; }
+.fjEntryName { font-weight: bold; font-size: 14px; color: #c8f0a0; }
+.fjEntryBadge { font-size: 11px; color: #6db87a; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+.fjEntryBody { padding: 8px 10px; background: #071209; border-top: 1px solid #1a3c22; display: none; }
+.fjEntry.expanded .fjEntryBody { display: block; }
+.fjSection { margin-bottom: 8px; }
+.fjSection strong { display: block; color: #9bea72; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px; }
+.fjSection p { margin: 0; line-height: 1.5; color: #cfdcba; font-size: 14px; }
+.fjLocked { color: #3d5a3d; font-size: 13px; font-style: italic; }
+.fjClose { margin: 0 14px 14px; width: calc(100% - 28px); height: 38px; font-size: 14px; font-weight: bold; background: #1b4a2b; border-color: #4a9a62; color: #c8f0a0; flex: 0 0 auto; border-style: solid; border-width: 1px; border-radius: 5px; cursor: pointer; }
 .knowledge { color: #9bea72; }
 .knowledge-tier { color: #d9c747; font-weight: bold; }
 /* === MOBILE: @media (max-width: 980px) === */
@@ -740,6 +762,7 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
             <button class="debugButton" type="button" id="profileSaveBtn">Save Active Run</button>
             <button class="debugButton" type="button" id="profileResumeBtn">Resume Active Run</button>
             <button class="debugButton" type="button" id="profileNewRunBtn">Start New Run</button>
+            <button class="debugButton" type="button" id="profileJournalBtn">Field Journal</button>
           </div>
           <div class="profileHistoryList" id="profileHistoryList"></div>
         </div>
@@ -843,6 +866,21 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
       </div>
       <div id="nhModalBody" class="nhModalBody"></div>
       <button id="nhModalClose" class="nhModalClose" type="button">Close</button>
+    </div>
+  </div>
+
+  <div id="fjModal" class="fjModal" aria-hidden="true">
+    <div class="fjCard" role="dialog" aria-modal="true" aria-labelledby="fjTitle">
+      <div class="fjHeader">
+        <div class="fjHeaderTitle" id="fjTitle">Field Journal</div>
+        <div class="fjTabs">
+          <button type="button" class="fjTab active" data-fjtab="fauna">Fauna</button>
+          <button type="button" class="fjTab" data-fjtab="flora">Flora</button>
+          <button type="button" class="fjTab" data-fjtab="misc">Misc</button>
+        </div>
+      </div>
+      <div id="fjBody" class="fjBody"></div>
+      <button id="fjClose" class="fjClose" type="button">Close</button>
     </div>
   </div>
 
@@ -4242,7 +4280,8 @@ function profileCreateNew(name) {
     buildCompatible: true,
     stats: profileDefaultStats(),
     activeRun: null,
-    runHistory: []
+    runHistory: [],
+    fieldJournal: {}
   };
   profileSaveStore(store);
   currentProfileId = profileId;
@@ -4535,6 +4574,57 @@ function profileSaveActiveRun() {
   profileUpdatePanelUI();
 }
 
+function profileLoadFieldJournal() {
+  if (!currentProfileId) return {};
+  try {
+    const store = profileLoadStore();
+    const profile = store.profiles[currentProfileId];
+    if (!profile || !profile.fieldJournal) return {};
+    return JSON.parse(JSON.stringify(profile.fieldJournal));
+  } catch (_) { return {}; }
+}
+
+function profileWriteJournalEntry(typeKey, entry) {
+  if (!currentProfileId) return;
+  try {
+    const store = profileLoadStore();
+    const profile = store.profiles[currentProfileId];
+    if (!profile) return;
+    if (!profile.fieldJournal) profile.fieldJournal = {};
+    profile.fieldJournal[typeKey] = Object.assign({}, entry);
+    profileSaveStore(store);
+  } catch (_) {}
+}
+
+function getEncounterLogCategory(e) {
+  if (!e) return "misc";
+  const kind = e.kind || "";
+  if (kind === "carcass" || kind === "nest") return "misc";
+  if (kind === "animal") return "fauna";
+  if (kind === "remedy") return "flora";
+  const cls = knowledgeClassFor(e);
+  if (["insects", "caterpillars", "myriapods", "arachnids", "amphibians"].includes(cls)) return "fauna";
+  return "flora";
+}
+
+function journalMarkFirstSeen(e) {
+  if (!e) return;
+  const typeKey = getEncounterTypeKey(e);
+  if (!player.knowledgeByEncounterKey) player.knowledgeByEncounterKey = {};
+  if (player.knowledgeByEncounterKey[typeKey] && player.knowledgeByEncounterKey[typeKey].firstSeen) return;
+  const existing = player.knowledgeByEncounterKey[typeKey] || {};
+  const entry = Object.assign(existing, {
+    typeKey,
+    name: e.name || typeKey,
+    category: getEncounterLogCategory(e),
+    firstSeen: true,
+    firstSeenTurn: player.turn,
+    investigations: existing.investigations || 0
+  });
+  player.knowledgeByEncounterKey[typeKey] = entry;
+  profileWriteJournalEntry(typeKey, entry);
+}
+
 function profileStartNewRun() {
   currentRunId = profileGenerateId("run");
   runStartedAt = new Date().toISOString();
@@ -4542,6 +4632,7 @@ function profileStartNewRun() {
   runQaBackUses = 0;
   runMaxGroupSize = 0;
   winAchievedThisRun = false;
+  player.knowledgeByEncounterKey = profileLoadFieldJournal();
   addDebugTrace("profile-new-run", {profileId: currentProfileId || "none", runId: currentRunId});
 }
 
@@ -12011,22 +12102,17 @@ function getEncounterTypeKey(e) {
   return e.key || e.name || "unknown";
 }
 
-// @target [INVESTIGATION] Encounter Instance Id (for per-entity cap)
-function getEncounterInstanceId(e) {
-  if (!e) return "unknown";
-  if (e.instanceId) return e.instanceId;
-  if (e.origin) return `${e.key || e.name}_${e.origin.x}_${e.origin.y}_${e.origin.z}`;
-  return e.key || e.name || "unknown";
-}
-
 // @target [INVESTIGATION] Ensure Encounter Type Knowledge
-function ensureEncounterTypeKnowledge(typeKey) {
+function ensureEncounterTypeKnowledge(typeKey, e) {
   if (!player.knowledgeByEncounterKey) player.knowledgeByEncounterKey = {};
   if (!player.knowledgeByEncounterKey[typeKey]) {
     player.knowledgeByEncounterKey[typeKey] = {
+      typeKey,
+      name: e ? (e.name || typeKey) : typeKey,
+      category: e ? getEncounterLogCategory(e) : "misc",
+      firstSeen: false,
       investigations: 0,
-      unlockedTier: 0,
-      investigatedInstanceIds: {}
+      unlockedTier: 0
     };
   }
   return player.knowledgeByEncounterKey[typeKey];
@@ -12045,17 +12131,7 @@ function computeKnowledgeTier(count) {
 function tryAddEncounterTypeKnowledge(e) {
   if (!e) return { gained: false, reason: "no-encounter" };
   const typeKey = getEncounterTypeKey(e);
-  const instanceId = getEncounterInstanceId(e);
-  const tk = ensureEncounterTypeKnowledge(typeKey);
-  const perEntityCount = tk.investigatedInstanceIds[instanceId] || 0;
-
-  if (perEntityCount >= KNOWLEDGE_PER_ENTITY_CAP) {
-    addDebugTrace("investigation-knowledge-cap-reached", {
-      encounterKey: typeKey, name: e.name, instanceId,
-      perEntityCount, cap: KNOWLEDGE_PER_ENTITY_CAP
-    });
-    return { gained: false, reason: "entity-cap" };
-  }
+  const tk = ensureEncounterTypeKnowledge(typeKey, e);
 
   if (tk.investigations >= KNOWLEDGE_MAX) {
     return { gained: false, reason: "type-max" };
@@ -12063,15 +12139,15 @@ function tryAddEncounterTypeKnowledge(e) {
 
   const prevCount = tk.investigations;
   const prevTier = computeKnowledgeTier(prevCount);
-  tk.investigatedInstanceIds[instanceId] = perEntityCount + 1;
   tk.investigations += 1;
   const newCount = tk.investigations;
   const newTier = computeKnowledgeTier(newCount);
 
+  profileWriteJournalEntry(typeKey, tk);
+
   addDebugTrace("investigation-knowledge-gained", {
-    encounterKey: typeKey, name: e.name, instanceId,
+    encounterKey: typeKey, name: e.name,
     prevCount, newCount,
-    perEntityCount: tk.investigatedInstanceIds[instanceId],
     prevTier: prevTier.label, newTier: newTier.label,
     threshold: KNOWLEDGE_MAX
   });
@@ -12152,6 +12228,72 @@ function showNaturalHistoryPopup(e) {
   addDebugTrace("natural-history-popup", {
     encounterKey: typeKey, name: e.name, count, unlockedCount
   });
+}
+
+// @target [INVESTIGATION] Show Field Journal
+function showFieldJournal(highlightTypeKey) {
+  const modal = document.getElementById("fjModal");
+  const body = document.getElementById("fjBody");
+  if (!modal || !body) return;
+
+  const journal = player.knowledgeByEncounterKey || {};
+  const entries = Object.values(journal);
+  const nhSections = [
+    { label: "Field Note", key: "fieldNote" },
+    { label: "Behaviour", key: "behaviour" },
+    { label: "Ecology", key: "ecology" },
+    { label: "Danger to you", key: "gameplayInsight" },
+    { label: "Science note", key: "scienceNote" }
+  ];
+
+  function renderTab(tab) {
+    const filtered = entries.filter(tk => tk.category === tab);
+    if (!filtered.length) {
+      body.innerHTML = `<div class="nhModalSection"><p>No ${tab} entries yet.</p></div>`;
+      return;
+    }
+    const sorted = filtered.slice().sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+    body.innerHTML = sorted.map(tk => {
+      const isHighlight = highlightTypeKey && tk.typeKey === highlightTypeKey;
+      const count = tk.investigations || 0;
+      const unlockedSections = nhSections.filter((s, i) => count >= (KNOWLEDGE_NH_THRESHOLDS[i] || Infinity));
+      const nhText = (function() {
+        if (!unlockedSections.length) return "";
+        const eData = encounters[tk.typeKey];
+        if (!eData || !eData.naturalHistory) return "";
+        return unlockedSections.map(s => `<div class="nhModalSection"><strong>${s.label}</strong><p>${eData.naturalHistory[s.key] || ""}</p></div>`).join("");
+      })();
+      const progressLabel = count >= KNOWLEDGE_MAX ? "Complete" : `${count}/${KNOWLEDGE_MAX}`;
+      return `<div class="fjEntry${isHighlight ? " fjHighlight" : ""}" data-fjtk="${tk.typeKey}">
+        <div class="fjEntryHead" onclick="this.parentElement.classList.toggle('expanded')">
+          <span>${tk.name || tk.typeKey}</span>
+          <span style="font-size:11px;color:#6db87a">${progressLabel}</span>
+        </div>
+        <div class="fjEntryBody">
+          ${nhText || `<div class="nhModalSection"><p>Investigate more to unlock field notes.</p></div>`}
+        </div>
+      </div>`;
+    }).join("");
+    if (highlightTypeKey) {
+      const el = body.querySelector(`[data-fjtk="${highlightTypeKey}"]`);
+      if (el) { el.classList.add("expanded"); el.scrollIntoView({block: "nearest"}); }
+    }
+  }
+
+  const targetEntry = highlightTypeKey ? journal[highlightTypeKey] : null;
+  const targetTab = (targetEntry && targetEntry.category) || null;
+  if (targetTab) {
+    modal.querySelectorAll(".fjTab").forEach(t => {
+      t.classList.toggle("active", t.dataset.fjtab === targetTab);
+    });
+  }
+  const activeTabEl = modal.querySelector(".fjTab.active");
+  const activeTab = (activeTabEl && activeTabEl.dataset.fjtab) || "fauna";
+  renderTab(activeTab);
+  modal._fjRenderTab = renderTab;
+
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
 }
 
 // @target [INVESTIGATION] Investigation Diminishing Text
@@ -12409,11 +12551,19 @@ function investigate() {
     return;
   }
 
+  const knowledgeResult = tryAddEncounterTypeKnowledge(e);
+
   if (k.level >= ceiling || k.encounterInvestigations >= 2) {
     setInvestigationResultFor(e, investigationDiminishingText(e, ceiling));
     const warning = dangerReadinessText(e);
     const logText = warning ? `no new detail; ${warning}` : `no further useful detail from this individual`;
     addDebugTrace("investigation-result", {resultType: "diminishing", encounter: cloneDebug(e), knowledge: cloneDebug(k), warning, logText, revealed: investigationRevealedTraits(e, k.level), hidden: investigationHiddenTraits(e, k.level)});
+    if (knowledgeResult.gained) {
+      const tk = ensureEncounterTypeKnowledge(getEncounterTypeKey(e), e);
+      const kCount = tk.investigations;
+      const eName = e.name || "creature";
+      addLog(`Field journal: ${eName} ${kCount}/${KNOWLEDGE_MAX}.`, "knowledge");
+    }
     setNarration(e.seen || `You notice ${article(e.name)} ${e.name}.`);
     render();
     return;
@@ -12423,12 +12573,11 @@ function investigate() {
   k.level = Math.min(k.level + 1, ceiling);
   classLearningGain(e);
 
-  const knowledgeResult = tryAddEncounterTypeKnowledge(e);
   if (knowledgeResult.gained) {
-    const tk = ensureEncounterTypeKnowledge(getEncounterTypeKey(e));
+    const tk = ensureEncounterTypeKnowledge(getEncounterTypeKey(e), e);
     const kCount = tk.investigations;
     const eName = e.name || "creature";
-    addLog(`Knowledge gained: ${eName} ${kCount}/${KNOWLEDGE_MAX}.`, "knowledge");
+    addLog(`Field journal: ${eName} ${kCount}/${KNOWLEDGE_MAX}.`, "knowledge");
     if (knowledgeResult.tierUnlocked) {
       const tierText = investigationKnowledgeTierText(e, knowledgeResult.tierUnlocked);
       if (tierText) addLog(tierText, "knowledge-tier");
@@ -13422,7 +13571,6 @@ function resetGameForPlayer(reason = "manual restart") {
     knownFoods: {},
     knowledge: {},
     classKnowledge: {},
-    knowledgeByEncounterKey: {},
     lastLowFitnessWarningTurn: -999,
     lastLowHydrationWarningTurn: -999,
     parasites: 0,
@@ -13433,6 +13581,7 @@ function resetGameForPlayer(reason = "manual restart") {
     matingCount: 0,
     lastMatingTurn: -999
   });
+  player.knowledgeByEncounterKey = profileLoadFieldJournal();
   lastHabitatKey = "primary";
   waterState = {inWater: false, turns: 0};
   currentEncounter = null;
@@ -13831,7 +13980,6 @@ function resetGameForBot(reason = "bot auto-reset") {
     knownFoods: {},
     knowledge: {},
     classKnowledge: {},
-    knowledgeByEncounterKey: {},
     lastLowFitnessWarningTurn: -999,
     lastLowHydrationWarningTurn: -999,
     parasites: 0,
@@ -13842,6 +13990,7 @@ function resetGameForBot(reason = "bot auto-reset") {
     matingCount: 0,
     lastMatingTurn: -999
   });
+  player.knowledgeByEncounterKey = profileLoadFieldJournal();
   lastHabitatKey = "primary";
   waterState = {inWater: false, turns: 0};
   currentEncounter = null;
@@ -16435,9 +16584,10 @@ function renderSenses() {
       const floatingInvestigationBox = cleanInvestigationText && !investigationBelongsToCard ? `<div class="investigationResult"><strong>Investigation result:</strong><br>${cleanInvestigationText}</div>` : "";
 
       const nhTypeKey = getEncounterTypeKey(e);
+      journalMarkFirstSeen(e);
       const nhTk = player.knowledgeByEncounterKey ? player.knowledgeByEncounterKey[nhTypeKey] : null;
-      const nhBtnHtml = (e.naturalHistory && nhTk && nhTk.investigations >= KNOWLEDGE_INFO_UNLOCK)
-        ? `<button type="button" id="nhInfoBtn" class="nhInfoBtn" title="Field Notes (${KNOWLEDGE_NH_THRESHOLDS.filter(t => nhTk.investigations >= t).length}/${KNOWLEDGE_NH_THRESHOLDS.length} sections unlocked)">ⓘ</button>`
+      const nhBtnHtml = (nhTk && nhTk.investigations >= KNOWLEDGE_INFO_UNLOCK)
+        ? `<button type="button" id="nhInfoBtn" class="nhInfoBtn" title="Field Journal (${KNOWLEDGE_NH_THRESHOLDS.filter(t => nhTk.investigations >= t).length}/${KNOWLEDGE_NH_THRESHOLDS.length} sections unlocked)">ⓘ</button>`
         : "";
 
       html += `
@@ -17106,9 +17256,29 @@ if (nhModal) nhModal.addEventListener("click", event => {
 });
 document.addEventListener("click", event => {
   if (event.target && event.target.id === "nhInfoBtn" && currentEncounter) {
-    showNaturalHistoryPopup(currentEncounter);
+    showFieldJournal(getEncounterTypeKey(currentEncounter));
   }
 });
+
+const fjModal = document.getElementById("fjModal");
+const fjClose = document.getElementById("fjClose");
+if (fjClose) fjClose.addEventListener("click", () => {
+  fjModal.classList.remove("open");
+  fjModal.setAttribute("aria-hidden", "true");
+});
+if (fjModal) fjModal.addEventListener("click", event => {
+  if (event.target === fjModal) { fjModal.classList.remove("open"); fjModal.setAttribute("aria-hidden", "true"); }
+});
+if (fjModal) fjModal.addEventListener("click", event => {
+  const tab = event.target.closest("[data-fjtab]");
+  if (!tab) return;
+  fjModal.querySelectorAll(".fjTab").forEach(t => t.classList.remove("active"));
+  tab.classList.add("active");
+  if (fjModal._fjRenderTab) fjModal._fjRenderTab(tab.dataset.fjtab);
+});
+
+const profileJournalBtn = document.getElementById("profileJournalBtn");
+if (profileJournalBtn) profileJournalBtn.addEventListener("click", () => showFieldJournal());
 const mapOverlay = document.getElementById("mapOverlay");
 if (mapOverlay) {
   mapOverlay.addEventListener("click", event => {
