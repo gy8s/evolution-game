@@ -370,7 +370,7 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
 .deathModalActions button { height: 42px; font-size: 14px; font-weight: bold; }
 #deathModalRestart { background: #7b2424; border-color: #ff8f8f; color: #fff3ee; }
 #deathModalStay { background: #251313; border-color: #8b4a4a; color: #f3c8c0; }
-.nhModal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 10060; padding: 18px; background: rgba(0, 20, 10, 0.82); }
+.nhModal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 10070; padding: 18px; background: rgba(0, 20, 10, 0.82); }
 .nhModal.open { display: flex; }
 .nhModalCard { width: min(94vw, 560px); background: #071209; border: 2px solid #4a9a62; box-shadow: 0 0 0 1px #1a3c22 inset, 0 18px 70px rgba(0,0,0,.75); border-radius: 10px; color: #e8f0d8; overflow: hidden; max-height: 88vh; display: flex; flex-direction: column; }
 .nhModalHeader { display: flex; align-items: center; gap: 10px; background: #1b4a2b; color: #c8f0a0; padding: 12px 14px; font-size: 16px; font-weight: bold; text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid #2d6b3e; flex: 0 0 auto; }
@@ -386,7 +386,11 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
 .fjModal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 10060; padding: 18px; background: rgba(0, 20, 10, 0.82); }
 .fjModal.open { display: flex; }
 .fjCard { width: min(96vw, 480px); background: #071209; border: 2px solid #4a9a62; box-shadow: 0 0 0 1px #1a3c22 inset, 0 18px 70px rgba(0,0,0,.75); border-radius: 10px; color: #e8f0d8; overflow: hidden; max-height: 90vh; display: flex; flex-direction: column; }
-.fjHeader { background: #1b4a2b; color: #c8f0a0; padding: 10px 14px; flex: 0 0 auto; border-bottom: 1px solid #2d6b3e; font-size: 15px; font-weight: bold; text-transform: uppercase; letter-spacing: .04em; }
+.fjHeader { background: #1b4a2b; color: #c8f0a0; padding: 10px 14px 0; flex: 0 0 auto; border-bottom: 1px solid #2d6b3e; }
+.fjHeaderTitle { font-size: 15px; font-weight: bold; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
+.fjTabs { display: flex; gap: 4px; }
+.fjTab { padding: 5px 14px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: .04em; background: transparent; border: 1px solid #2d6b3e; border-bottom: none; color: #6db87a; border-radius: 4px 4px 0 0; cursor: pointer; }
+.fjTab.active { background: #071209; color: #c8f0a0; border-color: #4a9a62; }
 .fjBody { padding: 8px 0; overflow-y: auto; flex: 1 1 auto; }
 .fjGroup { margin-bottom: 2px; }
 .fjGroupHeader { padding: 5px 14px 3px; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: .08em; color: #4a9a62; }
@@ -864,7 +868,14 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
 
   <div id="fjModal" class="fjModal" aria-hidden="true">
     <div class="fjCard" role="dialog" aria-modal="true" aria-labelledby="fjTitle">
-      <div class="fjHeader" id="fjTitle">Field Journal</div>
+      <div class="fjHeader">
+        <div class="fjHeaderTitle" id="fjTitle">Field Journal</div>
+        <div class="fjTabs">
+          <button type="button" class="fjTab active" data-fjtab="fauna">Fauna</button>
+          <button type="button" class="fjTab" data-fjtab="flora">Flora</button>
+          <button type="button" class="fjTab" data-fjtab="misc">Misc</button>
+        </div>
+      </div>
       <div id="fjBody" class="fjBody"></div>
       <button id="fjClose" class="fjClose" type="button">Close</button>
     </div>
@@ -12225,6 +12236,14 @@ const FJ_GROUPS = [
   "Nests", "Carcasses", "Other"
 ];
 
+const FJ_TAB_GROUPS = {
+  fauna: ["Predators", "Constrictors & snakes", "Reptiles", "Birds",
+          "Primates & relatives", "Other mammals", "Amphibians",
+          "Insects", "Arachnids & myriapods", "Freshwater & crustaceans"],
+  flora: ["Fruit & berries", "Flowers", "Fungi & plants"],
+  misc:  ["Water & mineral", "Nests", "Carcasses", "Other"]
+};
+
 const FJ_GROUP_MAP = {
   groundCarnivore: "Predators", climbingHunter: "Predators", gastornis: "Predators",
   masillaraptor: "Predators", eagle: "Predators", bergisuchus: "Predators",
@@ -12331,30 +12350,35 @@ function showEncounterJournalEntry(typeKey) {
 }
 
 // @target [INVESTIGATION] Show Field Journal (index)
-function showFieldJournal() {
+function showFieldJournal(tab) {
   const modal = document.getElementById("fjModal");
   const body = document.getElementById("fjBody");
   if (!modal || !body) return;
 
+  const activeTab = tab || (modal.querySelector(".fjTab.active") || {}).dataset && modal.querySelector(".fjTab.active").dataset.fjtab || "fauna";
+  modal.querySelectorAll(".fjTab").forEach(t => t.classList.toggle("active", t.dataset.fjtab === activeTab));
+
   const journal = player.knowledgeByEncounterKey || {};
   const entries = Object.values(journal);
+  const tabGroups = FJ_TAB_GROUPS[activeTab] || [];
+  const tabEntries = entries.filter(tk => tabGroups.includes(getEncounterGroup(tk.typeKey)));
 
-  if (!entries.length) {
-    body.innerHTML = `<p style="padding:12px 14px;color:#6db87a;font-style:italic">No encounters recorded yet. Investigate creatures and plants to build your journal.</p>`;
+  if (!tabEntries.length) {
+    body.innerHTML = `<p style="padding:12px 14px;color:#6db87a;font-style:italic">No ${activeTab} entries yet.</p>`;
     modal.classList.add("open");
     modal.setAttribute("aria-hidden", "false");
     return;
   }
 
   const grouped = {};
-  for (const tk of entries) {
+  for (const tk of tabEntries) {
     const g = getEncounterGroup(tk.typeKey);
     if (!grouped[g]) grouped[g] = [];
     grouped[g].push(tk);
   }
 
   const html = FJ_GROUPS
-    .filter(g => grouped[g])
+    .filter(g => tabGroups.includes(g) && grouped[g])
     .map(g => {
       const rows = grouped[g]
         .slice()
@@ -17326,16 +17350,20 @@ if (showWorldMapButton) showWorldMapButton.addEventListener("click", () => setAc
 const mapOverlayClose = document.getElementById("mapOverlayClose");
 if (mapOverlayClose) mapOverlayClose.addEventListener("click", closeMapOverlay);
 const nhModalClose = document.getElementById("nhModalClose");
-if (nhModalClose) nhModalClose.addEventListener("click", () => {
-  const nhModal = document.getElementById("nhModal");
-  if (nhModal) { nhModal.classList.remove("open"); nhModal.setAttribute("aria-hidden", "true"); }
-});
 const nhModal = document.getElementById("nhModal");
+if (nhModalClose) nhModalClose.addEventListener("click", () => {
+  if (nhModal) { nhModal.classList.remove("open"); nhModal.setAttribute("aria-hidden", "true"); nhModal._fromJournal = false; }
+});
 if (nhModal) nhModal.addEventListener("click", event => {
-  if (event.target === nhModal) { nhModal.classList.remove("open"); nhModal.setAttribute("aria-hidden", "true"); }
+  if (event.target === nhModal) {
+    nhModal.classList.remove("open"); nhModal.setAttribute("aria-hidden", "true");
+    if (nhModal._fromJournal && fjModal) { fjModal.classList.remove("open"); fjModal.setAttribute("aria-hidden", "true"); }
+    nhModal._fromJournal = false;
+  }
 });
 document.addEventListener("click", event => {
   if (event.target && event.target.id === "nhInfoBtn" && currentEncounter) {
+    if (nhModal) nhModal._fromJournal = false;
     showEncounterJournalEntry(getEncounterTypeKey(currentEncounter));
   }
 });
@@ -17347,11 +17375,12 @@ if (fjClose) fjClose.addEventListener("click", () => {
   fjModal.setAttribute("aria-hidden", "true");
 });
 if (fjModal) fjModal.addEventListener("click", event => {
-  if (event.target === fjModal) { fjModal.classList.remove("open"); fjModal.setAttribute("aria-hidden", "true"); }
+  if (event.target === fjModal) { fjModal.classList.remove("open"); fjModal.setAttribute("aria-hidden", "true"); return; }
+  const tab = event.target.closest(".fjTab[data-fjtab]");
+  if (tab) { showFieldJournal(tab.dataset.fjtab); return; }
   const row = event.target.closest(".fjEntryRow[data-fjtk]");
   if (row) {
-    fjModal.classList.remove("open");
-    fjModal.setAttribute("aria-hidden", "true");
+    if (nhModal) nhModal._fromJournal = true;
     showEncounterJournalEntry(row.dataset.fjtk);
   }
 });
