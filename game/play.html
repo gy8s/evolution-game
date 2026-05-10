@@ -380,6 +380,9 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
 .nhModalSection strong { display: block; color: #9bea72; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
 .nhModalSection p { margin: 0; line-height: 1.5; color: #cfdcba; font-size: 15px; }
 .nhModalClose { margin: 0 14px 14px; width: calc(100% - 28px); height: 38px; font-size: 14px; font-weight: bold; background: #1b4a2b; border-color: #4a9a62; color: #c8f0a0; flex: 0 0 auto; }
+.nhModalProgress { font-size: 11px; color: #6db87a; font-weight: normal; text-transform: uppercase; letter-spacing: .04em; margin-left: 8px; }
+.nhInfoBtn { font-size: 13px; padding: 2px 7px; background: #1b4a2b; border: 1px solid #4a9a62; color: #9bea72; border-radius: 4px; cursor: pointer; line-height: 1.4; vertical-align: middle; margin-left: 6px; }
+.nhInfoBtn:hover { background: #2d6b3e; }
 .knowledge { color: #9bea72; }
 .knowledge-tier { color: #d9c747; font-weight: bold; }
 /* === MOBILE: @media (max-width: 980px) === */
@@ -4738,6 +4741,8 @@ function initGame(resumeChoice) {
 
 const KNOWLEDGE_MAX = 30;
 const KNOWLEDGE_PER_ENTITY_CAP = 2;
+const KNOWLEDGE_INFO_UNLOCK = 10;
+const KNOWLEDGE_NH_THRESHOLDS = [10, 14, 18, 22, 26];
 const KNOWLEDGE_TIERS = [
   { threshold: 0,  tier: 0, label: "unknown" },
   { threshold: 1,  tier: 1, label: "noticed" },
@@ -12076,7 +12081,10 @@ function showNaturalHistoryPopup(e) {
 
   const nh = e.naturalHistory || {};
   const name = nh.title || e.name || "creature";
-  titleEl.textContent = `Natural History Unlocked: ${name}`;
+
+  const typeKey = getEncounterTypeKey(e);
+  const tk = player.knowledgeByEncounterKey ? player.knowledgeByEncounterKey[typeKey] : null;
+  const count = tk ? tk.investigations : KNOWLEDGE_MAX;
 
   const sections = [
     { label: "Field Note", key: "fieldNote" },
@@ -12086,18 +12094,24 @@ function showNaturalHistoryPopup(e) {
     { label: "Science note", key: "scienceNote" }
   ];
 
+  const unlockedCount = KNOWLEDGE_NH_THRESHOLDS.filter(t => count >= t).length;
+  const progressLabel = unlockedCount < sections.length
+    ? `<span class="nhModalProgress">${unlockedCount}/${sections.length} sections</span>`
+    : "";
+  titleEl.innerHTML = `Field Notes: ${name}${progressLabel}`;
+
   const rendered = sections
-    .filter(s => nh[s.key])
+    .filter((s, i) => count >= KNOWLEDGE_NH_THRESHOLDS[i] && nh[s.key])
     .map(s => `<div class="nhModalSection"><strong>${s.label}</strong><p>${nh[s.key]}</p></div>`)
     .join("");
 
-  body.innerHTML = rendered || `<div class="nhModalSection"><p>Your sustained observation of the <em>${name}</em> over many encounters has built a detailed understanding of its place in this world.</p></div>`;
+  body.innerHTML = rendered || `<div class="nhModalSection"><p>Continue investigating to expand your field notes.</p></div>`;
 
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
 
-  addDebugTrace("natural-history-unlocked", {
-    encounterKey: getEncounterTypeKey(e), name: e.name, naturalHistory: cloneDebug(nh)
+  addDebugTrace("natural-history-popup", {
+    encounterKey: typeKey, name: e.name, count, unlockedCount
   });
 }
 
@@ -12380,8 +12394,10 @@ function investigate() {
       const tierText = investigationKnowledgeTierText(e, knowledgeResult.tierUnlocked);
       if (tierText) addLog(tierText, "knowledge-tier");
     }
-    if (kCount >= KNOWLEDGE_MAX) {
-      showNaturalHistoryPopup(e);
+    if (kCount === KNOWLEDGE_INFO_UNLOCK && e.naturalHistory) {
+      addLog(`Field notes on the ${eName} are now accessible. Tap ⓘ on the encounter card to read them.`, "knowledge-tier");
+    } else if ([14, 18, 22, 26].includes(kCount) && e.naturalHistory) {
+      addLog(`Your field notes on the ${eName} have expanded.`, "knowledge");
     }
   }
 
@@ -16378,18 +16394,24 @@ function renderSenses() {
       const cleanInvestigationText = safeNarrativeText(investigationText, "");
       const floatingInvestigationBox = cleanInvestigationText && !investigationBelongsToCard ? `<div class="investigationResult"><strong>Investigation result:</strong><br>${cleanInvestigationText}</div>` : "";
 
+      const nhTypeKey = getEncounterTypeKey(e);
+      const nhTk = player.knowledgeByEncounterKey ? player.knowledgeByEncounterKey[nhTypeKey] : null;
+      const nhBtnHtml = (e.naturalHistory && nhTk && nhTk.investigations >= KNOWLEDGE_INFO_UNLOCK)
+        ? `<button type="button" id="nhInfoBtn" class="nhInfoBtn" title="Field Notes (${KNOWLEDGE_NH_THRESHOLDS.filter(t => nhTk.investigations >= t).length}/${KNOWLEDGE_NH_THRESHOLDS.length} sections unlocked)">ⓘ</button>`
+        : "";
+
       html += `
         ${floatingInvestigationBox}
         <div class="creatureCard">
           <div class="creatureIcon ${encounterThreatClass(e)}">${e.icon || "?"}</div>
           <div>
-            <div class="creatureName">${sexSymbolHtml(e)}<span>${e.name || "unknown encounter"}</span></div>
+            <div class="creatureName">${sexSymbolHtml(e)}<span>${e.name || "unknown encounter"}</span>${nhBtnHtml}</div>
             <div class="creatureText">${cardDetailForEncounter(e, seeCueText) || "Something is here, but the game has not described it properly yet."}</div>
             ${investigationBelongsToCard ? `<div class="investigationResult"><strong>Investigation result:</strong><br>${cleanInvestigationText}</div>` : ""}
             ${warning ? `<div class="creatureText poison">${warning}</div>` : ""}
             <div class="creatureStats">${statHtml}</div>
             <div class="cardActions">${actions}</div>
-            
+
           </div>
         </div>
         ${tileEncounterQueue.length ? tileEncounterQueue.map((rawQ, qi) => { const q = normaliseEncounter(rawQ, rawQ.key || rawQ.name || "queued"); return `
@@ -17041,6 +17063,11 @@ if (nhModalClose) nhModalClose.addEventListener("click", () => {
 const nhModal = document.getElementById("nhModal");
 if (nhModal) nhModal.addEventListener("click", event => {
   if (event.target === nhModal) { nhModal.classList.remove("open"); nhModal.setAttribute("aria-hidden", "true"); }
+});
+document.addEventListener("click", event => {
+  if (event.target && event.target.id === "nhInfoBtn" && currentEncounter) {
+    showNaturalHistoryPopup(currentEncounter);
+  }
 });
 const mapOverlay = document.getElementById("mapOverlay");
 if (mapOverlay) {
