@@ -380,6 +380,9 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
 .nhModalSection strong { display: block; color: #9bea72; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
 .nhModalSection p { margin: 0; line-height: 1.5; color: #cfdcba; font-size: 15px; }
 .nhModalClose { margin: 0 14px 14px; width: calc(100% - 28px); height: 38px; font-size: 14px; font-weight: bold; background: #1b4a2b; border-color: #4a9a62; color: #c8f0a0; flex: 0 0 auto; }
+.nhModalFooter { display: flex; gap: 8px; margin: 0 14px 14px; flex: 0 0 auto; }
+.nhModalFooter .nhModalClose { margin: 0; width: auto; flex: 1 1 auto; }
+.nhModalBack { flex: 0 0 auto; height: 38px; padding: 0 14px; font-size: 13px; font-weight: bold; background: transparent; border: 1px solid #2d6b3e; color: #6db87a; border-radius: 4px; cursor: pointer; white-space: nowrap; }
 .nhModalProgress { font-size: 11px; color: #6db87a; font-weight: normal; text-transform: uppercase; letter-spacing: .04em; margin-left: 8px; }
 .nhInfoBtn { font-size: 13px; padding: 2px 7px; background: #1b4a2b; border: 1px solid #4a9a62; color: #9bea72; border-radius: 4px; cursor: pointer; line-height: 1.4; vertical-align: middle; margin-left: 6px; }
 .nhInfoBtn:hover { background: #2d6b3e; }
@@ -862,7 +865,10 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
         <span class="nhModalTitle" id="nhModalTitle">Natural History Unlocked</span>
       </div>
       <div id="nhModalBody" class="nhModalBody"></div>
-      <button id="nhModalClose" class="nhModalClose" type="button">Close</button>
+      <div class="nhModalFooter">
+        <button id="nhModalBack" class="nhModalBack" type="button">← Journal</button>
+        <button id="nhModalClose" class="nhModalClose" type="button">Close</button>
+      </div>
     </div>
   </div>
 
@@ -17353,6 +17359,11 @@ const nhModalClose = document.getElementById("nhModalClose");
 const nhModal = document.getElementById("nhModal");
 if (nhModalClose) nhModalClose.addEventListener("click", () => {
   if (nhModal) { nhModal.classList.remove("open"); nhModal.setAttribute("aria-hidden", "true"); nhModal._fromJournal = false; }
+});
+const nhModalBack = document.getElementById("nhModalBack");
+if (nhModalBack) nhModalBack.addEventListener("click", () => {
+  if (nhModal) { nhModal.classList.remove("open"); nhModal.setAttribute("aria-hidden", "true"); nhModal._fromJournal = false; }
+  showFieldJournal();
 });
 if (nhModal) nhModal.addEventListener("click", event => {
   if (event.target === nhModal) {
