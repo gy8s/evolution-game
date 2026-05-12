@@ -1,3 +1,13 @@
+[2026-05-12 run-recap-achievement-toast | Claude]
+Run recap on death and achievement unlock toast.
+
+- renderRunRecap(): renders a "Run summary" block in the death modal showing turns survived, nights survived, tiles explored, food types tried, predators escaped, matings, companions, and any conditional flags (poison survived, wildfire survived). If achievements were unlocked during the run they are listed by icon and name.
+- runNewAchievements: new per-run array accumulating {key, name, icon} for each achievement unlocked. Reset at run start in initGame(), resetGameForPlayer(), resetGameForBot(), and profileOnRunEnd(). Populated by awardAchievement() alongside the existing localStorage save.
+- showAchievementToast(icon, name): shows a non-blocking fixed-position toast (bottom-centre) for 2.8s with a fade-out. _toastQueue and _processToastQueue() ensure multiple unlocks in the same turn play sequentially without overlap.
+- awardAchievement() updated to push to runNewAchievements, look up the def icon, and call showAchievementToast().
+- Death modal HTML: added <div id="runRecapPanel"> slot below fossilRecordSummary.
+- CSS: .achievementToast, .achievementToastIcon, .achievementToastLabel, .achievementToastSub, .runRecap, .runRecapTitle, .runRecapGrid, .runRecapStat, .runRecapAchievements, .runRecapAchievementsLabel, .runRecapAchievementEntry.
+
 [2026-05-12 delete-profile | Claude]
 Delete profile with full data cleanup and per-profile fossil record; achievement and night-tracking fixes.
 

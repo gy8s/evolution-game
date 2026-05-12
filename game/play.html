@@ -391,6 +391,20 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
 .fossilEntryCause { display: block; color: #e89898; }
 .fossilEntryMeta { display: block; color: #a07070; font-size: 11px; margin-top: 1px; }
 .fossilRecordEmpty { color: #7a5050; font-size: 12px; font-style: italic; }
+.achievementToast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: #1a2a1a; border: 1px solid #4a7a4a; border-radius: 6px; padding: 9px 16px 9px 12px; display: flex; align-items: center; gap: 9px; font-size: 13px; color: #c8f0a0; z-index: 12000; box-shadow: 0 4px 18px rgba(0,0,0,0.7); pointer-events: none; transition: opacity 0.4s; }
+.achievementToast.hide { opacity: 0; }
+.achievementToastIcon { font-size: 17px; line-height: 1; }
+.achievementToastLabel { font-weight: bold; }
+.achievementToastSub { color: #6db87a; font-size: 11px; margin-top: 1px; }
+.runRecap { border-top: 1px solid #3a1c1c; margin-top: 2px; padding: 10px 14px 4px; }
+.runRecapTitle { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.06em; color: #c08080; margin-bottom: 8px; }
+.runRecapGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 12px; margin-bottom: 8px; }
+.runRecapStat { font-size: 12px; color: #d0a0a0; }
+.runRecapStat span { color: #f0c8b8; font-weight: bold; }
+.runRecapAchievements { font-size: 12px; margin-top: 6px; }
+.runRecapAchievementsLabel { color: #c08080; margin-bottom: 4px; }
+.runRecapAchievementEntry { display: flex; align-items: center; gap: 6px; padding: 3px 0; color: #c8f0a0; }
+.runRecapAchievementEntry .rai { font-size: 14px; }
 .nhModal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 10070; padding: 18px; background: rgba(0, 20, 10, 0.82); }
 .nhModal.open { display: flex; }
 .nhModalCard { width: min(94vw, 560px); background: #071209; border: 2px solid #4a9a62; box-shadow: 0 0 0 1px #1a3c22 inset, 0 18px 70px rgba(0,0,0,.75); border-radius: 10px; color: #e8f0d8; overflow: hidden; max-height: 88vh; display: flex; flex-direction: column; }
@@ -845,6 +859,7 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
       </div>
       <div id="deathModalQANote" style="display:none;font-size:0.78em;color:#aaa;margin-top:6px;text-align:center;">God Mode only: restores the state before the fatal action.</div>
       <div id="fossilRecordSummary" class="fossilRecordSummary"></div>
+      <div id="runRecapPanel"></div>
     </div>
   </div>
 
@@ -4268,6 +4283,7 @@ let runQaBackUses = 0;
 let runMaxGroupSize = 0;
 let runStartedAt = null;
 let winAchievedThisRun = false;
+let runNewAchievements = [];
 
 function profileGenerateId(prefix) {
   return prefix + "_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
@@ -4663,7 +4679,34 @@ function awardAchievement(key, name) {
   ach[key] = new Date().toLocaleDateString();
   saveAchievements(currentProfileId, ach);
   addLog(`Achievement unlocked: ${name}`, "achievement");
+  const def = ACHIEVEMENT_DEFS.find(d => d.key === key);
+  const icon = def ? def.icon : "✨";
+  runNewAchievements.push({key, name, icon});
+  showAchievementToast(icon, name);
   return true;
+}
+
+let _toastQueue = [];
+let _toastActive = false;
+
+function showAchievementToast(icon, name) {
+  _toastQueue.push({icon, name});
+  if (!_toastActive) _processToastQueue();
+}
+
+function _processToastQueue() {
+  if (!_toastQueue.length) { _toastActive = false; return; }
+  _toastActive = true;
+  const {icon, name} = _toastQueue.shift();
+  const el = document.createElement("div");
+  el.className = "achievementToast";
+  el.innerHTML = `<span class="achievementToastIcon">${icon}</span><span><div class="achievementToastLabel">${escapeHtml(name)}</div><div class="achievementToastSub">Achievement unlocked</div></span>`;
+  document.body.appendChild(el);
+  const dismiss = () => {
+    el.classList.add("hide");
+    setTimeout(() => { el.remove(); _processToastQueue(); }, 420);
+  };
+  setTimeout(dismiss, 2800);
 }
 
 function checkAchievements() {
@@ -4757,6 +4800,7 @@ function profileOnRunEnd(outcome) {
   runStartedAt = null;
   winAchievedThisRun = false;
   currentRunId = null;
+  runNewAchievements = [];
   profileUpdatePanelUI();
 }
 
@@ -4878,6 +4922,7 @@ function profileStartNewRun() {
   runQaBackUses = 0;
   runMaxGroupSize = 0;
   winAchievedThisRun = false;
+  runNewAchievements = [];
   player.knowledgeByEncounterKey = profileLoadFieldJournal();
   addDebugTrace("profile-new-run", {profileId: currentProfileId || "none", runId: currentRunId});
 }
@@ -4902,6 +4947,7 @@ function profileResumeActiveRun(profile) {
   runQaBackUses = profile.activeRun.runQaBackUses || 0;
   runMaxGroupSize = 0;
   winAchievedThisRun = false;
+  runNewAchievements = [];
   clearRunLogsForNewGame();
   try {
     profileRestoreState(profile.activeRun.state);
@@ -5132,6 +5178,7 @@ function profileShowStartupModal(onChoiceMade) {
 
 function initGame(resumeChoice) {
   if (!player.runTracking) player.runTracking = freshRunTracking();
+  runNewAchievements = [];
   generateTerrain();
   generateHabitats();
   lastHabitatKey = habitatKeyAt(player.x, player.y);
@@ -13999,6 +14046,43 @@ function renderFossilRecord(records) {
   return `<div class="fossilRecordTitle">Fossil Record &mdash; ${records.length} specimen${records.length !== 1 ? "s" : ""} catalogued</div>${entries}`;
 }
 
+function renderRunRecap() {
+  const rt = player.runTracking || {};
+  const turns = player.turn || 0;
+  const nights = rt.nightSurvivedCount || 0;
+  const tiles = rt.tilesExplored || 0;
+  const foodTypes = Object.keys(rt.foodTypesEaten || {}).length;
+  const pursuits = rt.pursuitsEscaped || 0;
+  const mates = player.matingCount || 0;
+  const companions = (socialGroup && Array.isArray(socialGroup.members)) ? socialGroup.members.length : 0;
+
+  const stats = [
+    ["Turns survived", turns],
+    ["Nights survived", nights],
+    ["Tiles explored", tiles],
+    ["Food types tried", foodTypes],
+    ["Predators escaped", pursuits],
+    ["Matings", `${mates}/5`]
+  ];
+  if (companions > 0) stats.push(["Companions at death", companions]);
+  if (rt.poisonSurvived) stats.push(["Poison survived", "yes"]);
+  if (rt.wildfireEscaped) stats.push(["Wildfire survived", "yes"]);
+
+  const gridHtml = stats.map(([label, val]) =>
+    `<div class="runRecapStat">${escapeHtml(label)}: <span>${escapeHtml(String(val))}</span></div>`
+  ).join("");
+
+  let achHtml = "";
+  if (runNewAchievements.length > 0) {
+    const entries = runNewAchievements.map(a =>
+      `<div class="runRecapAchievementEntry"><span class="rai">${a.icon}</span>${escapeHtml(a.name)}</div>`
+    ).join("");
+    achHtml = `<div class="runRecapAchievements"><div class="runRecapAchievementsLabel">${runNewAchievements.length} achievement${runNewAchievements.length !== 1 ? "s" : ""} unlocked this run:</div>${entries}</div>`;
+  }
+
+  return `<div class="runRecap"><div class="runRecapTitle">Run summary</div><div class="runRecapGrid">${gridHtml}</div>${achHtml}</div>`;
+}
+
 function showDeathModal(message) {
   const modal = document.getElementById("deathModal");
   const messageBox = document.getElementById("deathModalMessage");
@@ -14017,6 +14101,8 @@ function showDeathModal(message) {
     const viewBtn = fossilSummary.querySelector("#fossilRecordViewBtn");
     if (viewBtn) viewBtn.addEventListener("click", () => { hideDeathModal(); showFieldJournal("fossil"); });
   }
+  const recapPanel = document.getElementById("runRecapPanel");
+  if (recapPanel) recapPanel.innerHTML = renderRunRecap();
   const qaBackBtn = document.getElementById("deathModalQABack");
   const qaNote = document.getElementById("deathModalQANote");
   const showQA = godModeEnabled && !!qaBackSnapshot;
