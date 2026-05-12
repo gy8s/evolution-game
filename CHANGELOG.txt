@@ -1,3 +1,13 @@
+[2026-05-12 delete-profile | Claude]
+Delete profile with full data cleanup and per-profile fossil record; achievement and night-tracking fixes.
+
+- deleteProfile(profileId): removes profile from evolutionGameProfiles_v1, deletes its achievements from evolutionGameAchievements_v1, filters its fossil entries from evolutionGameFossilRecord_v1, clears active profile key if matched.
+- Fossil record entries now tagged with profileId. Reads in showFieldJournal("fossil") and showDeathModal filtered to currentProfileId (legacy untagged entries shown to all profiles, survive any deletion).
+- Delete button on each profile entry in the profile selection modal. Two-step inline confirmation warns that run history, Field Journal, Fossil Record, and Achievements will be permanently erased. After deletion the modal stays open on the profile selection screen.
+- Achievement fixes (Codex review): ps.bestTurns → ps.bestTurn in "Record Holder" and "Champion" defs. Added totalTurns and totalMatings to profileDefaultStats() and profileUpdateStats() so Growth and Social cross-run achievements unlock correctly. Wildfire achievement changed from ps.totalWildfireEscapes (untracked) to rt.wildfireEscaped (per-run flag set when player is in wildfire radius and survives the burnout). checkAchievements() in profileOnRunEnd() moved to after profileSaveStore() so cumulative stat checks see updated values.
+- Night tracking fix (Codex review): nightSurvivedCount now incremented on night→dawn phase transition only, not every turn during the night phase. Added lastTrackedPhase to freshRunTracking() to detect the transition. Removed dawnSurvivedCount (unused). Added wildfireThreatened/wildfireEscaped fields.
+- CSS added for .profileDeleteConfirm, .deleteConfirmBtns, .profileEntryDeleteBtn and their states.
+
 [2026-05-12 achievements-system | Claude]
 Persistent achievements system: 50 achievements stored per profile in localStorage.
 
