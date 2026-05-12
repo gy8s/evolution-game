@@ -1,3 +1,19 @@
+[2026-05-12 achievements-system | Claude]
+Persistent achievements system: 50 achievements stored per profile in localStorage.
+
+- Added ACHIEVEMENTS_STORE_KEY ("evolutionGameAchievements_v1") localStorage constant.
+- freshRunTracking(): new function returning a per-run tracking object reset at the start of every run. Tracks food types eaten (with per-category counts: fruit, insect, leaf, fungus, meat, water), worst poison rank survived, poison survival flag, group join, mating, companion intercept, pursuits escaped, nights survived, near-death status, tiles explored, investigate/groom/alert action counts.
+- player.runTracking initialised in player const, initGame(), resetGameForPlayer(), resetGameForBot().
+- ACHIEVEMENT_DEFS: 50 achievement definitions across 8 categories (Survival, Foraging, Exploration, Social, Danger, Growth, Milestones). Each definition has a key, category, icon, name, description, and check(player, runTracking, profileStats) predicate.
+- loadAchievements(profileId) / saveAchievements(profileId, obj): read/write per-profile achievement objects from localStorage.
+- getProfileAchievements(): returns achievements for current active profile.
+- awardAchievement(key, name): marks an achievement unlocked with today's date; logs "Achievement unlocked: …" to the run log.
+- checkAchievements(): iterates all defs, runs check(), awards newly satisfied achievements. Called from startTurn() (every turn), die() (on death), and profileOnRunEnd() (after stats saved).
+- updateRunTracking(): called each turn from startTurn(); updates per-turn state (near-death flag, lowest fitness, poison survival, night count, tiles explored).
+- renderAchievements(): renders all achievements grouped by category as locked/unlocked entries with unlock dates.
+- Field Journal "Awards" tab: showFieldJournal("awards") renders the achievement panel via renderAchievements().
+- Tracking hooks wired: eat() forage path (food type + category counts), eatCarcass() (meat count), drinkWater() (water count), applyPoison() (worst rank), socialGroup recruits (groupEverJoined), attemptMating() and attemptGroupMating() (matingAttempted), companion intercept block (companionInterceptHit), pursuit abandonment (pursuitsEscaped), groom() (groomedCount), investigate() (investigatedCount), call action (alertedCount).
+
 [2026-05-12 fossil-record-journal-tab | Claude]
 Fossil Record moved into Field Journal as Fossils tab.
 
