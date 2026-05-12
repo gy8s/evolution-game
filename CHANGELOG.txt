@@ -1,8 +1,17 @@
+[2026-05-12 fossil-record-journal-tab | Claude]
+Fossil Record moved into Field Journal as Fossils tab.
+
+- Added "Fossils" tab to the Field Journal (fjModal). Clicking it renders the full run history from localStorage via renderFossilRecord(), accessible at any time during a run — not only on death.
+- Death modal simplified: the scrolling fossil panel is replaced with a one-line summary ("N specimens in Fossil Record") and a "View in Journal" button that closes the death modal and opens the journal to the Fossils tab.
+- CSS: replaced .fossilRecordPanel (scroll container) with .fossilRecordSummary / .fossilRecordSummaryText / .fossilRecordSummaryBtn for the death modal summary line.
+- Security: r.turns and r.companions now coerced through parseInt() before HTML interpolation in renderFossilRecord, closing the remaining XSS vector via tampered localStorage (Codex P2).
+
 [2026-05-12 fossil-record-mya-label | Claude]
 Fossil Record and epoch label.
 
 - Fossil Record: on death, the current run is saved to localStorage (key: evolutionGameFossilRecord_v1, capped at 10 entries). Each entry stores turns survived, cause of death, companion count, and date. The death modal now shows a scrollable Fossil Record panel beneath the action buttons listing all past specimens with their turn count, cause, and metadata.
 - Epoch label: a small "Eocene · ~50 MYA" label is displayed beneath the Local forest map heading on the map card. Uses id="epochLabel" for future period updates.
+- Security: r.cause and r.date are now passed through escapeHtml before innerHTML injection in renderFossilRecord, closing a potential XSS vector via tampered localStorage.
 
 [2026-05-10 field-journal-ui-v2 | Claude]
 Field Journal UI redesign: individual encounter windows, tabbed grouped index, stacked modal behaviour, player titlebar placement.
