@@ -1,9 +1,9 @@
-[2026-05-12 desktop-mode-toggle | Claude]
-Desktop mode checkbox in Developer panel forces full two-column layout.
+[2026-05-12 growth-bar-death-tips | Claude]
+Growth progress bar in player panel and contextual death tips in death modal.
 
-- Checkbox "Desktop mode" added at the bottom of the Developer / QA tools panel.
-- body.desktop-mode CSS block overrides all mobile media-query breakpoints: restores grid layout on .layout, .hudGrid, .vitalsRow, .actionBox, .mapTogglePanel, .statusSideGrid, .controls, .navLayerWrap, .mapSymbolStack, and resets log/font sizes.
-- State persisted in localStorage key "evolutionDesktopMode" ("1" / absent); restored on page load via IIFE.
+- Growth bar: added a fourth stat row ("Growth") in the vitals bars section of the player panel. Shows current size (e.g. "5.1") and growthProgress/28 as a progress bar. Bar turns dim when growth conditions are not met (energy < 75 or hydration < 45); bright green when actively growing.
+- Death tip: added <div id="deathTipPanel"> in the death modal, rendered immediately below the death message. deathTipFor(message) matches the death message text to one of nine contextual tips covering dehydration, starvation, drowning, parasites, wildfire, cannibal-mob, poison, predator, and a generic fitness fallback. Rendered via escapeHtml to prevent XSS.
+- CSS: #growthBar, #growthBar.growth-paused, .deathTip.
 
 [2026-05-12 run-recap-achievement-toast | Claude]
 Run recap on death and achievement unlock toast; toast/resume fixes.
