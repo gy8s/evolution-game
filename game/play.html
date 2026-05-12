@@ -370,6 +370,16 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
 .deathModalActions button { height: 42px; font-size: 14px; font-weight: bold; }
 #deathModalRestart { background: #7b2424; border-color: #ff8f8f; color: #fff3ee; }
 #deathModalStay { background: #251313; border-color: #8b4a4a; color: #f3c8c0; }
+.achievement { color: #ffd700; font-weight: bold; }
+.achievementGroup { margin-bottom: 10px; }
+.achievementGroupHeader { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.06em; color: #6db87a; margin-bottom: 4px; padding: 0 14px; }
+.achievementEntry { display: flex; align-items: flex-start; gap: 10px; padding: 5px 14px; font-size: 13px; line-height: 1.4; }
+.achievementEntry.unlocked .achievementName { color: #c8f0a0; font-weight: bold; }
+.achievementEntry.locked .achievementName { color: #3a6a3e; }
+.achievementIcon { font-size: 15px; flex: 0 0 18px; text-align: center; line-height: 1.5; }
+.achievementDesc { color: #6a9e6a; font-size: 12px; }
+.achievementDate { color: #3a6a3e; font-size: 11px; margin-top: 1px; }
+.achievementCount { padding: 8px 14px 4px; font-size: 12px; color: #6db87a; }
 .epochLabel { font-size: 11px; color: var(--muted); margin-top: 2px; letter-spacing: 0.03em; }
 .fossilRecordSummary { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-top: 1px solid #5a1c1c; padding: 10px 14px 14px; }
 .fossilRecordSummaryText { font-size: 12px; color: #c08080; }
@@ -894,6 +904,7 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
           <button type="button" class="fjTab" data-fjtab="flora">Flora</button>
           <button type="button" class="fjTab" data-fjtab="misc">Misc</button>
           <button type="button" class="fjTab" data-fjtab="fossil">Fossils</button>
+          <button type="button" class="fjTab" data-fjtab="awards">Awards</button>
         </div>
       </div>
       <div id="fjBody" class="fjBody"></div>
@@ -4041,7 +4052,8 @@ const player = {
   lastCarcassAge: 0,
   alcohol: null,
   matingCount: 0,
-  lastMatingTurn: -999
+  lastMatingTurn: -999,
+  runTracking: null
 };
 
 // Explicitly initialise learning/memory stores.
@@ -4237,6 +4249,7 @@ const PROFILE_STORE_KEY = "evolutionGameProfiles_v1";
 const ACTIVE_PROFILE_KEY_STORE = "evolutionGameActiveProfileId_v1";
 const FOSSIL_RECORD_KEY = "evolutionGameFossilRecord_v1";
 const FOSSIL_RECORD_CAP = 10;
+const ACHIEVEMENTS_STORE_KEY = "evolutionGameAchievements_v1";
 const PROFILE_LOG_CAP = 150;
 const PROFILE_TRACE_CAP = 200;
 
@@ -4511,6 +4524,211 @@ function profileUpdateStats(profile, summary) {
   if (summary.knowledgeUnlockCount > (s.bestKnowledgeUnlocks || 0)) s.bestKnowledgeUnlocks = summary.knowledgeUnlockCount;
 }
 
+function freshRunTracking() {
+  return {
+    foodTypesEaten: {},
+    fruitEaten: 0,
+    insectEaten: 0,
+    leafEaten: 0,
+    fungusEaten: 0,
+    meatEaten: 0,
+    waterDrank: 0,
+    worstPoisonRank: 0,
+    poisonSurvived: false,
+    groupEverJoined: false,
+    matingAttempted: false,
+    companionInterceptHit: false,
+    pursuitsEscaped: 0,
+    dawnSurvivedCount: 0,
+    nightSurvivedCount: 0,
+    consecutiveNightsAlive: 0,
+    maxConsecutiveNightsAlive: 0,
+    turnsAtMinFitness: 0,
+    lowestFitness: 100,
+    tilesExplored: 0,
+    tilesExploredThisRun: new Set(),
+    startedDying: false,
+    wasNearDeath: false,
+    investigatedCount: 0,
+    groomedCount: 0,
+    alertedCount: 0
+  };
+}
+
+// ---------------------------------------------------------------------------
+// [ACHIEVEMENTS] Definitions and persistence
+// ---------------------------------------------------------------------------
+
+const ACHIEVEMENT_DEFS = [
+  // --- Survival ---
+  { key: "survive_10",    cat: "Survival", icon: "🌿", name: "First Light",        desc: "Survive 10 turns.",                        check: (p) => (p.turn || 0) >= 10 },
+  { key: "survive_50",    cat: "Survival", icon: "🌿", name: "Foothold",           desc: "Survive 50 turns.",                        check: (p) => (p.turn || 0) >= 50 },
+  { key: "survive_100",   cat: "Survival", icon: "🌿", name: "Century",            desc: "Survive 100 turns.",                       check: (p) => (p.turn || 0) >= 100 },
+  { key: "survive_250",   cat: "Survival", icon: "🌿", name: "Deep Eocene",        desc: "Survive 250 turns.",                       check: (p) => (p.turn || 0) >= 250 },
+  { key: "survive_500",   cat: "Survival", icon: "🌿", name: "Ancient One",        desc: "Survive 500 turns.",                       check: (p) => (p.turn || 0) >= 500 },
+  { key: "night_3",       cat: "Survival", icon: "🌑", name: "Night Watch",        desc: "Survive 3 nights in a single run.",        check: (p, rt) => (rt.nightSurvivedCount || 0) >= 3 },
+  { key: "night_10",      cat: "Survival", icon: "🌑", name: "Creature of the Dark", desc: "Survive 10 nights in a single run.",    check: (p, rt) => (rt.nightSurvivedCount || 0) >= 10 },
+  { key: "low_fit_surv",  cat: "Survival", icon: "💀", name: "Last Breath",        desc: "Survive a turn at 10 fitness or below.",   check: (p, rt) => rt.wasNearDeath === true },
+  { key: "poison_surv",   cat: "Survival", icon: "☠", name: "Resilient",          desc: "Survive any poison.",                      check: (p, rt) => rt.poisonSurvived === true },
+  { key: "poison_deadly", cat: "Survival", icon: "☠", name: "Iron Gut",           desc: "Survive a deadly poison.",                 check: (p, rt) => (rt.worstPoisonRank || 0) >= 5 },
+
+  // --- Foraging ---
+  { key: "eat_fruit",     cat: "Foraging", icon: "🍎", name: "First Taste",        desc: "Eat a fruit.",                             check: (p, rt) => (rt.fruitEaten || 0) >= 1 },
+  { key: "eat_insect",    cat: "Foraging", icon: "🐛", name: "Bug Hunter",         desc: "Eat an insect.",                           check: (p, rt) => (rt.insectEaten || 0) >= 1 },
+  { key: "eat_fungus",    cat: "Foraging", icon: "🍄", name: "Mycophile",          desc: "Eat a fungus.",                            check: (p, rt) => (rt.fungusEaten || 0) >= 1 },
+  { key: "eat_meat",      cat: "Foraging", icon: "🦴", name: "Scavenger",          desc: "Eat meat from a carcass.",                 check: (p, rt) => (rt.meatEaten || 0) >= 1 },
+  { key: "eat_5types",    cat: "Foraging", icon: "🌾", name: "Opportunist",        desc: "Eat 5 different food types in one run.",   check: (p, rt) => Object.keys(rt.foodTypesEaten || {}).length >= 5 },
+  { key: "eat_10types",   cat: "Foraging", icon: "🌾", name: "Generalist",         desc: "Eat 10 different food types in one run.",  check: (p, rt) => Object.keys(rt.foodTypesEaten || {}).length >= 10 },
+  { key: "eat_fruit_20",  cat: "Foraging", icon: "🍎", name: "Frugivore",          desc: "Eat 20 fruits in a single run.",           check: (p, rt) => (rt.fruitEaten || 0) >= 20 },
+  { key: "eat_insect_10", cat: "Foraging", icon: "🐛", name: "Insectivore",        desc: "Eat 10 insects in a single run.",          check: (p, rt) => (rt.insectEaten || 0) >= 10 },
+  { key: "water_10",      cat: "Foraging", icon: "💧", name: "Hydrated",           desc: "Drink water 10 times in a single run.",    check: (p, rt) => (rt.waterDrank || 0) >= 10 },
+  { key: "knowledge_5",   cat: "Foraging", icon: "📖", name: "Field Naturalist",   desc: "Learn 5 foods across all runs.",           check: (p, rt, ps) => Object.keys(p.knownFoods || {}).length >= 5 },
+
+  // --- Exploration ---
+  { key: "explore_25",    cat: "Exploration", icon: "🗺", name: "Wanderer",         desc: "Explore 25 tiles in a single run.",        check: (p, rt) => (rt.tilesExplored || 0) >= 25 },
+  { key: "explore_100",   cat: "Exploration", icon: "🗺", name: "Trailblazer",      desc: "Explore 100 tiles in a single run.",       check: (p, rt) => (rt.tilesExplored || 0) >= 100 },
+  { key: "explore_250",   cat: "Exploration", icon: "🗺", name: "Cartographer",     desc: "Explore 250 tiles in a single run.",       check: (p, rt) => (rt.tilesExplored || 0) >= 250 },
+  { key: "investigate_3", cat: "Exploration", icon: "🔍", name: "Curious Mind",     desc: "Investigate 3 encounters in a run.",       check: (p, rt) => (rt.investigatedCount || 0) >= 3 },
+  { key: "investigate_10",cat: "Exploration", icon: "🔍", name: "Scholar",          desc: "Investigate 10 encounters in a run.",      check: (p, rt) => (rt.investigatedCount || 0) >= 10 },
+  { key: "journal_5",     cat: "Exploration", icon: "📕", name: "Archivist",        desc: "Record 5 species in the Field Journal.",   check: (p, rt, ps) => Object.keys(p.knowledgeByEncounterKey || {}).length >= 5 },
+  { key: "journal_20",    cat: "Exploration", icon: "📕", name: "Encyclopaedist",   desc: "Record 20 species in the Field Journal.",  check: (p, rt, ps) => Object.keys(p.knowledgeByEncounterKey || {}).length >= 20 },
+
+  // --- Social ---
+  { key: "join_group",    cat: "Social",   icon: "🐒", name: "Safety in Numbers", desc: "Join a social group.",                     check: (p, rt) => rt.groupEverJoined === true },
+  { key: "mate_once",     cat: "Social",   icon: "❤", name: "Courtship",         desc: "Attempt mating.",                          check: (p, rt) => rt.matingAttempted === true },
+  { key: "mate_3",        cat: "Social",   icon: "❤", name: "Progenitor",        desc: "Mate 3 times across all runs.",            check: (p, rt, ps) => (ps.totalMatings || 0) >= 3 },
+  { key: "groom_3",       cat: "Social",   icon: "🙈", name: "Groomer",           desc: "Groom a companion 3 times in a run.",      check: (p, rt) => (rt.groomedCount || 0) >= 3 },
+  { key: "companion_save",cat: "Social",   icon: "🛡", name: "Protector",         desc: "Have a companion intercept a predator.",   check: (p, rt) => rt.companionInterceptHit === true },
+  { key: "group_5",       cat: "Social",   icon: "🐒", name: "Troop",             desc: "Be in a group of 5+ companions.",          check: (p) => (socialGroup && socialGroup.members && socialGroup.members.length >= 5) },
+
+  // --- Danger ---
+  { key: "escape_1",      cat: "Danger",   icon: "💨", name: "Close Call",        desc: "Escape a predator pursuit.",               check: (p, rt) => (rt.pursuitsEscaped || 0) >= 1 },
+  { key: "escape_5",      cat: "Danger",   icon: "💨", name: "Ghost",             desc: "Escape 5 predator pursuits in a run.",     check: (p, rt) => (rt.pursuitsEscaped || 0) >= 5 },
+  { key: "escape_10",     cat: "Danger",   icon: "💨", name: "Untouchable",       desc: "Escape 10 predator pursuits in a run.",    check: (p, rt) => (rt.pursuitsEscaped || 0) >= 10 },
+  { key: "survive_wildfire", cat: "Danger",icon: "🔥", name: "Through the Flames",desc: "Survive a wildfire.",                      check: (p, rt, ps) => (ps.totalWildfireEscapes || 0) >= 1 },
+
+  // --- Growth ---
+  { key: "grown",         cat: "Growth",   icon: "🌱", name: "Coming of Age",     desc: "Grow to adult size.",                      check: (p) => (p.size || 0) >= 10 },
+  { key: "turns_100_profile", cat: "Growth", icon: "⏳", name: "Seasoned",        desc: "Accumulate 100 turns across all runs.",    check: (p, rt, ps) => (ps.totalTurns || 0) >= 100 },
+  { key: "turns_500_profile", cat: "Growth", icon: "⏳", name: "Veteran",         desc: "Accumulate 500 turns across all runs.",    check: (p, rt, ps) => (ps.totalTurns || 0) >= 500 },
+  { key: "turns_1000_profile",cat: "Growth", icon: "⏳", name: "Elder",           desc: "Accumulate 1000 turns across all runs.",   check: (p, rt, ps) => (ps.totalTurns || 0) >= 1000 },
+  { key: "runs_5",        cat: "Growth",   icon: "🔁", name: "Persistent",        desc: "Complete 5 runs.",                         check: (p, rt, ps) => (ps.totalRuns || 0) >= 5 },
+  { key: "runs_20",       cat: "Growth",   icon: "🔁", name: "Indomitable",       desc: "Complete 20 runs.",                        check: (p, rt, ps) => (ps.totalRuns || 0) >= 20 },
+
+  // --- Milestones ---
+  { key: "first_death",   cat: "Milestones", icon: "🪦", name: "Fossil",          desc: "Die for the first time.",                  check: (p, rt, ps) => (ps.totalRuns || 0) >= 1 },
+  { key: "best_50",       cat: "Milestones", icon: "🏆", name: "Record Holder",   desc: "Survive 50 turns in a single run.",        check: (p, rt, ps) => (ps.bestTurns || 0) >= 50 },
+  { key: "best_200",      cat: "Milestones", icon: "🏆", name: "Champion",        desc: "Survive 200 turns in a single run.",       check: (p, rt, ps) => (ps.bestTurns || 0) >= 200 },
+  { key: "companion_1",   cat: "Milestones", icon: "👁", name: "Not Alone",       desc: "Recruit your first companion.",            check: (p, rt) => rt.groupEverJoined === true },
+  { key: "full_stats",    cat: "Milestones", icon: "✨", name: "Peak Condition",  desc: "End a turn at 100 fitness, energy, and hydration.", check: (p) => (p.fitness || 0) >= 100 && (p.energy || 0) >= 100 && (p.hydration || 0) >= 100 },
+  { key: "alerted",       cat: "Milestones", icon: "👂", name: "Sentinel",        desc: "Use the Alert action 3 times in a run.",   check: (p, rt) => (rt.alertedCount || 0) >= 3 }
+];
+
+function loadAchievements(profileId) {
+  try {
+    const raw = localStorage.getItem(ACHIEVEMENTS_STORE_KEY);
+    const all = raw ? JSON.parse(raw) : {};
+    return all[profileId] || {};
+  } catch (_) { return {}; }
+}
+
+function saveAchievements(profileId, achObj) {
+  try {
+    const raw = localStorage.getItem(ACHIEVEMENTS_STORE_KEY);
+    const all = raw ? JSON.parse(raw) : {};
+    all[profileId] = achObj;
+    localStorage.setItem(ACHIEVEMENTS_STORE_KEY, JSON.stringify(all));
+  } catch (_) {}
+}
+
+function getProfileAchievements() {
+  if (!currentProfileId) return {};
+  return loadAchievements(currentProfileId);
+}
+
+function awardAchievement(key, name) {
+  if (!currentProfileId) return false;
+  const ach = loadAchievements(currentProfileId);
+  if (ach[key]) return false;
+  ach[key] = new Date().toLocaleDateString();
+  saveAchievements(currentProfileId, ach);
+  addLog(`Achievement unlocked: ${name}`, "achievement");
+  return true;
+}
+
+function checkAchievements() {
+  if (!currentProfileId) return;
+  const rt = player.runTracking || {};
+  const profileData = profileGetActive();
+  const ps = (profileData && profileData.stats) ? profileData.stats : {};
+  const ach = loadAchievements(currentProfileId);
+  for (const def of ACHIEVEMENT_DEFS) {
+    if (ach[def.key]) continue;
+    try {
+      if (def.check(player, rt, ps)) {
+        awardAchievement(def.key, def.name);
+      }
+    } catch (_) {}
+  }
+}
+
+function renderAchievements() {
+  const ach = getProfileAchievements();
+  const unlockedCount = Object.keys(ach).length;
+  const total = ACHIEVEMENT_DEFS.length;
+  const cats = {};
+  for (const def of ACHIEVEMENT_DEFS) {
+    if (!cats[def.cat]) cats[def.cat] = [];
+    cats[def.cat].push(def);
+  }
+  let html = `<div class="achievementCount">${unlockedCount} / ${total} unlocked</div>`;
+  for (const [cat, defs] of Object.entries(cats)) {
+    html += `<div class="achievementGroup"><div class="achievementGroupHeader">${escapeHtml(cat)}</div>`;
+    for (const def of defs) {
+      const unlocked = !!ach[def.key];
+      const dateStr = unlocked ? ach[def.key] : "";
+      html += `<div class="achievementEntry ${unlocked ? "unlocked" : "locked"}">
+        <span class="achievementIcon">${def.icon}</span>
+        <span>
+          <span class="achievementName">${escapeHtml(def.name)}</span>
+          <span class="achievementDesc"> — ${escapeHtml(def.desc)}</span>
+          ${unlocked ? `<div class="achievementDate">Unlocked ${escapeHtml(dateStr)}</div>` : ""}
+        </span>
+      </div>`;
+    }
+    html += `</div>`;
+  }
+  return html;
+}
+
+function updateRunTracking() {
+  const rt = player.runTracking;
+  if (!rt) return;
+  if ((player.fitness || 0) < 11) {
+    rt.wasNearDeath = true;
+    rt.turnsAtMinFitness = (rt.turnsAtMinFitness || 0) + 1;
+  }
+  if ((player.fitness || 0) < (rt.lowestFitness || 100)) {
+    rt.lowestFitness = player.fitness;
+  }
+  if (player.poison && player.poison.rank >= 1) {
+    if ((player.poison.rank) > (rt.worstPoisonRank || 0)) {
+      rt.worstPoisonRank = player.poison.rank;
+    }
+  }
+  if (!player.poison && rt.worstPoisonRank >= 1) {
+    rt.poisonSurvived = true;
+  }
+  if (timeState.phase === "night") {
+    rt.nightSurvivedCount = (rt.nightSurvivedCount || 0) + 1;
+  }
+  if (timeState.phase === "dawn") {
+    rt.dawnSurvivedCount = (rt.dawnSurvivedCount || 0) + 1;
+  }
+  const newTiles = exploredTiles ? exploredTiles.size : 0;
+  rt.tilesExplored = newTiles;
+}
+
 function profileOnRunEnd(outcome) {
   if (!currentProfileId) return;
   const store = profileLoadStore();
@@ -4521,6 +4739,7 @@ function profileOnRunEnd(outcome) {
   profile.runHistory.unshift(summary);
   if (profile.runHistory.length > 20) profile.runHistory.length = 20;
   profileUpdateStats(profile, summary);
+  checkAchievements();
   profile.activeRun = null;
   profile.lastPlayedAt = new Date().toISOString();
   profileSaveStore(store);
@@ -4842,6 +5061,7 @@ function profileShowStartupModal(onChoiceMade) {
 // ===== GAME INIT WITH PROFILE =====
 
 function initGame(resumeChoice) {
+  if (!player.runTracking) player.runTracking = freshRunTracking();
   generateTerrain();
   generateHabitats();
   lastHabitatKey = habitatKeyAt(player.x, player.y);
@@ -5858,6 +6078,8 @@ function startTurn() {
 
   updateNearbyEntities();
   updateRemoteSenses();
+  updateRunTracking();
+  checkAchievements();
   addDebugTrace("action-start-complete", {after: importantStateSnapshot()});
   return true;
 }
@@ -8373,6 +8595,7 @@ function attemptMating() {
     player.matingCount = (player.matingCount || 0) + 1;
     player.lastMatingTurn = player.turn;
     player.energy = clamp(player.energy - 15, 0, 100);
+    if (player.runTracking) player.runTracking.matingAttempted = true;
     const countAfter = player.matingCount;
     addLog(`Turn ${player.turn}: The ${mate.displayLabel || mate.sex + " " + player.species} accepts your approach. You mate. Progress: ${countAfter}/5.`, "prey");
     if (countAfter >= 5) {
@@ -8477,6 +8700,7 @@ function attemptGroupMating() {
     player.matingCount = (player.matingCount || 0) + 1;
     player.lastMatingTurn = player.turn;
     player.energy = clamp(player.energy - 15, 0, 100);
+    if (player.runTracking) player.runTracking.matingAttempted = true;
     changeGroupCohesion(5, "successful mating within group", {log: false});
     const countAfter = player.matingCount;
     addLog(`Turn ${player.turn}: The ${mate.displayLabel || mate.sex + " " + player.species} accepts. You mate within the group. Progress: ${countAfter}/5.`, "prey");
@@ -8746,6 +8970,7 @@ function acceptSocialEncounter(mode) {
   const availableSlots = Math.max(0, playerSpeciesProfile.maxGroupSize - groupSize());
   const recruits = encounter.social.members.slice(0, availableSlots).map((m, idx) => ({...m, name: m.sex + " " + player.species + (encounter.social.members.length > 1 ? " " + (idx + 1) : "")}));
   socialGroup.members.push(...recruits);
+  if (player.runTracking && recruits.length > 0) player.runTracking.groupEverJoined = true;
   ensureSocialGroupFields();
   socialGroup.cohesion = clamp(Math.max(socialGroup.cohesion, 45) + recruits.length * 10, 0, 100);
   socialGroup.sharedFoodRatio = 1;
@@ -9161,6 +9386,7 @@ function callOut(signalType = "social") {
   investigationText = "";
   lastActionKind = "call";
   debugLastAction = {kind: "call", signalType, priorCallStreak: callStreak, groupSize: groupSize(), layer: layers[player.z]};
+  if (player.runTracking) player.runTracking.alertedCount = (player.runTracking.alertedCount || 0) + 1;
   if (!startTurn()) return;
 
   callStreak = lastCallTurn === player.turn - 1 ? Math.min(5, callStreak + 1) : 1;
@@ -9370,6 +9596,7 @@ function exposeCarelessActionToThreat(actionLabel, target, opts = {}) {
       const interceptorIdx = protectiveIndex !== -1 ? protectiveIndex : Math.floor(Math.random() * socialGroup.members.length);
       const interceptor = socialGroup.members[interceptorIdx];
       if (roll(interceptChance)) {
+        if (player.runTracking) player.runTracking.companionInterceptHit = true;
         socialGroup.members.splice(interceptorIdx, 1);
         socialGroup.losses = (socialGroup.losses || 0) + 1;
         socialGroup.cohesion = clamp((socialGroup.cohesion || 0) - 30, 0, 100);
@@ -10248,6 +10475,7 @@ function groom() {
   investigationText = "";
   lastActionKind = "groom";
   debugLastAction = {kind: "groom", parasiteLoad: player.parasites, groupSize: groupSize()};
+  if (player.runTracking) player.runTracking.groomedCount = (player.runTracking.groomedCount || 0) + 1;
   if (!startTurn()) return;
 
   // Grooming while a social encounter is active and no rapport established counts as
@@ -10726,6 +10954,7 @@ function updatePursuit(actionKind) {
   if (roll(clamp(abandonChance, 0, 65))) {
     addLog(`Turn ${player.turn}: The ${activePursuit.name} finally abandons the chase.`, "minor");
     setNarration(`The hunter drops back after a costly pursuit. The canopy helped, but only because you kept moving.`);
+    if (player.runTracking) player.runTracking.pursuitsEscaped = (player.runTracking.pursuitsEscaped || 0) + 1;
     activePursuit = null;
     return;
   }
@@ -12390,6 +12619,13 @@ function showFieldJournal(tab) {
     return;
   }
 
+  if (activeTab === "awards") {
+    body.innerHTML = `<div style="padding:10px 0;">${renderAchievements()}</div>`;
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+    return;
+  }
+
   const journal = player.knowledgeByEncounterKey || {};
   const entries = Object.values(journal);
   const tabGroups = FJ_TAB_GROUPS[activeTab] || [];
@@ -12604,6 +12840,7 @@ function investigate() {
 
   const e = normaliseEncounter(currentEncounter, currentEncounter.key || currentEncounter.name || "unknown");
   currentEncounter = e;
+  if (player.runTracking) player.runTracking.investigatedCount = (player.runTracking.investigatedCount || 0) + 1;
 
   if (typeof isIndividualSameSpeciesSocialEncounter === "function" && isIndividualSameSpeciesSocialEncounter(e)) {
     lastActionKind = "investigate";
@@ -13187,7 +13424,7 @@ function drinkWater() {
 
   const inOpenWater = isWaterTile(player.x, player.y);
   const gain = addHydration(inOpenWater ? 24 : 28, inOpenWater ? "open water" : "water edge");
-  if (gain > 0) recordGroupProvisioning("water", gain, inOpenWater ? "open water" : "water edge");
+  if (gain > 0) { recordGroupProvisioning("water", gain, inOpenWater ? "open water" : "water edge"); if (player.runTracking) player.runTracking.waterDrank = (player.runTracking.waterDrank || 0) + 1; }
   const energyLoss = inOpenWater ? 4 : 1;
   player.energy = clamp(player.energy - energyLoss, 0, 100);
 
@@ -13381,6 +13618,15 @@ function eat() {
     bonusFoodText = " Tiny insects in the flower cluster add bonus protein.";
   }
   const share = addFoodEnergy(effectiveEnergy, fitnessGain, e.hydration ?? defaultHydrationFor(e), e.name);
+  if (player.runTracking) {
+    const rt = player.runTracking;
+    rt.foodTypesEaten[e.key] = (rt.foodTypesEaten[e.key] || 0) + 1;
+    const cls = knowledgeClassFor ? knowledgeClassFor(e) : "";
+    if (cls === "berries" || cls === "fruits") rt.fruitEaten = (rt.fruitEaten || 0) + 1;
+    else if (cls === "insects" || cls === "myriapods" || cls === "arachnids" || cls === "caterpillars") rt.insectEaten = (rt.insectEaten || 0) + 1;
+    else if (cls === "mushrooms") rt.fungusEaten = (rt.fungusEaten || 0) + 1;
+    else if (cls === "leaves" || cls === "bark") rt.leafEaten = (rt.leafEaten || 0) + 1;
+  }
 
   if (e.hiddenSubtype) e.name = e.trueLabel || e.name;
 
@@ -13429,6 +13675,7 @@ function eatCarcass(options = {}) {
   carcass.initialPortions = carcass.initialPortions || carcass.portions;
   carcass.portions = Math.max(0, carcass.portions - 1);
   const share = addFoodEnergy(carcass.energy, 2, carcass.hydration ?? defaultHydrationFor(carcass), carcass.name);
+  if (player.runTracking) { player.runTracking.meatEaten = (player.runTracking.meatEaten || 0) + 1; player.runTracking.foodTypesEaten["__carcass__"] = (player.runTracking.foodTypesEaten["__carcass__"] || 0) + 1; }
   const age = carcass.carcassAge || 0;
 
   addLog(`Turn ${player.turn}: You feed from the ${carcass.name} while keeping watch. The scent deepens around the kill.${share.shareText}`, "food");
@@ -13540,6 +13787,7 @@ function applyPoison(poison, sourceKey) {
   player.knownFoods[sourceKey] = poison;
 
   const rank = poisonRank(poison);
+  if (player.runTracking && rank > (player.runTracking.worstPoisonRank || 0)) player.runTracking.worstPoisonRank = rank;
   const defaultDamage = rank >= 5 ? 12 : rank >= 4 ? 7 : rank >= 2 ? 4 : 2;
   const defaultTurns = rank >= 4 ? 7 : rank >= 2 ? 4 : 3;
 
@@ -13629,6 +13877,7 @@ function die(message, context = null) {
   clearCurrentEncounter("death", {clearQueue: true});
   addLog(`Turn ${player.turn}: ${message}`, "death");
   setNarration(deathNarrationFor(message, deathContext));
+  checkAchievements();
   render();
   maybePromptRestartAfterDeath(message);
 }
@@ -13760,6 +14009,7 @@ function resetGameForPlayer(reason = "manual restart") {
     matingCount: 0,
     lastMatingTurn: -999
   });
+  player.runTracking = freshRunTracking();
   player.knowledgeByEncounterKey = profileLoadFieldJournal();
   lastHabitatKey = "primary";
   waterState = {inWater: false, turns: 0};
@@ -14169,6 +14419,7 @@ function resetGameForBot(reason = "bot auto-reset") {
     matingCount: 0,
     lastMatingTurn: -999
   });
+  player.runTracking = freshRunTracking();
   player.knowledgeByEncounterKey = profileLoadFieldJournal();
   lastHabitatKey = "primary";
   waterState = {inWater: false, turns: 0};
