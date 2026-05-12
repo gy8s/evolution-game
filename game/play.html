@@ -544,7 +544,27 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
 .mapIcon { display: inline-flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 0.68rem; line-height: 1; text-shadow: 0 1px 2px #000; }
 .mapIconThreat { color: #ffd76a; font-weight: 900; }
 
-/* ===== PROFILE SAVE SYSTEM ===== */
+/* === DESKTOP MODE (forced via checkbox, overrides all mobile media queries) === */
+body.desktop-mode { padding: 18px !important; font-size: 18px !important; }
+body.desktop-mode .layout { display: grid !important; grid-template-columns: minmax(520px, 1fr) minmax(520px, 620px) !important; gap: 10px !important; max-width: 1380px !important; flex-direction: unset !important; }
+body.desktop-mode .hudGrid { grid-template-columns: minmax(0, .96fr) minmax(300px, .86fr) !important; }
+body.desktop-mode .vitalsRow { display: grid !important; grid-template-columns: minmax(230px, 1fr) minmax(128px, 150px) !important; grid-column: 1 !important; max-width: none !important; row-gap: 10px !important; }
+body.desktop-mode .vitalsRow .stat { grid-template-columns: 92px 42px minmax(76px, 118px) !important; }
+body.desktop-mode .vitalsRow .barBox { margin: 0; width: 100% !important; height: 9px !important; }
+body.desktop-mode .statusSideSummary { grid-column: 2 !important; }
+body.desktop-mode .actionBox { grid-column: 1 !important; max-width: none !important; margin-left: 0 !important; margin-right: 0 !important; }
+body.desktop-mode .mapTogglePanel { grid-column: 2 !important; }
+body.desktop-mode .statusSideGrid { grid-template-columns: 1fr !important; }
+body.desktop-mode .controls { grid-template-columns: repeat(3, minmax(54px, 1fr)) !important; grid-template-rows: repeat(3, 46px) !important; width: unset !important; }
+body.desktop-mode .navLayerWrap { grid-template-columns: minmax(260px, 1fr) 66px !important; }
+body.desktop-mode .mapMainRow { grid-template-columns: minmax(0, 1fr) auto !important; }
+body.desktop-mode .mapSymbolStack { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+body.desktop-mode .mapSymbolCue { grid-template-columns: 1fr !important; justify-items: center !important; text-align: center !important; }
+body.desktop-mode .log { height: 150px !important; font-size: 13px !important; }
+body.desktop-mode .sceneNarration { font-size: 18px !important; }
+body.desktop-mode .senseLine { font-size: 13px !important; }
+
+
 .profileModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9000;align-items:center;justify-content:center;}
 .profileModal.open{display:flex;}
 .profileModalCard{background:#161a16;border:1px solid #4a6a4a;border-radius:6px;padding:22px 24px;max-width:500px;width:94vw;max-height:88vh;overflow-y:auto;color:#ccc;}
@@ -838,6 +858,12 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
             <button id="godModeToggle" class="debugButton" type="button">God Mode: OFF</button>
             <div class="small" style="margin-top:4px;">QA death recovery only. Adds a rollback button on the death screen.</div>
           </div>
+        </div>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid #555;">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:#cfc7ff;">
+            <input type="checkbox" id="desktopModeToggle" />
+            Desktop mode (forces full two-column layout regardless of window width)
+          </label>
         </div>
         </div>
       </div>
@@ -17919,6 +17945,16 @@ if (godModeToggle) godModeToggle.addEventListener("click", () => {
   godModeToggle.textContent = godModeEnabled ? "God Mode: ON" : "God Mode: OFF";
   godModeToggle.style.outline = godModeEnabled ? "2px solid #f90" : "";
 });
+(function initDesktopMode() {
+  const checkbox = document.getElementById("desktopModeToggle");
+  if (!checkbox) return;
+  const apply = (on) => { document.body.classList.toggle("desktop-mode", on); checkbox.checked = on; };
+  try { apply(localStorage.getItem("evolutionDesktopMode") === "1"); } catch (_) {}
+  checkbox.addEventListener("change", () => {
+    apply(checkbox.checked);
+    try { if (checkbox.checked) { localStorage.setItem("evolutionDesktopMode", "1"); } else { localStorage.removeItem("evolutionDesktopMode"); } } catch (_) {}
+  });
+})();
 document.addEventListener("keydown", event => {
   if (event.key === "Escape") {
     closeMapOverlay();

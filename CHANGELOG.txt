@@ -1,3 +1,10 @@
+[2026-05-12 desktop-mode-toggle | Claude]
+Desktop mode checkbox in Developer panel forces full two-column layout.
+
+- Checkbox "Desktop mode" added at the bottom of the Developer / QA tools panel.
+- body.desktop-mode CSS block overrides all mobile media-query breakpoints: restores grid layout on .layout, .hudGrid, .vitalsRow, .actionBox, .mapTogglePanel, .statusSideGrid, .controls, .navLayerWrap, .mapSymbolStack, and resets log/font sizes.
+- State persisted in localStorage key "evolutionDesktopMode" ("1" / absent); restored on page load via IIFE.
+
 [2026-05-12 run-recap-achievement-toast | Claude]
 Run recap on death and achievement unlock toast; toast/resume fixes.
 
