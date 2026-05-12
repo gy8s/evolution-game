@@ -1,3 +1,19 @@
+[2026-05-12 eocene-plant-encounters | Claude]
+Eight new Eocene-grounded plant encounters covering toxic and edible flora.
+
+- cycadSeeds: rank-3 cycasin poison (Cycadaceae), ground layer. Vivid orange seeds from squat cycad cone; no safe dose for a small primate.
+- spurgeCapsules: rank-3 latex/euphorbin poison (Euphorbiaceae), ground and undergrowth. Milky sap, explosive seed dispersal.
+- hollyBerries: rank-2 ilicin/saponin poison (Aquifoliaceae), undergrowth and mid-storey. Bright red, bird-dispersed, toxic to small mammals.
+- milkweedFruit: rank-2 cardiac glycoside poison (Apocynaceae), mid-storey and canopy. Elongated pale pod on climbing vine.
+- aroidShoots: rank-1 calcium oxalate poison (Araceae), ground and undergrowth. Fresh shoots cause mouth burning; edible in small amounts.
+- gingerRhizomes: no poison (Zingiberaceae), ground layer. Starchy, aromatic, requires excavation.
+- treeFernFiddleheads: no poison (Cyatheaceae), ground and undergrowth. Narrow edible window before frond expansion.
+- waterLilySeedPods: rank-1 alkaloid (Nymphaeaceae), ground near water. Nutritious and hydrating; nausea from excess.
+- All encounters include full naturalHistory blocks (fieldNote, behaviour, ecology, gameplayInsight, scienceNote) with Eocene fossil citations.
+- FJ_GROUP_MAP: berry/fruit/pod/seed types added to "Fruit & berries"; shoot/rhizome/fern/capsule types added to "Fungi & plants".
+- staticMapIcon: all 8 keys added to the forage "🌿" list.
+- Spawn tables: cycadSeeds/spurgeCapsules/aroidShoots/gingerRhizomes/treeFernFiddleheads/waterLilySeedPods → Ground; spurgeCapsules/hollyBerries/aroidShoots/treeFernFiddleheads → Undergrowth; hollyBerries/milkweedFruit → Mid-storey; milkweedFruit → Canopy.
+
 [2026-05-12 growth-bar-death-tips | Claude]
 Growth progress bar in player panel and contextual death tips in death modal.
 

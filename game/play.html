@@ -1715,6 +1715,174 @@ const encounters = {
     }
   },
 
+  cycadSeeds: {
+    kind: "forage", name: "cycad seeds", icon: "🔶", className: "food",
+    canInvestigate: true, portions: 2, energy: 16,
+    poison: {severity: "severe", rank: 3, toxinType: "cycasin", lethal: false, turns: 6, damage: 6, warning: "Cycasin attacks liver tissue — deep cramping and nausea spread rapidly."},
+    seen: "Bright orange seeds lie scattered around a squat, palm-like plant with a central cone structure.",
+    investigationDetails: [
+      "The plant is not a true palm — its leaves are stiffer, the trunk thicker and more fibrous.",
+      "The seeds are vivid orange and oily-looking, but nothing nearby has touched them.",
+      "A cycad. The seeds are energy-rich but packed with cycasin — a potent liver toxin with no safe dose."
+    ],
+    investigated: "Cycad seeds. Visually rich and attractive. Severely toxic raw — no safe quantity exists for a small-bodied primate.",
+    naturalHistory: {
+      title: "Cycad seeds (Cycadaceae)",
+      fieldNote: "Cycad seeds contain cycasin, a glycoside that hydrolyses to methylazoxymethanol in the gut — a compound causing irreversible liver and kidney damage at low doses in most vertebrates.",
+      behaviour: "Seeds ripen slowly within a central cone structure. Bright orange colouration develops over weeks as oil-rich seed tissue matures. Seeds scatter after cone disintegration rather than by explosive mechanism.",
+      ecology: "Cycads rely on large beetles and, in some lineages, vertebrates with cycasin tolerance for seed dispersal. Most frugivores are excluded — the toxin selectively filters which animals interact with the seeds.",
+      gameplayInsight: "Do not eat. The vivid colour is a warning, not an invitation. No safe dose exists for raw cycad seed in a small primate body.",
+      scienceNote: "Cycadaceae have one of the longest fossil records of any living plant family. Direct cycad ancestors are confirmed from the Triassic, with Eocene cycad pollen and megasporophylls recorded from North America, Europe, and Asia. The cycasin biosynthesis pathway is conserved across all extant cycad genera and is presumed ancient."
+    }
+  },
+
+  spurgeCapsules: {
+    kind: "forage", name: "spurge capsules", icon: "🟤", className: "food",
+    canInvestigate: true, portions: 2, energy: 10,
+    poison: {severity: "severe", rank: 3, toxinType: "latex", lethal: false, turns: 5, damage: 5, warning: "Euphorbia latex causes severe mucosal irritation and systemic toxicity."},
+    seen: "Small three-lobed capsules hang from a shrub with milky sap beading at every stem break.",
+    investigationDetails: [
+      "The stem oozes white latex when a leaf is bent — sticky and immediately unpleasant on the fingers.",
+      "Capsules split explosively in heat, scattering seeds coated in the same sap.",
+      "A spurge-family plant. The latex is a systemic deterrent toxic to most herbivores — seeds and flesh alike."
+    ],
+    investigated: "Euphorbiaceae capsules. Latex in both flesh and seed coat is toxic. The explosive dispersal mechanism means seeds carry the sap wherever they land.",
+    naturalHistory: {
+      title: "Spurge capsules (Euphorbiaceae)",
+      fieldNote: "Euphorbiaceae produce diterpenoid esters and latex compounds causing severe mucosal damage, systemic inflammation, and at high doses liver and kidney failure. The latex functions as both a herbivore deterrent and a wound-sealing agent.",
+      behaviour: "Mature capsules are three-sectioned and split explosively in dry heat, projecting seeds several metres. Latex production is highest in young tissue and at wound sites. The entire plant is chemically defended.",
+      ecology: "A dominant family in Eocene tropical forests, Euphorbiaceae fill roles from pioneer shrubs to canopy trees. The latex-based defence is a convergent strategy found across multiple unrelated plant families.",
+      gameplayInsight: "Avoid handling broken stems — latex contact is an irritant before consumption is attempted. Seeds carry the sap coating after explosive dispersal.",
+      scienceNote: "Euphorbiaceae are among the most frequently identified families in the London Clay flora. Seed and fruit morphology resembling Eocene Euphorbiaceae genera is recovered from multiple Eocene Lagerstätten. The diterpenoid ester pathway responsible for latex toxicity is conserved across the family and presumed ancient."
+    }
+  },
+
+  hollyBerries: {
+    kind: "forage", name: "holly-like berries", icon: "🔴", className: "food",
+    canInvestigate: true, portions: 2, energy: 8,
+    poison: {severity: "moderate", rank: 2, toxinType: "ilicin", lethal: false, turns: 4, damage: 3, warning: "Ilicin and saponins cause vomiting and cramping."},
+    seen: "Clusters of vivid red berries line a spiny-leaved shrub, each berry glossy and perfectly formed.",
+    investigationDetails: [
+      "The leaves are stiff with sharp teeth along the margin — the shrub actively deters browsing.",
+      "The red berries are small and bright but smell of nothing useful.",
+      "A holly-type shrub. The berries contain ilicin and saponins — attractive-looking but toxic to small mammals."
+    ],
+    investigated: "Holly-like berries. The vivid colour draws attention, but these are moderately toxic to small primates.",
+    naturalHistory: {
+      title: "Holly-like berries (Aquifoliaceae)",
+      fieldNote: "Ilex species contain ilicin, theobromine, and saponins in the berry flesh. These compounds cause vomiting, diarrhoea, and lethargy at doses toxic to most mammals, while remaining tolerated by the thrush-sized birds that disperse the seeds.",
+      behaviour: "Berries ripen to bright red, yellow, or black. They persist on the shrub into dry season as bird food when other resources are exhausted. Spiny leaves discourage large herbivore browsing of foliage.",
+      ecology: "A dispersal strategy targeting specific bird species and tolerant mammals. Toxicity level filters seed dispersers from seed predators — birds pass the seeds intact, most mammals cannot safely consume the flesh.",
+      gameplayInsight: "Bright red and present when other food is absent, but the attractiveness is the trap. Follow bird foraging activity on this shrub only when nothing safer is available.",
+      scienceNote: "Aquifoliaceae, including Ilex, are well-documented in Eocene fossil floras. Ilex pollen and leaf impressions from Eocene deposits in Europe and North America confirm the genus was widespread and diverse by this period. Theobromine — also found in cacao — is present in Ilex species and is toxic to most mammals at low doses."
+    }
+  },
+
+  milkweedFruit: {
+    kind: "forage", name: "milkweed-family fruit", icon: "🫛", className: "food",
+    canInvestigate: true, portions: 2, energy: 12,
+    poison: {severity: "moderate", rank: 2, toxinType: "cardiac_glycoside", lethal: false, turns: 5, damage: 4, warning: "Cardiac glycosides disrupt heart rhythm and cause weakness and nausea."},
+    seen: "A smooth, elongated pod hangs from a climbing plant, pale green and faintly waxy.",
+    investigationDetails: [
+      "The pod is long and tapered — more seed vessel than edible fruit.",
+      "Broken open, the interior holds dense rows of seeds attached to silky white fibres.",
+      "An Apocynaceae-type plant. The entire structure carries cardiac glycosides — genuinely dangerous, not just unpleasant."
+    ],
+    investigated: "Milkweed-family pod. Cardiac glycosides throughout the structure make this a real danger rather than a mild deterrent.",
+    naturalHistory: {
+      title: "Milkweed-family fruit (Apocynaceae)",
+      fieldNote: "Apocynaceae produce cardiac glycosides that inhibit the sodium-potassium pump in heart muscle cells, causing bradycardia and arrhythmia. These are among the most pharmacologically potent natural compounds produced by plants.",
+      behaviour: "Pods develop from insect-pollinated flowers with characteristic corona structures. Mature pods split along one seam, releasing seeds with long white fibres for wind dispersal. The entire plant from root to seed coat is chemically defended.",
+      ecology: "The cardiac glycoside defence discourages vertebrate seed predation while allowing some insect tolerance. Certain insects sequester the glycosides for their own chemical defence — a relationship likely established well before the Eocene.",
+      gameplayInsight: "Avoid. The seed fibres are not nutritious and the seed coat is toxic. The elongated pale-green pod shape becomes distinctive once recognised.",
+      scienceNote: "Apocynaceae are confirmed in Eocene fossil floras at both Messel and London Clay sites. The family is currently one of the most species-rich in tropical forests — its Eocene diversity was likely comparable. Cardiac glycoside-producing lineages are among the most ancient within the family based on molecular phylogenetics."
+    }
+  },
+
+  aroidShoots: {
+    kind: "forage", name: "aroid shoots", icon: "🌿", className: "food",
+    canInvestigate: true, portions: 2, energy: 6,
+    poison: {severity: "mild", rank: 1, toxinType: "oxalate", lethal: false, turns: 3, damage: 2, warning: "Calcium oxalate crystals cause immediate burning pain in the mouth and throat."},
+    seen: "Broad-leaved aroid plants crowd the shaded floor, fresh shoots tightly wound and pale.",
+    investigationDetails: [
+      "The leaves are large and waxy, forming natural funnels that pool moisture.",
+      "The shoots smell green and vegetable-like — potentially palatable, but aroids vary widely.",
+      "Raw aroid tissue contains raphide crystals. Eating untested means accepting mouth and throat burning."
+    ],
+    investigated: "Aroid shoots. Mild oxalate toxicity in raw tissue — unpleasant rather than dangerous in small amounts.",
+    naturalHistory: {
+      title: "Aroid shoots (Araceae)",
+      fieldNote: "Araceae produce calcium oxalate raphides — needle-shaped crystals that physically penetrate oral mucosa on contact, causing immediate burning pain and swelling. The mechanism deters consumption before significant tissue is ingested.",
+      behaviour: "Aroids produce a single emergent shoot that unfolds into a large leaf. The fresh shoot is the most palatable stage before lignification. Dense clonal patches form in moist, shaded understorey conditions.",
+      ecology: "Among the dominant understorey plants in Eocene tropical forests, Araceae occupy the deep-shade niche inaccessible to most fruiting angiosperms. Rhizomes store carbohydrate reserves and allow the plant to persist through seasonal variation.",
+      gameplayInsight: "Small amounts cause mouth burning but are survivable. Deeper rhizomes below ground have lower oxalate concentrations and higher starch, but require excavation. Do not eat in bulk.",
+      scienceNote: "Araceae have an extensive Eocene fossil record. Aroid pollen and leaf impressions are abundant in Eocene tropical and subtropical deposits globally. Calcium oxalate raphide production is found in virtually all genera and is ancient within the family."
+    }
+  },
+
+  gingerRhizomes: {
+    kind: "forage", name: "ginger rhizomes", icon: "🌱", className: "food",
+    canInvestigate: true, portions: 2, energy: 14, hydration: 2,
+    poison: null,
+    seen: "Thick aromatic rhizomes push through the soil surface near a stand of broad-leaved herbs.",
+    investigationDetails: [
+      "The scent when the rhizome is exposed is sharp and spicy — unmistakable ginger-family chemistry.",
+      "The tissue is dense and starchy with fibrous sheaths. It takes effort but gives solid nutrition.",
+      "Recent excavation marks in the soil suggest this is a known food source to local animals."
+    ],
+    investigated: "Ginger-family rhizomes. Nutritious starchy tissue, no toxicity. Requires ground-level excavation.",
+    naturalHistory: {
+      title: "Ginger rhizomes (Zingiberaceae)",
+      fieldNote: "Zingiberaceae rhizomes are carbohydrate-dense storage organs. Gingerol and related phenolic compounds produce the characteristic pungency and carry mild antimicrobial properties that reduce gut pathogen load.",
+      behaviour: "Rhizomes grow horizontally through the top layer of forest soil and are detectable by the spicy scent released when surrounding leaf litter is disturbed. Aerial shoots indicate rhizome presence below.",
+      ecology: "A major component of Eocene tropical understorey vegetation, Zingiberaceae provide ground-level food resources accessible to small mammals through excavation. The rhizome's carbohydrate stores are reliable and independent of fruiting cycles.",
+      gameplayInsight: "Accessible at the ground layer in shaded areas. Excavation requires time but the nutritional return is reliable. The spicy scent briefly masks your own odour while you feed.",
+      scienceNote: "Zingiberaceae have an Eocene fossil record confirmed from pollen and rhizome remains in Asian and African deposits. Molecular clock estimates place the family's origin in the Cretaceous, with major diversification in the Eocene as tropical forests expanded. Gingerol-related phenolics are biosynthetically ancient within the order Zingiberales."
+    }
+  },
+
+  treeFernFiddleheads: {
+    kind: "forage", name: "tree fern fiddleheads", icon: "🌾", className: "food",
+    canInvestigate: true, portions: 2, energy: 8, hydration: 1,
+    poison: null,
+    seen: "Tightly coiled frond tips emerge from the crown of a tree fern, pale and densely wound.",
+    investigationDetails: [
+      "The fiddleheads are compact and firm — the most energy-rich part of the fern at this stage.",
+      "They uncurl quickly once detached, revealing soft inner tissue beneath light scales.",
+      "Insects probe the base of the tightly wound fronds — a reliable indicator of palatability."
+    ],
+    investigated: "Tree fern fiddleheads. Edible at the young coiled stage before full frond expansion.",
+    naturalHistory: {
+      title: "Tree fern fiddleheads (Cyatheaceae)",
+      fieldNote: "The crozier or fiddlehead is the emerging frond of a fern, tightly coiled to protect the growing tissue inside. At this stage the tissue is high in carbohydrates and relatively soft compared to the mature frond, which becomes heavily lignified.",
+      behaviour: "Fiddleheads emerge from the crown in cohorts after sufficient rainfall. Each fiddlehead unfurls within two to four days — the edible window is narrow. The crown position on tree ferns requires climbing to reach.",
+      ecology: "Tree ferns were a dominant feature of Eocene forest understorey and margins. As non-flowering plants, they represent a nutritional resource completely outside the angiosperm fruiting system — available even when fruit is absent.",
+      gameplayInsight: "Available in a narrow window before full frond expansion. The crown position requires vertical access. Insects concentrated at the crown are a secondary food bonus when fiddleheads are present.",
+      scienceNote: "Cyatheaceae are confirmed from Eocene fossil deposits across multiple continents. Tree fern trunks are found in Eocene coal and lignite deposits. The family was more globally widespread in the Eocene warm climate than today. Cyatheaceous spores are abundant in Eocene palynological assemblages."
+    }
+  },
+
+  waterLilySeedPods: {
+    kind: "forage", name: "water lily seed pods", icon: "🪷", className: "food",
+    canInvestigate: true, portions: 3, energy: 8, hydration: 8,
+    poison: {severity: "mild", rank: 1, toxinType: "alkaloid", lethal: false, turns: 3, damage: 2, warning: "Nymphaea alkaloids cause mild nausea if consumed in excess."},
+    seen: "Round green seed pods bob at the edge of still water among broad floating leaves.",
+    investigationDetails: [
+      "The pods are accessible from the bank edge without entering the water.",
+      "Inside: dense rows of small seeds in a spongy matrix — starchy and mildly sweet.",
+      "Safe in moderate portions. Overconsumption brings on uncomfortable nausea from trace alkaloids."
+    ],
+    investigated: "Water lily seed pods. Nutritious and hydrating in moderate amounts — overconsumption causes nausea.",
+    naturalHistory: {
+      title: "Water lily seed pods (Nymphaeaceae)",
+      fieldNote: "Nymphaea seeds are enclosed in a spongy aril that keeps them buoyant for water dispersal. The seed matrix is starchy and mildly nutritious. Trace alkaloids in the seed coat are present across Nymphaeaceae and become mildly toxic at high doses.",
+      behaviour: "Pods form from the floating flower after beetle or fly pollination and ripen over several weeks, eventually releasing seeds that drift to new colonisation sites. Green pods at the bank edge are the most accessible stage.",
+      ecology: "Nymphaeaceae are among the most basal flowering plant lineages. In Eocene lake and slow-river environments, water lily beds were important structural features supporting invertebrates, fish, and amphibians.",
+      gameplayInsight: "Accessible from the bank without full water entry. The hydration return is significant — a useful resource at the water margin. Collect in moderation; overconsumption is unpleasant rather than dangerous.",
+      scienceNote: "Nymphaeaceae have among the richest Eocene fossil records of any aquatic plant family. Nymphaea-type pollen is abundant in Eocene lake sediments globally, and fossil Nymphaea leaves and seeds are known from Eocene deposits in Europe, North America, and Asia. The family's early divergence from other angiosperms is confirmed by molecular phylogenetics, placing the split in the Cretaceous."
+    }
+  },
+
   // small water sources
   rainPuddle: {
     kind: "forage", name: "small rain puddle", icon: "💧", className: "food",
@@ -3259,6 +3427,7 @@ const encounterTables = {
     ["redBerries", 0.030], ["purpleBerries", 0.028], ["bitterLeaves", 0.030], ["fallenFruit", 0.030], ["laurelDrupe", 0.018], ["palmFruit", 0.016], ["nypaFruit", 0.010], ["vitisBerries", 0.014], ["menispermBerry", 0.010], ["resinousFruit", 0.010], ["podFruit", 0.010], ["rainPuddle", 0.030],
     ["magnoliaFlowers", 0.018], ["hibiscusFlowers", 0.016], ["roseFamilyBlossoms", 0.024], ["citrusBlossoms", 0.012], ["bananaTypeFlowers", 0.010], ["palmFlowers", 0.014],
     ["largeGroundNest", 0.018], ["termiteMound", 0.028], ["nuts", 0.035], ["paleMushroom", 0.028], ["brownMushroom", 0.03],
+    ["cycadSeeds", 0.012], ["spurgeCapsules", 0.010], ["aroidShoots", 0.018], ["gingerRhizomes", 0.016], ["treeFernFiddleheads", 0.014], ["waterLilySeedPods", 0.008],
     ["smallCarcass", 0.02], ["largeCarcass", 0.01], ["smallMammal", 0.035], ["hedgehogLikeInsectivore", 0.018],
     ["leptictidium", 0.023], ["amphiperatherium", 0.018], ["hyracotherium", 0.012], ["coryphodon", 0.007],
     ["eomanis", 0.012], ["smallSnake", 0.018], ["defensiveSnake", 0.010], ["smallConstrictor", 0.008], ["constrictor", 0.016], ["pitviper", 0.014],
@@ -3280,6 +3449,7 @@ const encounterTables = {
     ["purpleBerries", 0.030], ["stranglerFigFruit", 0.024], ["fallenFruit", 0.026], ["laurelDrupe", 0.020], ["vitisBerries", 0.018], ["menispermBerry", 0.012], ["resinousFruit", 0.012], ["soapberryFruit", 0.010], ["podFruit", 0.010], ["pandanusFruit", 0.010], ["rainPuddle", 0.026], ["nuts", 0.03],
     ["magnoliaFlowers", 0.020], ["hibiscusFlowers", 0.020], ["roseFamilyBlossoms", 0.030], ["citrusBlossoms", 0.016], ["bananaTypeFlowers", 0.014], ["palmFlowers", 0.018],
     ["paleMushroom", 0.025], ["brownMushroom", 0.035],
+    ["spurgeCapsules", 0.012], ["hollyBerries", 0.014], ["aroidShoots", 0.022], ["treeFernFiddleheads", 0.018],
     ["smallMammal", 0.045], ["hedgehogLikeInsectivore", 0.014], ["leptictidium", 0.022], ["amphiperatherium", 0.02], ["coryphodon", 0.004],
     ["smallMammal", 0.025], ["godinotia", 0.012], ["eomanis", 0.01],
     ["eurotamandua", 0.012], ["monitorLizard", 0.01], ["eurheloderma", 0.006],
@@ -3298,6 +3468,7 @@ const encounterTables = {
     ["treeFrog", 0.038], ["frog", 0.018], ["poisonDartFrog", 0.006],
     ["redBerries", 0.026], ["purpleBerries", 0.032], ["stranglerFigFruit", 0.030], ["laurelDrupe", 0.024], ["palmFruit", 0.022], ["vitisBerries", 0.022], ["arilFruit", 0.014], ["custardAppleFruit", 0.014], ["resinousFruit", 0.012], ["soapberryFruit", 0.010], ["rainPuddle", 0.014], ["canopyFruit", 0.032],
     ["magnoliaFlowers", 0.024], ["hibiscusFlowers", 0.024], ["roseFamilyBlossoms", 0.026], ["citrusBlossoms", 0.020], ["bananaTypeFlowers", 0.018], ["palmFlowers", 0.022],
+    ["hollyBerries", 0.010], ["milkweedFruit", 0.014],
     ["nuts", 0.025], ["birdNest", 0.035], ["smallBird", 0.04], ["woodpeckerBird", 0.022], ["hummingbird", 0.018],
     ["messelornis", 0.012], ["ramphastos", 0.02], ["fruitBat", 0.018],
     ["heterohyus", 0.018], ["kopidodon", 0.014], ["darwinius", 0.012],
@@ -3316,6 +3487,7 @@ const encounterTables = {
     ["treeFrog", 0.032], ["poisonDartFrog", 0.004], ["purpleBerries", 0.032],
     ["stranglerFigFruit", 0.034], ["canopyFruit", 0.036], ["laurelDrupe", 0.026], ["palmFruit", 0.026], ["vitisBerries", 0.024], ["arilFruit", 0.016], ["custardAppleFruit", 0.018], ["resinousFruit", 0.012], ["soapberryFruit", 0.010], ["pandanusFruit", 0.012], ["nuts", 0.02], ["birdNest", 0.042],
     ["magnoliaFlowers", 0.026], ["hibiscusFlowers", 0.026], ["roseFamilyBlossoms", 0.020], ["citrusBlossoms", 0.022], ["bananaTypeFlowers", 0.020], ["palmFlowers", 0.026],
+    ["milkweedFruit", 0.010],
     ["smallBird", 0.055], ["woodpeckerBird", 0.026], ["hummingbird", 0.024], ["ramphastos", 0.025], ["fruitBat", 0.025],
     ["heterohyus", 0.022], ["kopidodon", 0.016], ["darwinius", 0.014],
     ["europolemur", 0.012], ["godinotia", 0.014], ["godinotia", 0.04],
@@ -12698,9 +12870,13 @@ const FJ_GROUP_MAP = {
   resinousFruit: "Fruit & berries", soapberryFruit: "Fruit & berries",
   podFruit: "Fruit & berries", pandanusFruit: "Fruit & berries",
   stranglerFigFruit: "Fruit & berries", canopyFruit: "Fruit & berries", nuts: "Fruit & berries",
+  hollyBerries: "Fruit & berries", milkweedFruit: "Fruit & berries",
+  cycadSeeds: "Fruit & berries", waterLilySeedPods: "Fruit & berries",
   magnoliaFlowers: "Flowers", hibiscusFlowers: "Flowers", roseFamilyBlossoms: "Flowers",
   citrusBlossoms: "Flowers", bananaTypeFlowers: "Flowers", palmFlowers: "Flowers",
   paleMushroom: "Fungi & plants", brownMushroom: "Fungi & plants", bitterLeaves: "Fungi & plants",
+  spurgeCapsules: "Fungi & plants", aroidShoots: "Fungi & plants",
+  gingerRhizomes: "Fungi & plants", treeFernFiddleheads: "Fungi & plants",
   rainPuddle: "Water & mineral", bromeliadPool: "Water & mineral", clayDeposit: "Water & mineral",
   antNest: "Nests", waspNest: "Nests", beehive: "Nests",
   termiteMound: "Nests", termiteSwarm: "Nests", birdNest: "Nests", largeGroundNest: "Nests",
@@ -17623,7 +17799,7 @@ function bindCardActionButtons() {
 function staticMapIcon(saved) {
   if (!saved || !saved.key) return "";
   const key = saved.key;
-  if (["bitterLeaves", "redBerries", "purpleBerries", "fallenFruit", "laurelDrupe", "palmFruit", "nypaFruit", "vitisBerries", "menispermBerry", "arilFruit", "custardAppleFruit", "resinousFruit", "soapberryFruit", "podFruit", "pandanusFruit", "nuts", "rainPuddle", "paleMushroom", "brownMushroom", "woodGrub", "grasshopper", "cricket", "cicada", "magnoliaFlowers", "hibiscusFlowers", "roseFamilyBlossoms", "citrusBlossoms", "bananaTypeFlowers", "palmFlowers"].includes(key)) return "🌿";
+  if (["bitterLeaves", "redBerries", "purpleBerries", "fallenFruit", "laurelDrupe", "palmFruit", "nypaFruit", "vitisBerries", "menispermBerry", "arilFruit", "custardAppleFruit", "resinousFruit", "soapberryFruit", "podFruit", "pandanusFruit", "nuts", "rainPuddle", "paleMushroom", "brownMushroom", "woodGrub", "grasshopper", "cricket", "cicada", "magnoliaFlowers", "hibiscusFlowers", "roseFamilyBlossoms", "citrusBlossoms", "bananaTypeFlowers", "palmFlowers", "cycadSeeds", "spurgeCapsules", "hollyBerries", "milkweedFruit", "aroidShoots", "gingerRhizomes", "treeFernFiddleheads", "waterLilySeedPods"].includes(key)) return "🌿";
   if (key === "clayDeposit") return "🟫";
   if (key === "termiteMound") return "🟤";
   if (key === "antNest" || key === "antTrail" || key === "antSwarm" || key === "titanomyrmaSwarm") return "🐜";
