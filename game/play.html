@@ -13650,10 +13650,10 @@ function renderFossilRecord(records) {
     return '<div class="fossilRecordTitle">Fossil Record</div><div class="fossilRecordEmpty">No specimens yet.</div>';
   }
   const entries = records.map((r, i) => {
-    const meta = [r.date, r.companions > 0 ? `${r.companions} companion${r.companions !== 1 ? "s" : ""}` : ""].filter(Boolean).join(" · ");
+    const meta = [escapeHtml(r.date), r.companions > 0 ? `${r.companions} companion${r.companions !== 1 ? "s" : ""}` : ""].filter(Boolean).join(" · ");
     return `<div class="fossilEntry">
       <span class="fossilEntryTurns">Specimen #${records.length - i} &mdash; ${r.turns} turn${r.turns !== 1 ? "s" : ""}</span>
-      <span class="fossilEntryCause">${r.cause}</span>
+      <span class="fossilEntryCause">${escapeHtml(r.cause)}</span>
       <span class="fossilEntryMeta">${meta}</span>
     </div>`;
   }).join("");
