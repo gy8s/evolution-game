@@ -547,13 +547,14 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
 /* === DESKTOP MODE (forced via checkbox, overrides all mobile media queries) === */
 body.desktop-mode { padding: 18px !important; font-size: 18px !important; }
 body.desktop-mode .layout { display: grid !important; grid-template-columns: minmax(520px, 1fr) minmax(520px, 620px) !important; gap: 10px !important; max-width: 1380px !important; flex-direction: unset !important; }
-body.desktop-mode .hudGrid { grid-template-columns: minmax(0, .96fr) minmax(300px, .86fr) !important; }
-body.desktop-mode .vitalsRow { display: grid !important; grid-template-columns: minmax(230px, 1fr) minmax(128px, 150px) !important; grid-column: 1 !important; max-width: none !important; row-gap: 10px !important; }
+body.desktop-mode .hudGrid { display: grid !important; grid-template-columns: minmax(0, .96fr) minmax(300px, .86fr) !important; grid-template-rows: auto auto auto !important; }
+body.desktop-mode .hudGrid > .vitalsRow { grid-column: 1 !important; grid-row: 1 !important; display: grid !important; grid-template-columns: minmax(230px, 1fr) minmax(128px, 150px) !important; max-width: none !important; }
+body.desktop-mode .hudGrid > .statusSideSummary { grid-column: 2 !important; grid-row: 1 !important; }
+body.desktop-mode .hudGrid > .compassBox { grid-column: 1 !important; grid-row: 2 !important; max-width: none !important; margin-left: 0 !important; margin-right: 0 !important; }
+body.desktop-mode .hudGrid > .groupPanel { grid-column: 1 !important; grid-row: 3 !important; }
+body.desktop-mode .hudGrid > .mapTogglePanel { grid-column: 2 !important; grid-row: 2 / span 2 !important; }
 body.desktop-mode .vitalsRow .stat { grid-template-columns: 92px 42px minmax(76px, 118px) !important; }
 body.desktop-mode .vitalsRow .barBox { margin: 0; width: 100% !important; height: 9px !important; }
-body.desktop-mode .statusSideSummary { grid-column: 2 !important; }
-body.desktop-mode .actionBox { grid-column: 1 !important; max-width: none !important; margin-left: 0 !important; margin-right: 0 !important; }
-body.desktop-mode .mapTogglePanel { grid-column: 2 !important; }
 body.desktop-mode .statusSideGrid { grid-template-columns: 1fr !important; }
 body.desktop-mode .controls { grid-template-columns: repeat(3, minmax(54px, 1fr)) !important; grid-template-rows: repeat(3, 46px) !important; width: unset !important; }
 body.desktop-mode .navLayerWrap { grid-template-columns: minmax(260px, 1fr) 66px !important; }
