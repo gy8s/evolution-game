@@ -1,3 +1,9 @@
+[2026-05-12 fossil-record-mya-label | Claude]
+Fossil Record and epoch label.
+
+- Fossil Record: on death, the current run is saved to localStorage (key: evolutionGameFossilRecord_v1, capped at 10 entries). Each entry stores turns survived, cause of death, companion count, and date. The death modal now shows a scrollable Fossil Record panel beneath the action buttons listing all past specimens with their turn count, cause, and metadata.
+- Epoch label: a small "Eocene · ~50 MYA" label is displayed beneath the Local forest map heading on the map card. Uses id="epochLabel" for future period updates.
+
 [2026-05-10 field-journal-ui-v2 | Claude]
 Field Journal UI redesign: individual encounter windows, tabbed grouped index, stacked modal behaviour, player titlebar placement.
 
