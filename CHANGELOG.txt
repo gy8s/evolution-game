@@ -1,5 +1,5 @@
 [2026-05-12 run-recap-achievement-toast | Claude]
-Run recap on death and achievement unlock toast.
+Run recap on death and achievement unlock toast; toast/resume fixes.
 
 - renderRunRecap(): renders a "Run summary" block in the death modal showing turns survived, nights survived, tiles explored, food types tried, predators escaped, matings, companions, and any conditional flags (poison survived, wildfire survived). If achievements were unlocked during the run they are listed by icon and name.
 - runNewAchievements: new per-run array accumulating {key, name, icon} for each achievement unlocked. Reset at run start in initGame(), resetGameForPlayer(), resetGameForBot(), and profileOnRunEnd(). Populated by awardAchievement() alongside the existing localStorage save.
@@ -7,6 +7,8 @@ Run recap on death and achievement unlock toast.
 - awardAchievement() updated to push to runNewAchievements, look up the def icon, and call showAchievementToast().
 - Death modal HTML: added <div id="runRecapPanel"> slot below fossilRecordSummary.
 - CSS: .achievementToast, .achievementToastIcon, .achievementToastLabel, .achievementToastSub, .runRecap, .runRecapTitle, .runRecapGrid, .runRecapStat, .runRecapAchievements, .runRecapAchievementsLabel, .runRecapAchievementEntry.
+- Codex P2 fix: clearToastQueue() added — clears _toastQueue, resets _toastActive, removes any in-flight toast DOM elements. Called at every run reset point (initGame, resetGameForPlayer, resetGameForBot, profileOnRunEnd) so stale toasts from the previous run never render in a new context.
+- Codex P2 fix: runNewAchievements persisted through save/resume. profileSaveActiveRun() writes runNewAchievements into profile.activeRun; profileResumeActiveRun() restores it (falling back to [] for old saves) so the death recap correctly includes achievements earned before a mid-run save.
 
 [2026-05-12 delete-profile | Claude]
 Delete profile with full data cleanup and per-profile fossil record; achievement and night-tracking fixes.

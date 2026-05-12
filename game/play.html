@@ -4689,6 +4689,12 @@ function awardAchievement(key, name) {
 let _toastQueue = [];
 let _toastActive = false;
 
+function clearToastQueue() {
+  _toastQueue = [];
+  _toastActive = false;
+  document.querySelectorAll(".achievementToast").forEach(el => el.remove());
+}
+
 function showAchievementToast(icon, name) {
   _toastQueue.push({icon, name});
   if (!_toastActive) _processToastQueue();
@@ -4801,6 +4807,7 @@ function profileOnRunEnd(outcome) {
   winAchievedThisRun = false;
   currentRunId = null;
   runNewAchievements = [];
+  clearToastQueue();
   profileUpdatePanelUI();
 }
 
@@ -4835,6 +4842,7 @@ function profileSaveActiveRun() {
     seed: currentRunId,
     runGodModeUsed,
     runQaBackUses,
+    runNewAchievements: runNewAchievements.slice(),
     summary: {
       turn: player.turn,
       x: player.x,
@@ -4923,6 +4931,7 @@ function profileStartNewRun() {
   runMaxGroupSize = 0;
   winAchievedThisRun = false;
   runNewAchievements = [];
+  clearToastQueue();
   player.knowledgeByEncounterKey = profileLoadFieldJournal();
   addDebugTrace("profile-new-run", {profileId: currentProfileId || "none", runId: currentRunId});
 }
@@ -4947,7 +4956,8 @@ function profileResumeActiveRun(profile) {
   runQaBackUses = profile.activeRun.runQaBackUses || 0;
   runMaxGroupSize = 0;
   winAchievedThisRun = false;
-  runNewAchievements = [];
+  runNewAchievements = Array.isArray(profile.activeRun.runNewAchievements) ? profile.activeRun.runNewAchievements.slice() : [];
+  clearToastQueue();
   clearRunLogsForNewGame();
   try {
     profileRestoreState(profile.activeRun.state);
@@ -5179,6 +5189,7 @@ function profileShowStartupModal(onChoiceMade) {
 function initGame(resumeChoice) {
   if (!player.runTracking) player.runTracking = freshRunTracking();
   runNewAchievements = [];
+  clearToastQueue();
   generateTerrain();
   generateHabitats();
   lastHabitatKey = habitatKeyAt(player.x, player.y);
