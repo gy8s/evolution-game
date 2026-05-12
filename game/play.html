@@ -547,6 +547,14 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
 .profileModalActions button{padding:6px 13px;border-radius:4px;border:1px solid #555;background:#252a25;color:#bbb;cursor:pointer;font-size:.88em;}
 .profileModalActions button:hover{border-color:#999;background:#2e362e;}
 .profileModalActions button.primary{border-color:#d9c747;color:#d9c747;}
+.profileDeleteConfirm{margin-top:8px;padding:9px 12px;background:#2a1a1a;border:1px solid #7a2a2a;border-radius:4px;font-size:.85em;color:#cc8888;}
+.profileDeleteConfirm p{margin:0 0 7px;line-height:1.5;}
+.profileDeleteConfirm .deleteConfirmBtns{display:flex;gap:7px;flex-wrap:wrap;}
+.profileDeleteConfirm button{padding:5px 12px;border-radius:4px;border:1px solid #555;background:#252a25;color:#bbb;cursor:pointer;font-size:.85em;}
+.profileDeleteConfirm button.danger{border-color:#aa3333;color:#ee6666;background:#2a1515;}
+.profileDeleteConfirm button.danger:hover{background:#3a1515;border-color:#dd4444;}
+.profileEntry .profileEntryDeleteBtn{float:right;margin-top:2px;padding:2px 8px;font-size:.78em;border-radius:3px;border:1px solid #5a3a3a;background:#2a1a1a;color:#aa6666;cursor:pointer;line-height:1.4;}
+.profileEntry .profileEntryDeleteBtn:hover{border-color:#aa3333;color:#ee6666;background:#3a1515;}
 .winModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.76);z-index:8000;align-items:center;justify-content:center;}
 .winModal.open{display:flex;}
 .winModalCard{background:#161a16;border:1px solid #5a9a5a;border-radius:6px;padding:24px;max-width:400px;width:90vw;color:#ccc;text-align:center;}
@@ -4963,6 +4971,42 @@ function profileUpdatePanelUI() {
   }
 }
 
+// ===== PROFILE DELETE =====
+
+function deleteProfile(profileId) {
+  if (!profileId) return;
+  // Remove from profile store
+  const store = profileLoadStore();
+  delete store.profiles[profileId];
+  profileSaveStore(store);
+  // Remove per-profile achievements
+  try {
+    const raw = localStorage.getItem(ACHIEVEMENTS_STORE_KEY);
+    const all = raw ? JSON.parse(raw) : {};
+    delete all[profileId];
+    localStorage.setItem(ACHIEVEMENTS_STORE_KEY, JSON.stringify(all));
+  } catch (_) {}
+  // Remove this profile's fossil record entries; preserve all others
+  try {
+    const raw = localStorage.getItem(FOSSIL_RECORD_KEY);
+    let records = raw ? JSON.parse(raw) : [];
+    if (Array.isArray(records)) {
+      records = records.filter(r => r.profileId && r.profileId !== profileId);
+      localStorage.setItem(FOSSIL_RECORD_KEY, JSON.stringify(records));
+    }
+  } catch (_) {}
+  // Clear active profile key if it was this profile
+  try {
+    if (localStorage.getItem(ACTIVE_PROFILE_KEY_STORE) === profileId) {
+      localStorage.removeItem(ACTIVE_PROFILE_KEY_STORE);
+    }
+  } catch (_) {}
+  // If the deleted profile was the current in-game profile, reset state
+  if (currentProfileId === profileId) {
+    currentProfileId = null;
+  }
+}
+
 // ===== PROFILE STARTUP MODAL =====
 
 function profileShowStartupModal(onChoiceMade) {
@@ -5005,8 +5049,42 @@ function profileShowStartupModal(onChoiceMade) {
         } else {
           runText = '<div class="profileEntryRun">No runs yet.</div>';
         }
-        div.innerHTML = '<div class="profileEntryName">' + p.name + compatWarn + '</div><div class="profileEntryMeta">Build: ' + (p.buildId || "").slice(0, 35) + ' | Runs: ' + ((p.stats || {}).totalRuns || 0) + '</div>' + runText;
-        div.addEventListener("click", () => { selectedProfileId = p.profileId; renderModalContent(); });
+        div.innerHTML = '<div class="profileEntryName">' + escapeHtml(p.name) + compatWarn + '<button class="profileEntryDeleteBtn" type="button" data-delid="' + escapeHtml(p.profileId) + '" title="Delete profile">Delete</button></div><div class="profileEntryMeta">Build: ' + escapeHtml((p.buildId || "").slice(0, 35)) + ' | Runs: ' + ((p.stats || {}).totalRuns || 0) + '</div>' + runText;
+        div.addEventListener("click", (ev) => {
+          if (ev.target.closest("[data-delid]")) return;
+          selectedProfileId = p.profileId;
+          renderModalContent();
+        });
+        const delBtn = div.querySelector("[data-delid]");
+        if (delBtn) {
+          delBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            const targetId = delBtn.dataset.delid;
+            const targetName = escapeHtml(p.name);
+            // Remove any existing confirm panel
+            body.querySelectorAll(".profileDeleteConfirm").forEach(el => el.remove());
+            const confirm = document.createElement("div");
+            confirm.className = "profileDeleteConfirm";
+            confirm.innerHTML = '<p><strong>Delete "' + targetName + '"?</strong><br>This permanently erases all data for this profile: run history, Field Journal, Fossil Record, and Achievements. <strong>This cannot be undone.</strong></p><div class="deleteConfirmBtns"></div>';
+            const btns = confirm.querySelector(".deleteConfirmBtns");
+            const cancelBtn = document.createElement("button");
+            cancelBtn.textContent = "Cancel";
+            cancelBtn.addEventListener("click", () => confirm.remove());
+            const confirmBtn = document.createElement("button");
+            confirmBtn.textContent = "Delete permanently";
+            confirmBtn.className = "danger";
+            confirmBtn.addEventListener("click", () => {
+              const idx = profileList.findIndex(x => x.profileId === targetId);
+              if (idx !== -1) profileList.splice(idx, 1);
+              if (selectedProfileId === targetId) selectedProfileId = profileList.length ? profileList[0].profileId : null;
+              deleteProfile(targetId);
+              renderModalContent();
+            });
+            btns.appendChild(cancelBtn);
+            btns.appendChild(confirmBtn);
+            div.after(confirm);
+          });
+        }
         body.appendChild(div);
       });
     }
@@ -12613,6 +12691,7 @@ function showFieldJournal(tab) {
     let records = [];
     try { records = JSON.parse(localStorage.getItem(FOSSIL_RECORD_KEY) || "[]"); } catch (_) {}
     if (!Array.isArray(records)) records = [];
+    records = records.filter(r => !r.profileId || r.profileId === currentProfileId);
     body.innerHTML = `<div style="padding:10px 14px;">${renderFossilRecord(records)}</div>`;
     modal.classList.add("open");
     modal.setAttribute("aria-hidden", "false");
@@ -13897,6 +13976,7 @@ function saveFossilRecord(deathMessage) {
   if (!Array.isArray(records)) records = [];
   const companions = (socialGroup && Array.isArray(socialGroup.members)) ? socialGroup.members.length : 0;
   records.unshift({
+    profileId: currentProfileId || null,
     turns: player.turn || 0,
     cause: (deathMessage || "Unknown").replace(/^Turn \d+:\s*/i, ""),
     companions,
@@ -13904,7 +13984,7 @@ function saveFossilRecord(deathMessage) {
   });
   if (records.length > FOSSIL_RECORD_CAP) records.length = FOSSIL_RECORD_CAP;
   try { localStorage.setItem(FOSSIL_RECORD_KEY, JSON.stringify(records)); } catch (_) {}
-  return records;
+  return records.filter(r => !r.profileId || r.profileId === currentProfileId);
 }
 
 function renderFossilRecord(records) {

@@ -1,3 +1,12 @@
+[2026-05-12 delete-profile | Claude]
+Delete profile with full data cleanup and per-profile fossil record.
+
+- deleteProfile(profileId): removes the profile from evolutionGameProfiles_v1, deletes its achievements entry from evolutionGameAchievements_v1, filters its fossil entries from evolutionGameFossilRecord_v1 (entries without a profileId tag are preserved for backwards compat), and clears the active profile key if it matched.
+- Fossil record entries now include a profileId field (set in saveFossilRecord). Reads in showFieldJournal("fossil") and the showDeathModal summary are filtered to currentProfileId only (entries without profileId shown to all, for backwards compat).
+- Delete button appears on each profile entry in the profile selection modal. Clicking it shows an inline confirmation panel warning that run history, Field Journal, Fossil Record, and Achievements will be permanently erased. A second "Delete permanently" click executes the delete and re-renders the modal. Cancelling removes the panel without action.
+- After deletion the modal stays open on the profile selection screen (no crash, no page reload).
+- CSS added: .profileDeleteConfirm, .deleteConfirmBtns, .profileEntryDeleteBtn and their states.
+
 [2026-05-12 achievements-system | Claude]
 Persistent achievements system: 50 achievements stored per profile in localStorage.
 
