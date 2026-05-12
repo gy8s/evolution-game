@@ -4,6 +4,7 @@ Fossil Record moved into Field Journal as Fossils tab.
 - Added "Fossils" tab to the Field Journal (fjModal). Clicking it renders the full run history from localStorage via renderFossilRecord(), accessible at any time during a run — not only on death.
 - Death modal simplified: the scrolling fossil panel is replaced with a one-line summary ("N specimens in Fossil Record") and a "View in Journal" button that closes the death modal and opens the journal to the Fossils tab.
 - CSS: replaced .fossilRecordPanel (scroll container) with .fossilRecordSummary / .fossilRecordSummaryText / .fossilRecordSummaryBtn for the death modal summary line.
+- Security: r.turns and r.companions now coerced through parseInt() before HTML interpolation in renderFossilRecord, closing the remaining XSS vector via tampered localStorage (Codex P2).
 
 [2026-05-12 fossil-record-mya-label | Claude]
 Fossil Record and epoch label.
