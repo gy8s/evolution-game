@@ -547,6 +547,14 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
 .profileModalActions button{padding:6px 13px;border-radius:4px;border:1px solid #555;background:#252a25;color:#bbb;cursor:pointer;font-size:.88em;}
 .profileModalActions button:hover{border-color:#999;background:#2e362e;}
 .profileModalActions button.primary{border-color:#d9c747;color:#d9c747;}
+.profileDeleteConfirm{margin-top:8px;padding:9px 12px;background:#2a1a1a;border:1px solid #7a2a2a;border-radius:4px;font-size:.85em;color:#cc8888;}
+.profileDeleteConfirm p{margin:0 0 7px;line-height:1.5;}
+.profileDeleteConfirm .deleteConfirmBtns{display:flex;gap:7px;flex-wrap:wrap;}
+.profileDeleteConfirm button{padding:5px 12px;border-radius:4px;border:1px solid #555;background:#252a25;color:#bbb;cursor:pointer;font-size:.85em;}
+.profileDeleteConfirm button.danger{border-color:#aa3333;color:#ee6666;background:#2a1515;}
+.profileDeleteConfirm button.danger:hover{background:#3a1515;border-color:#dd4444;}
+.profileEntry .profileEntryDeleteBtn{float:right;margin-top:2px;padding:2px 8px;font-size:.78em;border-radius:3px;border:1px solid #5a3a3a;background:#2a1a1a;color:#aa6666;cursor:pointer;line-height:1.4;}
+.profileEntry .profileEntryDeleteBtn:hover{border-color:#aa3333;color:#ee6666;background:#3a1515;}
 .winModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.76);z-index:8000;align-items:center;justify-content:center;}
 .winModal.open{display:flex;}
 .winModalCard{background:#161a16;border:1px solid #5a9a5a;border-radius:6px;padding:24px;max-width:400px;width:90vw;color:#ccc;text-align:center;}
@@ -4296,7 +4304,7 @@ function profileEmptyStore() {
 }
 
 function profileDefaultStats() {
-  return {totalRuns: 0, completedRuns: 0, deaths: 0, wins: 0, godModeRuns: 0, bestTurn: 0, bestMatingCount: 0, bestKnowledgeUnlocks: 0};
+  return {totalRuns: 0, completedRuns: 0, deaths: 0, wins: 0, godModeRuns: 0, bestTurn: 0, bestMatingCount: 0, bestKnowledgeUnlocks: 0, totalTurns: 0, totalMatings: 0};
 }
 
 function profileCreateNew(name) {
@@ -4522,6 +4530,8 @@ function profileUpdateStats(profile, summary) {
   if (summary.turnsSurvived > (s.bestTurn || 0)) s.bestTurn = summary.turnsSurvived;
   if (summary.matingCount > (s.bestMatingCount || 0)) s.bestMatingCount = summary.matingCount;
   if (summary.knowledgeUnlockCount > (s.bestKnowledgeUnlocks || 0)) s.bestKnowledgeUnlocks = summary.knowledgeUnlockCount;
+  s.totalTurns = (s.totalTurns || 0) + (summary.turnsSurvived || 0);
+  s.totalMatings = (s.totalMatings || 0) + (summary.matingCount || 0);
 }
 
 function freshRunTracking() {
@@ -4539,16 +4549,16 @@ function freshRunTracking() {
     matingAttempted: false,
     companionInterceptHit: false,
     pursuitsEscaped: 0,
-    dawnSurvivedCount: 0,
     nightSurvivedCount: 0,
-    consecutiveNightsAlive: 0,
-    maxConsecutiveNightsAlive: 0,
+    lastTrackedPhase: null,
     turnsAtMinFitness: 0,
     lowestFitness: 100,
     tilesExplored: 0,
     tilesExploredThisRun: new Set(),
     startedDying: false,
     wasNearDeath: false,
+    wildfireThreatened: false,
+    wildfireEscaped: false,
     investigatedCount: 0,
     groomedCount: 0,
     alertedCount: 0
@@ -4605,7 +4615,7 @@ const ACHIEVEMENT_DEFS = [
   { key: "escape_1",      cat: "Danger",   icon: "💨", name: "Close Call",        desc: "Escape a predator pursuit.",               check: (p, rt) => (rt.pursuitsEscaped || 0) >= 1 },
   { key: "escape_5",      cat: "Danger",   icon: "💨", name: "Ghost",             desc: "Escape 5 predator pursuits in a run.",     check: (p, rt) => (rt.pursuitsEscaped || 0) >= 5 },
   { key: "escape_10",     cat: "Danger",   icon: "💨", name: "Untouchable",       desc: "Escape 10 predator pursuits in a run.",    check: (p, rt) => (rt.pursuitsEscaped || 0) >= 10 },
-  { key: "survive_wildfire", cat: "Danger",icon: "🔥", name: "Through the Flames",desc: "Survive a wildfire.",                      check: (p, rt, ps) => (ps.totalWildfireEscapes || 0) >= 1 },
+  { key: "survive_wildfire", cat: "Danger",icon: "🔥", name: "Through the Flames",desc: "Survive a wildfire.",                      check: (p, rt) => rt.wildfireEscaped === true },
 
   // --- Growth ---
   { key: "grown",         cat: "Growth",   icon: "🌱", name: "Coming of Age",     desc: "Grow to adult size.",                      check: (p) => (p.size || 0) >= 10 },
@@ -4617,8 +4627,8 @@ const ACHIEVEMENT_DEFS = [
 
   // --- Milestones ---
   { key: "first_death",   cat: "Milestones", icon: "🪦", name: "Fossil",          desc: "Die for the first time.",                  check: (p, rt, ps) => (ps.totalRuns || 0) >= 1 },
-  { key: "best_50",       cat: "Milestones", icon: "🏆", name: "Record Holder",   desc: "Survive 50 turns in a single run.",        check: (p, rt, ps) => (ps.bestTurns || 0) >= 50 },
-  { key: "best_200",      cat: "Milestones", icon: "🏆", name: "Champion",        desc: "Survive 200 turns in a single run.",       check: (p, rt, ps) => (ps.bestTurns || 0) >= 200 },
+  { key: "best_50",       cat: "Milestones", icon: "🏆", name: "Record Holder",   desc: "Survive 50 turns in a single run.",        check: (p, rt, ps) => (ps.bestTurn || 0) >= 50 },
+  { key: "best_200",      cat: "Milestones", icon: "🏆", name: "Champion",        desc: "Survive 200 turns in a single run.",       check: (p, rt, ps) => (ps.bestTurn || 0) >= 200 },
   { key: "companion_1",   cat: "Milestones", icon: "👁", name: "Not Alone",       desc: "Recruit your first companion.",            check: (p, rt) => rt.groupEverJoined === true },
   { key: "full_stats",    cat: "Milestones", icon: "✨", name: "Peak Condition",  desc: "End a turn at 100 fitness, energy, and hydration.", check: (p) => (p.fitness || 0) >= 100 && (p.energy || 0) >= 100 && (p.hydration || 0) >= 100 },
   { key: "alerted",       cat: "Milestones", icon: "👂", name: "Sentinel",        desc: "Use the Alert action 3 times in a run.",   check: (p, rt) => (rt.alertedCount || 0) >= 3 }
@@ -4719,12 +4729,10 @@ function updateRunTracking() {
   if (!player.poison && rt.worstPoisonRank >= 1) {
     rt.poisonSurvived = true;
   }
-  if (timeState.phase === "night") {
+  if (timeState.phase === "dawn" && rt.lastTrackedPhase === "night") {
     rt.nightSurvivedCount = (rt.nightSurvivedCount || 0) + 1;
   }
-  if (timeState.phase === "dawn") {
-    rt.dawnSurvivedCount = (rt.dawnSurvivedCount || 0) + 1;
-  }
+  rt.lastTrackedPhase = timeState.phase;
   const newTiles = exploredTiles ? exploredTiles.size : 0;
   rt.tilesExplored = newTiles;
 }
@@ -4739,10 +4747,10 @@ function profileOnRunEnd(outcome) {
   profile.runHistory.unshift(summary);
   if (profile.runHistory.length > 20) profile.runHistory.length = 20;
   profileUpdateStats(profile, summary);
-  checkAchievements();
   profile.activeRun = null;
   profile.lastPlayedAt = new Date().toISOString();
   profileSaveStore(store);
+  checkAchievements();
   runGodModeUsed = false;
   runQaBackUses = 0;
   runMaxGroupSize = 0;
@@ -4963,6 +4971,35 @@ function profileUpdatePanelUI() {
   }
 }
 
+// ===== PROFILE DELETE =====
+
+function deleteProfile(profileId) {
+  if (!profileId) return;
+  const store = profileLoadStore();
+  delete store.profiles[profileId];
+  profileSaveStore(store);
+  try {
+    const raw = localStorage.getItem(ACHIEVEMENTS_STORE_KEY);
+    const all = raw ? JSON.parse(raw) : {};
+    delete all[profileId];
+    localStorage.setItem(ACHIEVEMENTS_STORE_KEY, JSON.stringify(all));
+  } catch (_) {}
+  try {
+    const raw = localStorage.getItem(FOSSIL_RECORD_KEY);
+    let records = raw ? JSON.parse(raw) : [];
+    if (Array.isArray(records)) {
+      records = records.filter(r => r.profileId && r.profileId !== profileId);
+      localStorage.setItem(FOSSIL_RECORD_KEY, JSON.stringify(records));
+    }
+  } catch (_) {}
+  try {
+    if (localStorage.getItem(ACTIVE_PROFILE_KEY_STORE) === profileId) {
+      localStorage.removeItem(ACTIVE_PROFILE_KEY_STORE);
+    }
+  } catch (_) {}
+  if (currentProfileId === profileId) currentProfileId = null;
+}
+
 // ===== PROFILE STARTUP MODAL =====
 
 function profileShowStartupModal(onChoiceMade) {
@@ -5005,8 +5042,41 @@ function profileShowStartupModal(onChoiceMade) {
         } else {
           runText = '<div class="profileEntryRun">No runs yet.</div>';
         }
-        div.innerHTML = '<div class="profileEntryName">' + p.name + compatWarn + '</div><div class="profileEntryMeta">Build: ' + (p.buildId || "").slice(0, 35) + ' | Runs: ' + ((p.stats || {}).totalRuns || 0) + '</div>' + runText;
-        div.addEventListener("click", () => { selectedProfileId = p.profileId; renderModalContent(); });
+        div.innerHTML = '<div class="profileEntryName">' + escapeHtml(p.name) + compatWarn + '<button class="profileEntryDeleteBtn" type="button" data-delid="' + escapeHtml(p.profileId) + '" title="Delete profile">Delete</button></div><div class="profileEntryMeta">Build: ' + escapeHtml((p.buildId || "").slice(0, 35)) + ' | Runs: ' + ((p.stats || {}).totalRuns || 0) + '</div>' + runText;
+        div.addEventListener("click", (ev) => {
+          if (ev.target.closest("[data-delid]")) return;
+          selectedProfileId = p.profileId;
+          renderModalContent();
+        });
+        const delBtn = div.querySelector("[data-delid]");
+        if (delBtn) {
+          delBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            const targetId = delBtn.dataset.delid;
+            const targetName = escapeHtml(p.name);
+            body.querySelectorAll(".profileDeleteConfirm").forEach(el => el.remove());
+            const confirm = document.createElement("div");
+            confirm.className = "profileDeleteConfirm";
+            confirm.innerHTML = '<p><strong>Delete "' + targetName + '"?</strong><br>This permanently erases all data for this profile: run history, Field Journal, Fossil Record, and Achievements. <strong>This cannot be undone.</strong></p><div class="deleteConfirmBtns"></div>';
+            const btns = confirm.querySelector(".deleteConfirmBtns");
+            const cancelBtn = document.createElement("button");
+            cancelBtn.textContent = "Cancel";
+            cancelBtn.addEventListener("click", () => confirm.remove());
+            const confirmBtn = document.createElement("button");
+            confirmBtn.textContent = "Delete permanently";
+            confirmBtn.className = "danger";
+            confirmBtn.addEventListener("click", () => {
+              const idx = profileList.findIndex(x => x.profileId === targetId);
+              if (idx !== -1) profileList.splice(idx, 1);
+              if (selectedProfileId === targetId) selectedProfileId = profileList.length ? profileList[0].profileId : null;
+              deleteProfile(targetId);
+              renderModalContent();
+            });
+            btns.appendChild(cancelBtn);
+            btns.appendChild(confirmBtn);
+            div.after(confirm);
+          });
+        }
         body.appendChild(div);
       });
     }
@@ -6424,7 +6494,9 @@ function updateWildfireState() {
       }
 
       addLog("The fire has burned out. Ash covers the ground.", "minor");
-
+      if (player.runTracking && player.runTracking.wildfireThreatened && !player.dead) {
+        player.runTracking.wildfireEscaped = true;
+      }
       environment.wildfire = {active: false, x: 0, y: 0, radius: 0, turnsRemaining: 0, intensity: 0};
     }
 
@@ -10724,6 +10796,7 @@ function applyWildfireProximityEffects() {
   const alreadyLogged = environment.wildfire._lastLogTurn === player.turn;
 
   if (dist <= r) {
+    if (player.runTracking) player.runTracking.wildfireThreatened = true;
     player.fitness = Math.max(0, player.fitness - (2 + environment.wildfire.intensity));
     if (!alreadyLogged) {
       addLog(`Flames move through the undergrowth ${dirStr}.`, "threat");
@@ -12613,6 +12686,7 @@ function showFieldJournal(tab) {
     let records = [];
     try { records = JSON.parse(localStorage.getItem(FOSSIL_RECORD_KEY) || "[]"); } catch (_) {}
     if (!Array.isArray(records)) records = [];
+    records = records.filter(r => !r.profileId || r.profileId === currentProfileId);
     body.innerHTML = `<div style="padding:10px 14px;">${renderFossilRecord(records)}</div>`;
     modal.classList.add("open");
     modal.setAttribute("aria-hidden", "false");
@@ -13897,6 +13971,7 @@ function saveFossilRecord(deathMessage) {
   if (!Array.isArray(records)) records = [];
   const companions = (socialGroup && Array.isArray(socialGroup.members)) ? socialGroup.members.length : 0;
   records.unshift({
+    profileId: currentProfileId || null,
     turns: player.turn || 0,
     cause: (deathMessage || "Unknown").replace(/^Turn \d+:\s*/i, ""),
     companions,
@@ -13904,7 +13979,7 @@ function saveFossilRecord(deathMessage) {
   });
   if (records.length > FOSSIL_RECORD_CAP) records.length = FOSSIL_RECORD_CAP;
   try { localStorage.setItem(FOSSIL_RECORD_KEY, JSON.stringify(records)); } catch (_) {}
-  return records;
+  return records.filter(r => !r.profileId || r.profileId === currentProfileId);
 }
 
 function renderFossilRecord(records) {
