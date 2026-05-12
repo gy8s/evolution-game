@@ -405,6 +405,9 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
 .runRecapAchievementsLabel { color: #c08080; margin-bottom: 4px; }
 .runRecapAchievementEntry { display: flex; align-items: center; gap: 6px; padding: 3px 0; color: #c8f0a0; }
 .runRecapAchievementEntry .rai { font-size: 14px; }
+#growthBar { background: #4aa362; }
+#growthBar.growth-paused { background: #2a4a30; }
+.deathTip { font-size: 12px; color: #a0c0a0; background: #0d1e0d; border-top: 1px solid #2a4a2a; padding: 7px 14px; line-height: 1.45; }
 .nhModal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 10070; padding: 18px; background: rgba(0, 20, 10, 0.82); }
 .nhModal.open { display: flex; }
 .nhModalCard { width: min(94vw, 560px); background: #071209; border: 2px solid #4a9a62; box-shadow: 0 0 0 1px #1a3c22 inset, 0 18px 70px rgba(0,0,0,.75); border-radius: 10px; color: #e8f0d8; overflow: hidden; max-height: 88vh; display: flex; flex-direction: column; }
@@ -637,6 +640,11 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
               <strong>Hydration</strong><span id="hydration"></span>
               <div class="barBox"><div id="hydrationBar" class="bar"></div></div>
             </div>
+
+            <div class="stat">
+              <strong>Growth</strong><span id="growthVal"></span>
+              <div class="barBox"><div id="growthBar" class="bar"></div></div>
+            </div>
           </div>
 
           <div class="vitalsCondition">
@@ -852,6 +860,7 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
         <span id="deathModalTitle">You died</span>
       </div>
       <div id="deathModalMessage" class="deathModalMessage">The run is over.</div>
+      <div id="deathTipPanel"></div>
       <div class="deathModalActions">
         <button id="deathModalStay" type="button">Stay on this run</button>
         <button id="deathModalRestart" type="button">Restart</button>
@@ -14022,6 +14031,20 @@ function maybePromptRestartAfterDeath(message) {
   window.setTimeout(() => showDeathModal(message || "The run is over."), 80);
 }
 
+// @fn deathTipFor
+function deathTipFor(message) {
+  const m = (message || "").toLowerCase();
+  if (m.includes("dehydrat")) return "Keep hydration above 45% for growth and above 35% to avoid fitness loss.";
+  if (m.includes("starvat") || m.includes("loss of fitness")) return "Eat regularly — energy below 50% halts growth and at 0% it damages fitness each turn.";
+  if (m.includes("drown")) return "Cross water tiles as fast as possible — water predators cannot be outrun once engaged.";
+  if (m.includes("parasite") || m.includes("exhaust")) return "Avoid carcasses and undergrowth to reduce parasite exposure.";
+  if (m.includes("wildfire") || m.includes("fire")) return "Move upwind and climb higher forest layers when wildfire threatens.";
+  if (m.includes("own kind") || m.includes("cannibal") || m.includes("mobs you")) return "Join a group before approaching your own species — lone individuals attract aggression.";
+  if (m.includes("poison") || m.includes("toxin") || m.includes("overwhelm")) return "After eating something unfamiliar, wait a few turns before eating more — poison builds up.";
+  if (m.includes("kill") || m.includes("attack") || m.includes("takes you") || m.includes("catch") || m.includes("wound")) return "Climbing to a higher forest layer puts distance between you and most ground predators.";
+  return "Watch your fitness — if it drops below 30%, prioritise food and rest over exploration.";
+}
+
 // @fn showDeathModal
 function saveFossilRecord(deathMessage) {
   let records = [];
@@ -14102,6 +14125,8 @@ function showDeathModal(message) {
     return;
   }
   messageBox.textContent = message || "The run is over.";
+  const tipPanel = document.getElementById("deathTipPanel");
+  if (tipPanel) tipPanel.innerHTML = `<div class="deathTip">💡 ${escapeHtml(deathTipFor(message))}</div>`;
   const fossilRecords = saveFossilRecord(message);
   const fossilSummary = document.getElementById("fossilRecordSummary");
   if (fossilSummary) {
@@ -16986,6 +17011,15 @@ function render() {
   document.getElementById("fitnessBar").style.width = `${player.fitness}%`;
   document.getElementById("energyBar").style.width = `${player.energy}%`;
   document.getElementById("hydrationBar").style.width = `${player.hydration}%`;
+  const growthBarEl = document.getElementById("growthBar");
+  const growthValEl = document.getElementById("growthVal");
+  if (growthBarEl && growthValEl) {
+    const gp = player.growthProgress || 0;
+    const growing = player.energy >= 75 && player.hydration >= 45;
+    growthValEl.textContent = `${player.size.toFixed(1)} (${gp}/28)`;
+    growthBarEl.style.width = `${(gp / 28) * 100}%`;
+    if (growing) { growthBarEl.classList.remove("growth-paused"); } else { growthBarEl.classList.add("growth-paused"); }
+  }
 
   renderButtons();
   renderLayers();
