@@ -62,20 +62,68 @@ You MUST:
    - Every code PR must include this  
    - If unsure → ASK before proceeding  
 
-5. Ensure:
+5. Complete the mandatory documentation gate  
+   - Check whether wider documentation must be updated  
+   - Update all affected docs in the same PR  
+   - If no wider docs are required, explain the specific reason in the PR body  
+   - If unsure → ASK before proceeding  
+
+6. Ensure:
    - NO claude.ai links  
    - NO session URLs  
    - NO internal tool references  
 
-6. Open PR  
+7. Open PR  
 
-7. STOP  
+8. STOP  
 
 No follow-up commits. No silent fixes.
 
 ---
 
-## 4. STRICT SCOPE CONTROL
+## 4. MANDATORY DOCUMENTATION GATE
+
+Documentation discipline is mandatory. Documentation drift is a serious process failure.
+
+Every implementation PR must explicitly check whether the change affects repository documentation.
+
+`CHANGELOG.txt` remains mandatory for every code, gameplay, UI, bot/debug, app-loading, documentation, workflow, or repo-structure change.
+
+In addition, you MUST explicitly assess whether any of these files need updating:
+
+- `README.md`
+- `docs/current-game-structure.md`
+- `docs/architecture-notes.md`
+- `docs/project-plan.md`
+- `docs/bug-guardrails.md`
+- `docs/release-checklist.md`
+- `.github/pull_request_template.md`
+- `CLAUDE.md`
+
+You MUST update any affected document in the same PR.
+
+If no wider documentation update is required, the PR body must include this exact form with a specific reason:
+
+`Documentation checked; no wider docs required because: [specific reason]`
+
+If documentation was updated, the PR body must include this exact form:
+
+`Documentation updated: [list files]`
+
+You are not allowed to say a PR is complete, safe, ready, or ready to merge if this documentation gate has not been addressed.
+
+Examples:
+
+- New major feature or user-facing system → check/update `README.md`, `docs/current-game-structure.md`, `docs/project-plan.md`, and `CHANGELOG.txt`.
+- Runtime flow, save/profile flow, rendering, encounter lifecycle, bot/QA lifecycle, or file/module structure changes → check/update `docs/current-game-structure.md` and `docs/architecture-notes.md`.
+- Bug fix, regression repair, repeated failure, misleading QA output, or process failure → check/update `docs/bug-guardrails.md`.
+- Release, build, CI, smoke-check, PR-template, or assistant workflow changes → check/update `docs/release-checklist.md`, `.github/pull_request_template.md`, and/or `CLAUDE.md`.
+
+Silence on documentation impact is failure.
+
+---
+
+## 5. STRICT SCOPE CONTROL
 
 You are NOT allowed to:
 - add new systems
@@ -89,7 +137,7 @@ If it is not explicitly requested:
 
 ---
 
-## 5. VERSION CONTROL RULES
+## 6. VERSION CONTROL RULES
 
 - One patch = one new branch  
 - NEVER reuse branches  
@@ -101,7 +149,7 @@ All PRs must be intentional and authorised.
 
 ---
 
-## 6. REPORTING RULES
+## 7. REPORTING RULES
 
 - Analysis is done in CHAT  
 - NOT in the repo  
@@ -120,7 +168,7 @@ authorised log commits). No exceptions without direct instruction from George.
 
 ---
 
-## 7. SECURITY RULE (CRITICAL)
+## 8. SECURITY RULE (CRITICAL)
 
 You must NEVER include:
 
@@ -134,12 +182,15 @@ Violation = critical failure.
 
 ---
 
-## 8. FAILURE CONDITIONS
+## 9. FAILURE CONDITIONS
 
 Any of the following:
 
 - repo changes without permission  
 - missing CHANGELOG  
+- missing required documentation update  
+- failing to explicitly state why wider docs were not updated  
+- documentation gate omitted or answered vaguely  
 - adding unrequested files  
 - reusing branches  
 - including forbidden links  
@@ -150,7 +201,7 @@ Any of the following:
 
 ---
 
-## 9. UNCERTAINTY RULE
+## 10. UNCERTAINTY RULE
 
 If ANYTHING is unclear:
 
@@ -161,7 +212,7 @@ Guessing is not allowed.
 
 ---
 
-## 10. CURRENT WORKFLOW
+## 11. CURRENT WORKFLOW
 
 1. GPT + Claude analyse  
 2. Plan is agreed  
@@ -174,7 +225,7 @@ You do not deviate from this flow.
 
 ---
 
-## 11. BOT LOG LOCATION AND REVIEW PROCESS
+## 12. BOT LOG LOCATION AND REVIEW PROCESS
 
 Committed bot logs live in:
 
