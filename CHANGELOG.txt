@@ -1,10 +1,3 @@
-[2026-05-13 hidden-subtype-variance | Claude]
-Hidden subtype pools for hollyBerries and aroidShoots; investigation now mechanically meaningful for both.
-
-- hollyBerries pool: edible (20%), mildly toxic rank-1 ilicin (55%), toxic rank-2 ilicin (25%). Reflects real Ilex species variation from palatable (yerba maté) to moderately toxic.
-- aroidShoots pool: edible (30%), mildly irritant rank-1 oxalate (50%), severely irritant rank-2 oxalate (20%). Reflects Araceae edibility range from staple food (taro) to severe mucosal irritant.
-- Both encounters now use the existing hiddenSubtype resolve path: generic name shown until investigation level 4, true variant revealed on confirm.
-
 [2026-05-12 eocene-plant-encounters | Claude]
 Eight new Eocene-grounded plant encounters covering toxic and edible flora.
 
