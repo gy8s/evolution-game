@@ -1,69 +1,92 @@
 #!/usr/bin/env node
 // build_play_html.mjs
 //
-// Inlines the CSS source (src/styles/game.css) into the generated CSS region
-// of game/play.html.
+// Inlines source files into the generated regions of game/play.html so the
+// file stays directly playable without external dependencies at runtime.
 //
-// Why inline (not an external stylesheet): game/play.html must remain a
-// directly playable artifact. Opening the file straight from disk — or via the
-// GitHub Pages link — must work with no build step and no runtime dependency on
-// a separate CSS file. So the CSS *source* lives in src/styles/game.css, and
-// this script copies it back into the inline <style> block between two markers.
+// Currently inlines:
+//   1. src/styles/game.css        → the <style> block (CSS)
+//   2. src/data/encounter-data.js → two JS regions:
+//        [1/2] encounters + encounterTables  (~line 1040)
+//        [2/2] hiddenSubtypePools            (~line 6037)
 //
-// This script ONLY touches the marked CSS region. It never alters JavaScript,
-// HTML structure, or anything outside the markers.
+// Why inline (not external files): game/play.html must open straight from
+// disk — or via the GitHub Pages link — with no build step and no runtime
+// dependency. Source files live under src/ for editability; this script
+// copies them back into the marked generated regions.
+//
+// This script touches ONLY the marked regions. It never alters JavaScript
+// outside the encounter-data regions, HTML structure, or CSS outside the
+// CSS region.
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
-const here = dirname(fileURLToPath(import.meta.url));
+const here     = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(here, '..');
 
-const CSS_SOURCE = resolve(repoRoot, 'src/styles/game.css');
-const PLAY_HTML = resolve(repoRoot, 'game/play.html');
+const CSS_SOURCE  = resolve(repoRoot, 'src/styles/game.css');
+const DATA_SOURCE = resolve(repoRoot, 'src/data/encounter-data.js');
+const PLAY_HTML   = resolve(repoRoot, 'game/play.html');
 
-const BEGIN = '/* BEGIN GENERATED CSS: src/styles/game.css */';
-const END = '/* END GENERATED CSS: src/styles/game.css */';
+// CSS markers (CSS comment style, inside <style>)
+const CSS_BEGIN = '/* BEGIN GENERATED CSS: src/styles/game.css */';
+const CSS_END   = '/* END GENERATED CSS: src/styles/game.css */';
+
+// Encounter-data markers (JS comment style, inside <script>)
+const JS_BEGIN1 = '// BEGIN GENERATED JS: src/data/encounter-data.js [1/2]';
+const JS_END1   = '// END GENERATED JS: src/data/encounter-data.js [1/2]';
+const JS_BEGIN2 = '// BEGIN GENERATED JS: src/data/encounter-data.js [2/2]';
+const JS_END2   = '// END GENERATED JS: src/data/encounter-data.js [2/2]';
+
+// The split comment that divides the source file into part1 and part2.
+// It is NOT inlined into game/play.html.
+const JS_SPLIT  = '// << SPLIT: hiddenSubtypePools >>';
 
 function fail(msg) {
   console.error(`build_play_html: ERROR: ${msg}`);
   process.exit(1);
 }
 
-let css;
-try {
-  css = readFileSync(CSS_SOURCE, 'utf8');
-} catch (e) {
-  fail(`cannot read CSS source at src/styles/game.css (${e.message})`);
+// Inline a body string between a BEGIN/END marker pair inside html.
+// Returns the rebuilt html string (unchanged if already matches).
+function inlineRegion(html, beginMarker, endMarker, body, label) {
+  const bi = html.indexOf(beginMarker);
+  const ei = html.indexOf(endMarker);
+  if (bi === -1) fail(`missing BEGIN marker for ${label}: ${beginMarker}`);
+  if (ei === -1) fail(`missing END marker for ${label}: ${endMarker}`);
+  if (ei < bi)   fail(`END marker appears before BEGIN marker for ${label}`);
+  const before = html.slice(0, bi + beginMarker.length);
+  const after  = html.slice(ei);
+  // Stable, idempotent: single newline after BEGIN, trimmed body, single newline before END.
+  return `${before}\n${body.replace(/\s+$/, '')}\n${after}`;
 }
 
-let html;
-try {
-  html = readFileSync(PLAY_HTML, 'utf8');
-} catch (e) {
-  fail(`cannot read game/play.html (${e.message})`);
-}
+// --- Read sources ---
+if (!existsSync(CSS_SOURCE))  fail('cannot find src/styles/game.css');
+if (!existsSync(DATA_SOURCE)) fail('cannot find src/data/encounter-data.js');
+if (!existsSync(PLAY_HTML))   fail('cannot find game/play.html');
 
-const beginIdx = html.indexOf(BEGIN);
-const endIdx = html.indexOf(END);
+const css    = readFileSync(CSS_SOURCE,  'utf8');
+const jsData = readFileSync(DATA_SOURCE, 'utf8');
+let   html   = readFileSync(PLAY_HTML,   'utf8');
 
-if (beginIdx === -1) fail(`missing BEGIN marker in game/play.html: ${BEGIN}`);
-if (endIdx === -1) fail(`missing END marker in game/play.html: ${END}`);
-if (endIdx < beginIdx) fail('END marker appears before BEGIN marker in game/play.html');
+// --- Split encounter-data into two parts at the SPLIT marker ---
+const splitIdx = jsData.indexOf(JS_SPLIT);
+if (splitIdx === -1) fail(`missing split marker in src/data/encounter-data.js: ${JS_SPLIT}`);
+const jsPart1 = jsData.slice(0, splitIdx).replace(/\s+$/, '');
+const jsPart2 = jsData.slice(splitIdx + JS_SPLIT.length).replace(/^\n/, '').replace(/\s+$/, '');
 
-const before = html.slice(0, beginIdx + BEGIN.length);
-const after = html.slice(endIdx);
+// --- Apply all three regions ---
+const original = html;
+html = inlineRegion(html, CSS_BEGIN, CSS_END, css.replace(/\s+$/, ''), 'CSS');
+html = inlineRegion(html, JS_BEGIN1, JS_END1, jsPart1, 'encounter-data [1/2]');
+html = inlineRegion(html, JS_BEGIN2, JS_END2, jsPart2, 'encounter-data [2/2]');
 
-// One newline after the BEGIN marker, the CSS body (trailing whitespace
-// trimmed), then one newline before the END marker. This keeps the generated
-// region stable and idempotent across repeated builds.
-const cssBody = css.replace(/\s+$/, '');
-const rebuilt = `${before}\n${cssBody}\n${after}`;
-
-if (rebuilt === html) {
-  console.log('build_play_html: no change — game/play.html already matches src/styles/game.css.');
+if (html === original) {
+  console.log('build_play_html: no change — game/play.html already matches all source files.');
 } else {
-  writeFileSync(PLAY_HTML, rebuilt, 'utf8');
-  console.log('build_play_html: regenerated inline CSS in game/play.html from src/styles/game.css.');
+  writeFileSync(PLAY_HTML, html, 'utf8');
+  console.log('build_play_html: regenerated game/play.html from source files.');
 }
