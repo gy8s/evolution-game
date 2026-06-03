@@ -1,3 +1,15 @@
+[2026-06-03 extract-css-build-scaffold | Claude]
+First controlled extraction — CSS source extracted and play.html build scaffold added.
+
+- Created src/styles/game.css: the full CSS from the game/play.html <style> block, moved mechanically. No selectors renamed, no rules changed, no tidying — byte-identical to the previous inline CSS (61,027 chars verified).
+- Created scripts/build_play_html.mjs: reads src/styles/game.css and inlines it into game/play.html between marker comments. Replaces only the marked CSS region; never touches JavaScript or HTML structure. Fails clearly if the CSS source or either marker is missing. Idempotent.
+- Edited game/play.html: the <style> block now wraps the CSS in /* BEGIN GENERATED CSS: src/styles/game.css */ and /* END GENERATED CSS: src/styles/game.css */ markers. The only change to the file is these two comment lines; everything outside the <style> block is byte-identical. CSS remains inline so the file stays directly playable with no build step or runtime dependency.
+- game/evolution_game_v66_57.html NOT changed: it is a historical archive already divergent from play.html (13,643 vs 18,434 lines) and this is a build-tooling change, not a release.
+- Docs: README.md (repo layout + build notes), docs/current-game-structure.md (CSS source location + build scaffold), docs/architecture-notes.md (single-file notes + generated-CSS fragile area), docs/documentation-map.md (extraction row), docs/release-checklist.md (build step).
+- Verification: node scripts/build_play_html.mjs (idempotent, no change) and node scripts/check_html_js_syntax.mjs both pass. Browser render not manually verified in this environment.
+- No gameplay logic, JavaScript behaviour, encounter data, save/profile logic, or rendering logic changed.
+- Documentation changed; build-tooling/repo-structure change. No gameplay, UI, bot, or app-loading behaviour changed.
+
 [2026-06-03 phase1-documentation-repair | Claude]
 Documentation repair and enforcement — Phase 1 of controlled rebuild.
 

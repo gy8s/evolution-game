@@ -89,6 +89,9 @@ evolution-game/
 ├── game/
 │   ├── play.html                     Stable playable build used by public link/PWA
 │   └── evolution_game_v66_57.html    Versioned playable build
+├── src/
+│   └── styles/
+│       └── game.css                  CSS source (inlined into play.html by the build script)
 ├── docs/
 │   ├── current-game-structure.md     How the game works now: systems, flows, line ranges
 │   ├── documentation-map.md          What each doc covers and when to update it
@@ -103,6 +106,7 @@ evolution-game/
 │   ├── bot-runs/                     Raw bot run outputs when intentionally saved
 │   └── consolidated/                 AI-reviewed summaries and bug reports
 ├── scripts/
+│   ├── build_play_html.mjs           Inlines src/styles/game.css into game/play.html
 │   ├── check_html_js_syntax.mjs      JavaScript syntax checker for game HTML files
 │   └── ingest_bot_report.sh          Helper for manually ingesting downloaded bot logs
 └── .github/
@@ -125,6 +129,18 @@ Agree a proposed modular structure before any code is moved. No extraction begin
 Extract code in small PRs in a defined order, keeping the playable build working at every step.
 
 The rebuild is not a rewrite, not a framework migration, and not a gameplay redesign. See `docs/project-plan.md` for full detail.
+
+### Build scaffold (Phase 3, first step)
+
+The first extraction has begun. CSS source now lives in `src/styles/game.css`. `game/play.html` keeps its CSS **inline** (between marker comments) so it stays directly playable with no build step or runtime dependency.
+
+To regenerate the inline CSS in `game/play.html` after editing `src/styles/game.css`:
+
+```sh
+node scripts/build_play_html.mjs
+```
+
+The script replaces only the marked CSS region in `game/play.html`; it never touches JavaScript or HTML structure. Edit CSS in `src/styles/game.css`, then run the build script — do not hand-edit the generated region in `game/play.html`.
 
 ---
 

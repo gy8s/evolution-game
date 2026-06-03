@@ -6,9 +6,19 @@ This document is a map of how the game HTML file is organised. Read this before 
 
 ## The single-file structure
 
-The entire game lives in one large HTML file (`game/play.html`, ~18,400 lines). There is no build step, no bundler, and no separate JavaScript files. Everything — CSS, HTML structure, and all JavaScript — is in one file.
+The game runs from one large HTML file (`game/play.html`, ~18,400 lines). There is no bundler and no separate JavaScript files: HTML structure and all JavaScript are inline.
 
-`game/evolution_game_v66_57.html` is the versioned archive of the same build. `game/play.html` is the stable public-facing copy that gets replaced on each release.
+As of the first extraction step, **CSS is the exception**. Its source lives in `src/styles/game.css` and is inlined back into `game/play.html` by `scripts/build_play_html.mjs`, which replaces only the region between these marker comments inside the `<style>` block:
+
+```
+/* BEGIN GENERATED CSS: src/styles/game.css */
+...generated css...
+/* END GENERATED CSS: src/styles/game.css */
+```
+
+The playable file still ships its CSS inline, so it works with no build step at runtime. **Edit CSS in `src/styles/game.css` and run `node scripts/build_play_html.mjs` — do not hand-edit the generated region.** The build script never touches JavaScript or HTML structure.
+
+`game/evolution_game_v66_57.html` is the versioned archive of an earlier build. It is a historical snapshot and is not kept byte-in-sync with `game/play.html` between releases; `game/play.html` is the stable public-facing copy that gets replaced on each release.
 
 **Critical consequence:** A single JavaScript syntax error anywhere in the script block prevents the entire game from loading. The browser cannot run any of the script if it fails to parse. This is why `scripts/check_html_js_syntax.mjs` exists and must pass before any game file PR is merged.
 
@@ -85,6 +95,7 @@ All rendering is done by a single `render()` call that redraws the map, UI panel
 - **`game/play.html` and `game/evolution_game_v66_57.html` must be kept in sync** on each release. If you edit one, copy the change to the other, or replace `play.html` entirely.
 - **`index.html` and `manifest.json` must both reference `game/play.html`.** The syntax check script verifies `index.html`. Check `manifest.json` manually on releases.
 - **`player.knowledge` / `player.classKnowledge`** accumulate across runs and feed the Field Journal. Incorrect resets at run boundaries lose journal data permanently.
+- **The CSS region in `game/play.html` is generated.** Editing it by hand will be overwritten on the next `node scripts/build_play_html.mjs`. Edit `src/styles/game.css` instead. Do not remove the BEGIN/END marker comments — the build script needs them to find the region.
 
 ---
 

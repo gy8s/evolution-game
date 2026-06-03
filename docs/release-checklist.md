@@ -12,6 +12,11 @@ Run through this every time a new version becomes the stable build.
 - [ ] `index.html` still points to `game/play.html` (not a versioned filename)
 - [ ] `manifest.json` `start_url` still set to `game/play.html`
 
+## Build step
+
+- [ ] If `src/styles/game.css` was changed, `node scripts/build_play_html.mjs` was run to inline the CSS into `game/play.html`
+- [ ] The generated CSS region in `game/play.html` was not hand-edited (CSS changes go in `src/styles/game.css`)
+
 ## Syntax and render check
 
 - [ ] `node scripts/check_html_js_syntax.mjs` passed

@@ -10,7 +10,9 @@ Last updated: 2026-06-03 (Phase 1 documentation repair).
 
 Evolution Game is a browser-based single-player survival simulation. The player controls a small early primate navigating a procedurally generated prehistoric forest. The goal is to survive, explore, eat, drink, avoid predators, and learn about the world.
 
-The entire game is a single HTML file (`game/play.html`, ~18,400 lines). There is no build step, no bundler, and no server. Open the file in a browser and it works.
+The game runs from a single HTML file (`game/play.html`, ~18,400 lines). There is no bundler and no server. Open the file in a browser and it works.
+
+As of the first extraction step, the **CSS source** lives in `src/styles/game.css` and is inlined back into `game/play.html` by `scripts/build_play_html.mjs`. The playable file still contains its CSS inline (between marker comments) so it works with no build step at runtime. All JavaScript, HTML structure, and data remain inside `game/play.html` for now.
 
 ---
 
@@ -255,7 +257,7 @@ flowchart TD
 
 | Lines | Area |
 |-------|------|
-| 1–990 | HTML head, CSS styles, HTML body structure (UI panels, buttons, modals) |
+| 1–990 | HTML head, inline CSS (generated region — source is `src/styles/game.css`), HTML body structure (UI panels, buttons, modals) |
 | 990–1020 | Game version constant |
 | 1021–3413 | Static data: encounter definitions (~100+ encounters with spawn, poison, natural-history blocks) |
 | 3414–3630 | Spawn tables: layer-based encounter probability lists |
@@ -291,7 +293,7 @@ flowchart TD
 
 The rebuild plan (see `docs/project-plan.md`) targets extraction in this rough order:
 
-1. CSS and HTML templates (currently embedded in the `<style>` and `<body>` sections)
+1. CSS and HTML templates (currently embedded in the `<style>` and `<body>` sections) — **CSS source extracted to `src/styles/game.css`; HTML templates still inline**
 2. Static encounter data and spawn tables (lines 1021–3630)
 3. Pure helper functions with no side effects
 4. State and save schema (player object, world state, profile schema)
@@ -299,4 +301,12 @@ The rebuild plan (see `docs/project-plan.md`) targets extraction in this rough o
 6. Rendering layer
 7. Bot/QA tools
 
-No extraction has begun yet. This document will be updated as each phase completes.
+### Build scaffold
+
+The first extraction introduced a build scaffold:
+
+- `src/styles/game.css` — the CSS source of truth.
+- `scripts/build_play_html.mjs` — inlines `src/styles/game.css` into the marked CSS region of `game/play.html`.
+- Marker comments in `game/play.html`: `/* BEGIN GENERATED CSS: src/styles/game.css */` and `/* END GENERATED CSS: src/styles/game.css */`.
+
+Edit CSS in `src/styles/game.css`, then run `node scripts/build_play_html.mjs`. Do not hand-edit the generated region in `game/play.html`. This document will be updated as each further extraction completes.
