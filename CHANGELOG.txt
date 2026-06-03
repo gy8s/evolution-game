@@ -1,3 +1,17 @@
+[2026-06-03 phase1-documentation-repair | Claude]
+Documentation repair and enforcement — Phase 1 of controlled rebuild.
+
+- Created docs/current-game-structure.md: owner-facing description of every current game system (turn flow, encounter lifecycle, save/profile flow, ecology, bot/QA tooling, render lifecycle, Field Journal, Fossil Record, Achievements, group system) with six Mermaid diagrams and accurate line ranges for game/play.html (~18,400 lines).
+- Created docs/documentation-map.md: single-page guide to what each documentation file covers, when to update it, and a quick-reference update table.
+- Repaired docs/architecture-notes.md: updated line ranges from stale ~13,400 to current ~18,400; added profiles/saves, Field Journal, Fossil Record, Achievements, and natural-history system to key areas; added knowledge-store fragile area and profile save/resume to do-not-touch list.
+- Repaired docs/project-plan.md: updated current phase from early ecology expansion to Phase 1 of controlled rebuild; added three-phase rebuild plan; parked ecology expansion work clearly for later resumption.
+- Repaired docs/bug-guardrails.md: added BG-004 (documentation drift — docs not updated alongside code changes, causing architectural misalignment and reviewer confusion).
+- Repaired docs/release-checklist.md: replaced single documentation section with a full documentation gate checklist covering all affected doc files and the required gate statement.
+- Repaired .github/pull_request_template.md: added mandatory documentation gate section with per-file tick list and required gate statement; reviewers must confirm statement is present before approving merge.
+- Repaired README.md: updated repository layout table to include all current docs, scripts, and CLAUDE.md; added controlled rebuild plan section.
+- No code changes. No changes to game/play.html.
+- Documentation changed; no gameplay, UI, bot, or app-loading changes.
+
 [2026-05-12 eocene-plant-encounters | Claude]
 Eight new Eocene-grounded plant encounters covering toxic and edible flora.
 

@@ -79,6 +79,7 @@ These systems are still evolving. Many are deliberately lightweight at this stag
 evolution-game/
 ├── README.md                         Project overview and workflow
 ├── CHANGELOG.txt                     Reverse-chronological change record
+├── CLAUDE.md                         Operating rules for AI assistants
 ├── AI_REVIEW_DIALOGUE.txt            GPT/Claude review coordination notes
 ├── manifest.json                     PWA/home-screen metadata
 ├── index.html                        GitHub Pages entry point; redirects to game/play.html
@@ -89,17 +90,41 @@ evolution-game/
 │   ├── play.html                     Stable playable build used by public link/PWA
 │   └── evolution_game_v66_57.html    Versioned playable build
 ├── docs/
-│   ├── patch8-short-eco-cycles.txt   Detailed notes for Patch 8 ecology cycle work
+│   ├── current-game-structure.md     How the game works now: systems, flows, line ranges
+│   ├── documentation-map.md          What each doc covers and when to update it
+│   ├── architecture-notes.md         Internal file layout and do-not-touch warnings
 │   ├── bug-guardrails.md             Known repeated failure modes and prevention checks
-│   └── project-plan.md               Non-code design plan, priorities, and idea log
+│   ├── project-plan.md               Non-code design plan, priorities, and idea log
+│   ├── release-checklist.md          Step-by-step checklist for each release
+│   ├── design-decisions.md           Record of significant design choices
+│   ├── testing-protocol.md           QA and bot testing guidance
+│   └── patch8-short-eco-cycles.txt   Detailed notes for Patch 8 ecology cycle work
 ├── logs/
 │   ├── bot-runs/                     Raw bot run outputs when intentionally saved
 │   └── consolidated/                 AI-reviewed summaries and bug reports
 ├── scripts/
+│   ├── check_html_js_syntax.mjs      JavaScript syntax checker for game HTML files
 │   └── ingest_bot_report.sh          Helper for manually ingesting downloaded bot logs
 └── .github/
     └── pull_request_template.md      Required PR checklist
 ```
+
+---
+
+## Controlled rebuild plan
+
+The game has grown to ~18,400 lines in a single HTML file. It still works, but the structure is now too fragile to maintain safely. The plan is to restructure it in three phases while keeping the playable build stable throughout.
+
+**Phase 1 — Documentation repair and enforcement** *(current)*  
+Repair all documentation to accurately describe the current game. Create `docs/current-game-structure.md` and `docs/documentation-map.md`. Make documentation checks mandatory in every PR.
+
+**Phase 2 — Architecture plan** *(next)*  
+Agree a proposed modular structure before any code is moved. No extraction begins until George approves the plan.
+
+**Phase 3 — Safe extraction** *(after Phase 2 is approved)*  
+Extract code in small PRs in a defined order, keeping the playable build working at every step.
+
+The rebuild is not a rewrite, not a framework migration, and not a gameplay redesign. See `docs/project-plan.md` for full detail.
 
 ---
 

@@ -6,7 +6,7 @@ This document is a map of how the game HTML file is organised. Read this before 
 
 ## The single-file structure
 
-The entire game lives in one large HTML file (`game/play.html`, ~13,400 lines). There is no build step, no bundler, and no separate JavaScript files. Everything — CSS, HTML structure, and all JavaScript — is in one file.
+The entire game lives in one large HTML file (`game/play.html`, ~18,400 lines). There is no build step, no bundler, and no separate JavaScript files. Everything — CSS, HTML structure, and all JavaScript — is in one file.
 
 `game/evolution_game_v66_57.html` is the versioned archive of the same build. `game/play.html` is the stable public-facing copy that gets replaced on each release.
 
@@ -18,38 +18,51 @@ The entire game lives in one large HTML file (`game/play.html`, ~13,400 lines). 
 
 | Lines | Area |
 |-------|------|
-| 1–700 | HTML head, CSS styles, HTML body structure (UI panels, buttons, modals) |
-| 700–780 | Game constants (`GAME_VERSION`, world size, layer names, etc.) |
-| 780–2050 | Static data: encounter definitions, spawn tables |
-| 2050–2860 | World generation: habitat, altitude, terrain, water, clay deposits |
-| 2860–3340 | Game state helpers: water tiles, habitat change, debug logging infrastructure |
-| 3340–5000 | Player actions: movement, drinking, grooming, climbing, waiting |
-| 5000–8000 | Encounter system: active encounters, pursuit, resolution, combat |
-| 8000–10000 | Group/social system, ecology, world tick, spawning |
-| 10000–10900 | Bot infrastructure: `botState` object, QA issue tracking, run summaries |
-| 10900–11250 | Bot execution: `runRandomBot`, `stepRandomBot`, `stopRandomBot` |
-| 11250–12120 | Bot reporting and GitHub auto-save |
-| 12120–13200 | Rendering: map, UI panels, status bars, button state |
-| 13200–13400 | Event listener setup and game initialisation |
+| 1–990 | HTML head, CSS styles, HTML body structure (UI panels, buttons, modals) |
+| 990–1020 | Game version constant (`GAME_VERSION`) |
+| 1021–3413 | Static data: encounter definitions (~100+ encounters with spawn, poison, natural-history blocks) |
+| 3414–3630 | Spawn tables: layer-based encounter probability lists |
+| 3631–4252 | World generation: terrain, habitats, altitude, water, clay deposits |
+| 4253–4791 | Player state object and dynamic world state (waterState, socialGroup, nearbyEntities) |
+| 4792–5829 | Achievements (50 defs), profiles, save/load, Field Journal, Fossil Record |
+| 5830–6281 | Core utilities: logging, clamping, cloning, debug tracing, invariant checks |
+| 6282–7612 | Turn flow: `startTurn`, `endTurn`, metabolism, time of day, ecology tick |
+| 7613–8429 | Nearby entity simulation: spawning, persistence, world registry |
+| 8430–11327 | Social system, same-species encounters, group management, calls |
+| 11328–11826 | Threat and predator logic: pursuit, escalation, flee/fight resolution |
+| 11827–12523 | Player action handlers: move, eat, drink, climb, wait, groom, look, etc. |
+| 12524–14471 | Investigation system, carcass interactions, encounter resolution helpers, Field Journal render |
+| 14472–15839 | Bot/QA: `botState`, strategy, step execution, goal planner, loop detection |
+| 15840–16687 | Debug helpers: compact/full report generation, GitHub API push, debug downloads |
+| 16688–17140 | Rendering helpers: encounter card HTML builder, button state logic |
+| 17141–18434 | Main `render()` function, event listeners, game initialisation call, tag extension pass |
 
 ---
 
 ## Key areas explained
 
 ### Game state
-The player state is a single object (`player`) with fields for position, fitness, energy, hydration, death status, and current layer. World state is stored in flat arrays indexed by tile coordinates.
+The player state is a single object (`player`) with fields for position, fitness, energy, hydration, growth, poison, alcohol, parasites, knowledge, and run tracking. World state is stored in flat arrays indexed by tile coordinates. The two must be treated separately: world state is not saved between runs; player knowledge and profile data are.
 
 ### World/map generation
-The world is generated once at startup. It is a fixed grid (`WORLD_SIZE` × `WORLD_SIZE`). Habitats, altitude, terrain, and water are all generated procedurally. There is no save/load of world state.
+The world is generated once at startup. It is a fixed grid (`WORLD_SIZE` × `WORLD_SIZE`). Habitats, altitude, terrain, and water are all generated procedurally. There is no save/load of world state between runs.
 
 ### Encounters
-Encounters are defined in a static data table. An active encounter is tracked in a separate object. Encounters can be: passive (observation), social, predator, prey, or environmental. Each has its own resolution logic.
+Encounters are defined in a static data table (~100+ entries). An active encounter is tracked in `currentEncounter`. Encounters have a `dangerProfile`, `temperament`, `persistence` type, and optional `naturalHistory` blocks. The investigation system builds per-encounter knowledge that feeds the Field Journal.
 
 ### Player actions
-Every player action (move, wait, drink, groom, etc.) follows the same pattern: validate → execute → advance turn → log → render. The bot calls the same action functions that the player UI does.
+Every player action (move, wait, drink, groom, etc.) follows the same pattern: `startTurn()` → action logic → `endTurn()` → `render()`. The bot calls the same action functions that the player UI does.
+
+### Profiles and saves
+Multiple profiles are supported. All persistence uses `localStorage` under versioned keys. Each profile stores cross-run stats, Field Journal knowledge, achievements, the Fossil Record, and an active run snapshot (restorable if the tab is closed mid-run).
+
+### Field Journal, Fossil Record, and Achievements
+- **Field Journal**: accumulates knowledge about encounter types across runs. Knowledge tiers (0–30) unlock natural-history text and gameplay tips.
+- **Fossil Record**: stores the last 10 run outcomes per profile (turns survived, cause of death, companions, date).
+- **Achievements**: 50 definitions checked each turn, on death, and at run end. Stored per profile; displayed in the Field Journal's Awards tab.
 
 ### Bot / debug tools
-The bot (`botState`) runs the game automatically by picking random valid actions on a timer. It records every step, validates game invariants after each action, and accumulates QA issues. When it stops, it can push reports directly to GitHub via the API.
+The bot (`botState`) runs the game automatically using a weighted strategy with a goal planner and loop detection. It records every step, validates invariants after each action, and accumulates QA issues. When it stops, compact and full reports are generated and can be pushed to GitHub via the API.
 
 ### Logging / reporting
 Two logging layers:
@@ -57,11 +70,11 @@ Two logging layers:
 - `debugTrace` — raw diagnostic events, max 8,000 entries
 
 Bot reports have two formats:
-- **Compact** — QA issues, run summaries, patch gate summary. Use for routine review.
-- **Full** — everything above plus per-step snapshots and raw JSON. Only needed for deep debugging.
+- **Compact** — QA issues, death-cause rollup, run summary table, patch gate summary. Use for routine review.
+- **Full** — everything above plus per-step snapshots and raw JSON. Use only for deep debugging.
 
 ### Rendering
-All rendering is done by a single `render()` call that redraws the map, UI panels, and button states. There is no virtual DOM or reactive framework — it is direct DOM manipulation.
+All rendering is done by a single `render()` call that redraws the map, UI panels, vitals bars, encounter card, and button states. There is no virtual DOM or reactive framework — it is direct DOM manipulation. `render()` is always the last call in `endTurn()`.
 
 ---
 
@@ -71,12 +84,14 @@ All rendering is done by a single `render()` call that redraws the map, UI panel
 - **The bot auto-save uses the GitHub API directly from the browser.** It requires a fine-grained PAT with `Contents: read and write`. The PAT is stored in `sessionStorage` and clears when the tab closes.
 - **`game/play.html` and `game/evolution_game_v66_57.html` must be kept in sync** on each release. If you edit one, copy the change to the other, or replace `play.html` entirely.
 - **`index.html` and `manifest.json` must both reference `game/play.html`.** The syntax check script verifies `index.html`. Check `manifest.json` manually on releases.
+- **`player.knowledge` / `player.classKnowledge`** accumulate across runs and feed the Field Journal. Incorrect resets at run boundaries lose journal data permanently.
 
 ---
 
 ## Do not touch without checking
 
-- The encounter resolution logic (lines ~5000–8000) — tightly coupled, easy to break survival balance
+- The encounter resolution logic (~11328–12523) — tightly coupled, easy to break survival balance
 - The world generation functions — changing these affects the entire map layout and habitat distribution
 - The `render()` function and anything that calls it — re-entrancy issues can cause visible glitches
 - The bot timer and step logic — race conditions are possible if the timer interval and step validation get out of sync
+- The profile save/resume logic — incorrect resets silently lose player data across runs
