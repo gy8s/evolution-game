@@ -8,7 +8,7 @@ This document is a map of how the game HTML file is organised. Read this before 
 
 The entire game lives in one large HTML file (`game/play.html`, ~18,400 lines). There is no build step, no bundler, and no separate JavaScript files. Everything — CSS, HTML structure, and all JavaScript — is in one file.
 
-Four source files have been extracted and are inlined back into `game/play.html` by `scripts/build_play_html.mjs`. The playable file still ships all content inline, so it works with no build step at runtime. The build script replaces only the regions between these marker comments:
+Five source files have been extracted and are inlined back into `game/play.html` by `scripts/build_play_html.mjs`. The playable file still ships all content inline, so it works with no build step at runtime. The build script replaces only the regions between these marker comments:
 
 **CSS** (inside the `<style>` block) — source `src/styles/game.css`:
 ```
@@ -38,7 +38,15 @@ Four source files have been extracted and are inlined back into `game/play.html`
 // END GENERATED JS: src/utils/core-utils.js
 ```
 
-**Achievement definitions** (inside the `<script>` block, ~line 4798) — the `ACHIEVEMENT_DEFS` array only:
+**Run-tracking state factory** (inside the `<script>` block, ~line 4763) — the `freshRunTracking()` function only:
+```
+// BEGIN GENERATED JS: src/state/run-tracking.js
+...generated js...
+// END GENERATED JS: src/state/run-tracking.js
+```
+This region sits between the profile-stats update code and the `[ACHIEVEMENTS]` section, preserving load order. Only the `freshRunTracking()` factory is extracted; profile/save logic, `profileUpdateStats`, achievement logic, and all other run-management code remain in `game/play.html`. The run-tracking state factory should be edited in `src/state/run-tracking.js`, not inside the generated region of `game/play.html`.
+
+**Achievement definitions** (inside the `<script>` block, ~line 4800) — the `ACHIEVEMENT_DEFS` array only:
 ```
 // BEGIN GENERATED JS: src/data/achievement-data.js
 ...generated js...
@@ -46,9 +54,9 @@ Four source files have been extracted and are inlined back into `game/play.html`
 ```
 This region sits between `freshRunTracking` and `loadAchievements`, preserving load order and access to surrounding functions/globals (e.g. the `check` callbacks reference `socialGroup`). Only the definitions array is extracted; achievement persistence (`loadAchievements`, `saveAchievements`, `checkAchievements`), profile/save logic, and achievement rendering/toast logic remain in `game/play.html`. Achievement definitions should be edited in `src/data/achievement-data.js`, not inside the generated region of `game/play.html`.
 
-`src/data/encounter-data.js` uses a `// << SPLIT: hiddenSubtypePools >>` line to divide part 1 from part 2; the build script splits on it and inlines each part into its region. The split marker itself is not inlined. `src/utils/core-utils.js` and `src/data/achievement-data.js` have no split marker and each maps to one contiguous region.
+`src/data/encounter-data.js` uses a `// << SPLIT: hiddenSubtypePools >>` line to divide part 1 from part 2; the build script splits on it and inlines each part into its region. The split marker itself is not inlined. All other source files have no split marker and each maps to one contiguous region.
 
-**Edit CSS in `src/styles/game.css`, encounter data in `src/data/encounter-data.js`, pure utility helpers in `src/utils/core-utils.js`, and achievement definitions in `src/data/achievement-data.js`, then run `node scripts/build_play_html.mjs` — do not hand-edit the generated regions.** The build script never touches code outside the marked regions.
+**Edit CSS in `src/styles/game.css`, encounter data in `src/data/encounter-data.js`, pure utility helpers in `src/utils/core-utils.js`, achievement definitions in `src/data/achievement-data.js`, and run-tracking factory in `src/state/run-tracking.js`, then run `node scripts/build_play_html.mjs` — do not hand-edit the generated regions.** The build script never touches code outside the marked regions.
 
 `game/evolution_game_v66_57.html` is the versioned archive of an earlier build. It is a historical snapshot and is not kept byte-in-sync with `game/play.html` between releases; `game/play.html` is the stable public-facing copy that gets replaced on each release.
 
@@ -65,8 +73,9 @@ This region sits between `freshRunTracking` and `loadAchievements`, preserving l
 | 1021–3501 | Static data: encounters + spawn tables — generated, source in `src/data/encounter-data.js` [1/2] |
 | 3502–4254 | World generation: terrain, habitats, altitude, water, clay deposits |
 | 4253–4791 | Player state object and dynamic world state (waterState, socialGroup, nearbyEntities) |
-| 4798–4863 | Achievement definitions (`ACHIEVEMENT_DEFS`, 50 defs) — generated, source in `src/data/achievement-data.js` |
-| 4865–5829 | Achievement persistence (load/save/check), profiles, save/load, Field Journal, Fossil Record |
+| 4763–4794 | Run-tracking state factory (`freshRunTracking`) — generated, source in `src/state/run-tracking.js` |
+| 4800–4865 | Achievement definitions (`ACHIEVEMENT_DEFS`, 50 defs) — generated, source in `src/data/achievement-data.js` |
+| 4867–5829 | Achievement persistence (load/save/check), profile stats, profiles, save/load, Field Journal, Fossil Record |
 | 5830–5924 | Core utility helpers — generated, source in `src/utils/core-utils.js`: pure stateless helpers (clamp, roll, choice, clonePlain, escapeHtml, chooseWeighted, text-sanitisation) |
 | 5925–6036 | Remaining [UTILS]: logging, narration setters, noise, risk memory (not extracted — side effects) |
 | 6037–6115 | hiddenSubtypePools — generated, source in `src/data/encounter-data.js` [2/2] |
@@ -129,7 +138,7 @@ All rendering is done by a single `render()` call that redraws the map, UI panel
 - **`game/play.html` and `game/evolution_game_v66_57.html` must be kept in sync** on each release. If you edit one, copy the change to the other, or replace `play.html` entirely.
 - **`index.html` and `manifest.json` must both reference `game/play.html`.** The syntax check script verifies `index.html`. Check `manifest.json` manually on releases.
 - **`player.knowledge` / `player.classKnowledge`** accumulate across runs and feed the Field Journal. Incorrect resets at run boundaries lose journal data permanently.
-- **The CSS region, both encounter-data regions, the core-utils region, and the achievement-data region in `game/play.html` are generated.** Hand edits are overwritten on the next `node scripts/build_play_html.mjs`. Edit `src/styles/game.css`, `src/data/encounter-data.js`, `src/utils/core-utils.js`, and `src/data/achievement-data.js` instead. Do not remove any BEGIN/END marker comments or the `// << SPLIT: hiddenSubtypePools >>` line — the build script requires all of them.
+- **The CSS region, both encounter-data regions, the core-utils region, the achievement-data region, and the run-tracking region in `game/play.html` are generated.** Hand edits are overwritten on the next `node scripts/build_play_html.mjs`. Edit `src/styles/game.css`, `src/data/encounter-data.js`, `src/utils/core-utils.js`, `src/data/achievement-data.js`, and `src/state/run-tracking.js` instead. Do not remove any BEGIN/END marker comments or the `// << SPLIT: hiddenSubtypePools >>` line — the build script requires all of them.
 
 ---
 
