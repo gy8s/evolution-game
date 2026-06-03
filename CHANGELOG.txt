@@ -1,3 +1,19 @@
+[2026-06-03 extract-run-tracking | Claude]
+Fifth controlled extraction — run-tracking state factory source extracted and build script extended.
+
+- Created src/state/run-tracking.js: the freshRunTracking() function moved mechanically from game/play.html, byte-identical to the original.
+  - freshRunTracking() returns the initial run-tracking state object used to reset per-run stats at the start of each run (food counts, poison history, pursuit escapes, night survival, tile exploration, etc.).
+  - No field names changed. No default values changed. Set usage unchanged.
+- Edited game/play.html: the freshRunTracking() block is now wrapped in // BEGIN/END GENERATED JS: src/state/run-tracking.js markers.
+  - The generated region stays exactly where freshRunTracking() lived: after profileUpdateStats, before the [ACHIEVEMENTS] section — preserving load order.
+  - Only freshRunTracking() was extracted. profileUpdateStats, profile/save logic, achievement logic, and all other run-management code remain in game/play.html. No call sites changed.
+  - game/play.html remains the directly playable artifact.
+- Extended scripts/build_play_html.mjs: now inlines CSS, encounter data, core utils, achievement definitions, and run-tracking state factory. Fails clearly if src/state/run-tracking.js or its region markers are missing. Idempotent.
+- game/evolution_game_v66_57.html NOT changed: historical archive, not kept byte-synced between releases.
+- Docs: README.md (repo layout tree + build scaffold table), docs/current-game-structure.md (line-range table, build scaffold table), docs/architecture-notes.md (generated region + markers, line-range table, fragile-area note), docs/release-checklist.md (build step check for run-tracking).
+- Verification: node scripts/build_play_html.mjs (idempotent — no change) and node scripts/check_html_js_syntax.mjs both pass. Extracted source verified to match the inline region (excluding markers and trailing whitespace).
+- Source/build structure change only. No gameplay logic, run-tracking fields or defaults, save/profile logic, achievement logic, rendering, CSS, encounter data, or core utility code changed.
+
 [2026-06-03 extract-achievement-data | Claude]
 Fourth controlled extraction — achievement definitions source extracted and build script extended.
 

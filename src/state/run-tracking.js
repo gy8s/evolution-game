@@ -1,0 +1,30 @@
+function freshRunTracking() {
+  return {
+    foodTypesEaten: {},
+    fruitEaten: 0,
+    insectEaten: 0,
+    leafEaten: 0,
+    fungusEaten: 0,
+    meatEaten: 0,
+    waterDrank: 0,
+    worstPoisonRank: 0,
+    poisonSurvived: false,
+    groupEverJoined: false,
+    matingAttempted: false,
+    companionInterceptHit: false,
+    pursuitsEscaped: 0,
+    nightSurvivedCount: 0,
+    lastTrackedPhase: null,
+    turnsAtMinFitness: 0,
+    lowestFitness: 100,
+    tilesExplored: 0,
+    tilesExploredThisRun: new Set(),
+    startedDying: false,
+    wasNearDeath: false,
+    wildfireThreatened: false,
+    wildfireEscaped: false,
+    investigatedCount: 0,
+    groomedCount: 0,
+    alertedCount: 0
+  };
+}

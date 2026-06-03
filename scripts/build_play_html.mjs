@@ -10,7 +10,8 @@
 //        [1/2] encounters + encounterTables  (~line 1040)
 //        [2/2] hiddenSubtypePools            (~line 6037)
 //   3. src/utils/core-utils.js    → one JS region (~line 5833)
-//   4. src/data/achievement-data.js → one JS region (~line 4798)
+//   4. src/data/achievement-data.js → one JS region (~line 4800)
+//   5. src/state/run-tracking.js   → one JS region (~line 4763)
 //
 // Why inline (not external files): game/play.html must open straight from
 // disk — or via the GitHub Pages link — with no build step and no runtime
@@ -28,11 +29,12 @@ import { dirname, resolve } from 'node:path';
 const here     = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(here, '..');
 
-const CSS_SOURCE    = resolve(repoRoot, 'src/styles/game.css');
-const DATA_SOURCE   = resolve(repoRoot, 'src/data/encounter-data.js');
-const UTILS_SOURCE  = resolve(repoRoot, 'src/utils/core-utils.js');
-const ACHIEVE_SOURCE = resolve(repoRoot, 'src/data/achievement-data.js');
-const PLAY_HTML     = resolve(repoRoot, 'game/play.html');
+const CSS_SOURCE      = resolve(repoRoot, 'src/styles/game.css');
+const DATA_SOURCE     = resolve(repoRoot, 'src/data/encounter-data.js');
+const UTILS_SOURCE    = resolve(repoRoot, 'src/utils/core-utils.js');
+const ACHIEVE_SOURCE  = resolve(repoRoot, 'src/data/achievement-data.js');
+const RUNTRACK_SOURCE = resolve(repoRoot, 'src/state/run-tracking.js');
+const PLAY_HTML       = resolve(repoRoot, 'game/play.html');
 
 // CSS markers (CSS comment style, inside <style>)
 const CSS_BEGIN = '/* BEGIN GENERATED CSS: src/styles/game.css */';
@@ -49,8 +51,12 @@ const JS_BEGIN_UTILS = '// BEGIN GENERATED JS: src/utils/core-utils.js';
 const JS_END_UTILS   = '// END GENERATED JS: src/utils/core-utils.js';
 
 // Achievement-data markers (JS comment style, inside <script>)
-const JS_BEGIN_ACHIEVE = '// BEGIN GENERATED JS: src/data/achievement-data.js';
-const JS_END_ACHIEVE   = '// END GENERATED JS: src/data/achievement-data.js';
+const JS_BEGIN_ACHIEVE  = '// BEGIN GENERATED JS: src/data/achievement-data.js';
+const JS_END_ACHIEVE    = '// END GENERATED JS: src/data/achievement-data.js';
+
+// Run-tracking markers (JS comment style, inside <script>)
+const JS_BEGIN_RUNTRACK = '// BEGIN GENERATED JS: src/state/run-tracking.js';
+const JS_END_RUNTRACK   = '// END GENERATED JS: src/state/run-tracking.js';
 
 // The split comment that divides the source file into part1 and part2.
 // It is NOT inlined into game/play.html.
@@ -76,17 +82,19 @@ function inlineRegion(html, beginMarker, endMarker, body, label) {
 }
 
 // --- Read sources ---
-if (!existsSync(CSS_SOURCE))     fail('cannot find src/styles/game.css');
-if (!existsSync(DATA_SOURCE))    fail('cannot find src/data/encounter-data.js');
-if (!existsSync(UTILS_SOURCE))   fail('cannot find src/utils/core-utils.js');
-if (!existsSync(ACHIEVE_SOURCE)) fail('cannot find src/data/achievement-data.js');
-if (!existsSync(PLAY_HTML))      fail('cannot find game/play.html');
+if (!existsSync(CSS_SOURCE))      fail('cannot find src/styles/game.css');
+if (!existsSync(DATA_SOURCE))     fail('cannot find src/data/encounter-data.js');
+if (!existsSync(UTILS_SOURCE))    fail('cannot find src/utils/core-utils.js');
+if (!existsSync(ACHIEVE_SOURCE))  fail('cannot find src/data/achievement-data.js');
+if (!existsSync(RUNTRACK_SOURCE)) fail('cannot find src/state/run-tracking.js');
+if (!existsSync(PLAY_HTML))       fail('cannot find game/play.html');
 
-const css       = readFileSync(CSS_SOURCE,     'utf8');
-const jsData    = readFileSync(DATA_SOURCE,    'utf8');
-const jsUtils   = readFileSync(UTILS_SOURCE,   'utf8');
-const jsAchieve = readFileSync(ACHIEVE_SOURCE, 'utf8');
-let   html      = readFileSync(PLAY_HTML,      'utf8');
+const css        = readFileSync(CSS_SOURCE,      'utf8');
+const jsData     = readFileSync(DATA_SOURCE,     'utf8');
+const jsUtils    = readFileSync(UTILS_SOURCE,    'utf8');
+const jsAchieve  = readFileSync(ACHIEVE_SOURCE,  'utf8');
+const jsRunTrack = readFileSync(RUNTRACK_SOURCE, 'utf8');
+let   html       = readFileSync(PLAY_HTML,       'utf8');
 
 // --- Split encounter-data into two parts at the SPLIT marker ---
 const splitIdx = jsData.indexOf(JS_SPLIT);
@@ -100,7 +108,8 @@ html = inlineRegion(html, CSS_BEGIN,        CSS_END,        css.replace(/\s+$/, 
 html = inlineRegion(html, JS_BEGIN1,        JS_END1,        jsPart1, 'encounter-data [1/2]');
 html = inlineRegion(html, JS_BEGIN2,        JS_END2,        jsPart2, 'encounter-data [2/2]');
 html = inlineRegion(html, JS_BEGIN_UTILS,   JS_END_UTILS,   jsUtils.replace(/\s+$/, ''), 'core-utils');
-html = inlineRegion(html, JS_BEGIN_ACHIEVE, JS_END_ACHIEVE, jsAchieve.replace(/\s+$/, ''), 'achievement-data');
+html = inlineRegion(html, JS_BEGIN_ACHIEVE,  JS_END_ACHIEVE,  jsAchieve.replace(/\s+$/, ''),  'achievement-data');
+html = inlineRegion(html, JS_BEGIN_RUNTRACK, JS_END_RUNTRACK, jsRunTrack.replace(/\s+$/, ''), 'run-tracking');
 
 if (html === original) {
   console.log('build_play_html: no change — game/play.html already matches all source files.');
