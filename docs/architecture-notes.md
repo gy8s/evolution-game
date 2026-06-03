@@ -8,32 +8,15 @@ This document is a map of how the game HTML file is organised. Read this before 
 
 The entire game lives in one large HTML file (`game/play.html`, ~18,400 lines). There is no build step, no bundler, and no separate JavaScript files. Everything — CSS, HTML structure, and all JavaScript — is in one file.
 
-Two source files have been extracted. `game/play.html` still ships all content inline so it works with no build step at runtime. `scripts/build_play_html.mjs` inlines them back using marker comments:
+As of the first extraction step, **CSS is the exception**. Its source lives in `src/styles/game.css` and is inlined back into `game/play.html` by `scripts/build_play_html.mjs`, which replaces only the region between these marker comments inside the `<style>` block:
 
-**CSS** (inside `<style>` block):
 ```
 /* BEGIN GENERATED CSS: src/styles/game.css */
-...generated...
+...generated css...
 /* END GENERATED CSS: src/styles/game.css */
 ```
 
-**Encounter data — part 1** (inside `<script>` block, ~line 1040):
-```
-// BEGIN GENERATED JS: src/data/encounter-data.js [1/2]
-...const encounters = { ... };  const encounterTables = { ... };...
-// END GENERATED JS: src/data/encounter-data.js [1/2]
-```
-
-**Encounter data — part 2** (inside `<script>` block, ~line 6037):
-```
-// BEGIN GENERATED JS: src/data/encounter-data.js [2/2]
-...const hiddenSubtypePools = { ... };...
-// END GENERATED JS: src/data/encounter-data.js [2/2]
-```
-
-`src/data/encounter-data.js` uses `// << SPLIT: hiddenSubtypePools >>` to separate part 1 from part 2. The build script splits on this marker and inlines each part into its respective location.
-
-**Edit CSS in `src/styles/game.css`; edit encounter data in `src/data/encounter-data.js`. Run `node scripts/build_play_html.mjs`. Do not hand-edit the generated regions.** The build script never touches code outside the marked regions.
+The playable file still ships its CSS inline, so it works with no build step at runtime. **Edit CSS in `src/styles/game.css` and run `node scripts/build_play_html.mjs` — do not hand-edit the generated region.** The build script never touches JavaScript or HTML structure.
 
 `game/evolution_game_v66_57.html` is the versioned archive of an earlier build. It is a historical snapshot and is not kept byte-in-sync with `game/play.html` between releases; `game/play.html` is the stable public-facing copy that gets replaced on each release.
 
