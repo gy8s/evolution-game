@@ -1,3 +1,25 @@
+[2026-06-03 extract-core-utils | Claude]
+Third controlled extraction — pure utility helper source extracted and build script extended.
+
+- Created src/utils/core-utils.js: thirteen pure stateless helper functions moved mechanically from game/play.html.
+  - strengthOf, effective, clamp, capitalise, roll, choice — basic math and value utilities.
+  - sanitizeNarrativeText, ensureNarrativeString, containsCodeLikeText, cleanNarrative — text-sanitisation helpers.
+  - escapeHtml — HTML-escaping utility.
+  - clonePlain — JSON deep-clone.
+  - chooseWeighted — weighted random selection (takes items array, no side effects).
+  - All thirteen are pure: no DOM access, no localStorage, no mutation of player/world/encounter/bot state, no calls to render/startTurn/endTurn/save functions.
+  - Byte-identical to original code; no logic changed.
+  - chooseWeighted was previously located after the encounter-data [2/2] generated region; it is now in the [UTILS] generated region (safe — function declarations are hoisted). applyHiddenSubtype continues to call it correctly.
+  - Non-pure utilities (addLog, setNarration, setGroupNotice, etc.) remain in game/play.html outside the generated region.
+- Edited game/play.html: [UTILS] section reorganised so pure helpers form a contiguous block wrapped in generated-region markers. Non-pure utilities follow immediately after the END marker. The encounter-data [2/2] region and all code from [TURN] onwards are unchanged.
+  - Only structural change: BEGIN/END markers inserted, functions reordered within [UTILS] (safe due to hoisting). All code is byte-identical to the originals.
+  - game/play.html remains the directly playable artifact.
+- Extended scripts/build_play_html.mjs: now inlines CSS, encounter data, and core-utils. Fails clearly if src/utils/core-utils.js or its region markers are missing. Idempotent.
+- game/evolution_game_v66_57.html NOT changed: historical archive, not kept byte-synced between releases.
+- Docs: README.md (repo layout tree fixed — added src/data/, src/utils/, build_play_html.mjs; build scaffold table updated), docs/current-game-structure.md (build scaffold table and line ranges), docs/architecture-notes.md (single-file structure section, line-range table, known fragile areas), docs/release-checklist.md (build step check for core-utils).
+- Verification: node scripts/build_play_html.mjs (idempotent — no change) and node scripts/check_html_js_syntax.mjs both pass. Browser render not manually verified in this environment.
+- Source/build structure change only. No gameplay logic, encounter values, JavaScript outside the generated regions, save/profile logic, or rendering changed.
+
 [2026-06-03 fix-encounter-data-build-wiring | Claude]
 Corrective build-wiring patch — build script now actually inlines the encounter data source.
 

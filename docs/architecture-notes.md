@@ -8,7 +8,7 @@ This document is a map of how the game HTML file is organised. Read this before 
 
 The entire game lives in one large HTML file (`game/play.html`, ~18,400 lines). There is no build step, no bundler, and no separate JavaScript files. Everything — CSS, HTML structure, and all JavaScript — is in one file.
 
-Two source files have been extracted and are inlined back into `game/play.html` by `scripts/build_play_html.mjs`. The playable file still ships all content inline, so it works with no build step at runtime. The build script replaces only the regions between these marker comments:
+Three source files have been extracted and are inlined back into `game/play.html` by `scripts/build_play_html.mjs`. The playable file still ships all content inline, so it works with no build step at runtime. The build script replaces only the regions between these marker comments:
 
 **CSS** (inside the `<style>` block) — source `src/styles/game.css`:
 ```
@@ -31,9 +31,16 @@ Two source files have been extracted and are inlined back into `game/play.html` 
 // END GENERATED JS: src/data/encounter-data.js [2/2]
 ```
 
-`src/data/encounter-data.js` uses a `// << SPLIT: hiddenSubtypePools >>` line to divide part 1 from part 2; the build script splits on it and inlines each part into its region. The split marker itself is not inlined.
+**Core utility helpers** (inside the `<script>` block, ~line 5835) — pure stateless helper functions:
+```
+// BEGIN GENERATED JS: src/utils/core-utils.js
+...generated js...
+// END GENERATED JS: src/utils/core-utils.js
+```
 
-**Edit CSS in `src/styles/game.css` and encounter data in `src/data/encounter-data.js`, then run `node scripts/build_play_html.mjs` — do not hand-edit the generated regions.** The build script never touches code outside the marked regions.
+`src/data/encounter-data.js` uses a `// << SPLIT: hiddenSubtypePools >>` line to divide part 1 from part 2; the build script splits on it and inlines each part into its region. The split marker itself is not inlined. `src/utils/core-utils.js` has no split marker and maps to one contiguous region.
+
+**Edit CSS in `src/styles/game.css`, encounter data in `src/data/encounter-data.js`, and pure utility helpers in `src/utils/core-utils.js`, then run `node scripts/build_play_html.mjs` — do not hand-edit the generated regions.** The build script never touches code outside the marked regions.
 
 `game/evolution_game_v66_57.html` is the versioned archive of an earlier build. It is a historical snapshot and is not kept byte-in-sync with `game/play.html` between releases; `game/play.html` is the stable public-facing copy that gets replaced on each release.
 
@@ -51,7 +58,8 @@ Two source files have been extracted and are inlined back into `game/play.html` 
 | 3502–4254 | World generation: terrain, habitats, altitude, water, clay deposits |
 | 4253–4791 | Player state object and dynamic world state (waterState, socialGroup, nearbyEntities) |
 | 4792–5829 | Achievements (50 defs), profiles, save/load, Field Journal, Fossil Record |
-| 5830–6036 | Core utilities: logging, clamping, cloning, debug tracing |
+| 5830–5924 | Core utility helpers — generated, source in `src/utils/core-utils.js`: pure stateless helpers (clamp, roll, choice, clonePlain, escapeHtml, chooseWeighted, text-sanitisation) |
+| 5925–6036 | Remaining [UTILS]: logging, narration setters, noise, risk memory (not extracted — side effects) |
 | 6037–6115 | hiddenSubtypePools — generated, source in `src/data/encounter-data.js` [2/2] |
 | 6116–7614 | Remaining utilities + turn flow: `startTurn`, `endTurn`, metabolism, ecology tick |
 | 7613–8429 | Nearby entity simulation: spawning, persistence, world registry |
@@ -112,7 +120,7 @@ All rendering is done by a single `render()` call that redraws the map, UI panel
 - **`game/play.html` and `game/evolution_game_v66_57.html` must be kept in sync** on each release. If you edit one, copy the change to the other, or replace `play.html` entirely.
 - **`index.html` and `manifest.json` must both reference `game/play.html`.** The syntax check script verifies `index.html`. Check `manifest.json` manually on releases.
 - **`player.knowledge` / `player.classKnowledge`** accumulate across runs and feed the Field Journal. Incorrect resets at run boundaries lose journal data permanently.
-- **The CSS region and both encounter-data regions in `game/play.html` are generated.** Hand edits are overwritten on the next `node scripts/build_play_html.mjs`. Edit `src/styles/game.css` and `src/data/encounter-data.js` instead. Do not remove the BEGIN/END marker comments or the `// << SPLIT: hiddenSubtypePools >>` line — the build script requires all of them.
+- **The CSS region, both encounter-data regions, and the core-utils region in `game/play.html` are generated.** Hand edits are overwritten on the next `node scripts/build_play_html.mjs`. Edit `src/styles/game.css`, `src/data/encounter-data.js`, and `src/utils/core-utils.js` instead. Do not remove any BEGIN/END marker comments or the `// << SPLIT: hiddenSubtypePools >>` line — the build script requires all of them.
 
 ---
 

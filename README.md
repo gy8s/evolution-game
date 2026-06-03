@@ -90,8 +90,12 @@ evolution-game/
 │   ├── play.html                     Stable playable build used by public link/PWA
 │   └── evolution_game_v66_57.html    Versioned playable build
 ├── src/
-│   └── styles/
-│       └── game.css                  CSS source (inlined into play.html by the build script)
+│   ├── styles/
+│   │   └── game.css                  CSS source (inlined into play.html by the build script)
+│   ├── data/
+│   │   └── encounter-data.js         Encounter + spawn-table source (inlined into play.html by the build script)
+│   └── utils/
+│       └── core-utils.js             Pure utility helpers source (inlined into play.html by the build script)
 ├── docs/
 │   ├── current-game-structure.md     How the game works now: systems, flows, line ranges
 │   ├── documentation-map.md          What each doc covers and when to update it
@@ -106,6 +110,7 @@ evolution-game/
 │   ├── bot-runs/                     Raw bot run outputs when intentionally saved
 │   └── consolidated/                 AI-reviewed summaries and bug reports
 ├── scripts/
+│   ├── build_play_html.mjs           Inlines src/ source files into game/play.html
 │   ├── check_html_js_syntax.mjs      JavaScript syntax checker for game HTML files
 │   └── ingest_bot_report.sh          Helper for manually ingesting downloaded bot logs
 └── .github/
@@ -131,12 +136,13 @@ The rebuild is not a rewrite, not a framework migration, and not a gameplay rede
 
 ### Build scaffold
 
-Two source extractions are complete:
+Three source extractions are complete:
 
 | Source file | What it contains | Destination in play.html |
 |-------------|-----------------|--------------------------|
 | `src/styles/game.css` | All CSS | Inline `<style>` block |
-| `src/data/encounter-data.js` | `encounters`, `encounterTables`, `hiddenSubtypePools` | Two JS regions (~line 1040 and ~line 6035) |
+| `src/data/encounter-data.js` | `encounters`, `encounterTables`, `hiddenSubtypePools` | Two JS regions (~line 1040 and ~line 6037) |
+| `src/utils/core-utils.js` | Pure stateless helper functions | One JS region (~line 5835) |
 
 `game/play.html` keeps all content **inline** so it stays directly playable with no build step or runtime dependency. To regenerate `game/play.html` after editing any source file:
 

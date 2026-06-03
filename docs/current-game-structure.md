@@ -12,14 +12,15 @@ Evolution Game is a browser-based single-player survival simulation. The player 
 
 The game runs from a single HTML file (`game/play.html`, ~18,400 lines). There is no bundler and no server. Open the file in a browser and it works.
 
-Two source extractions are complete. The playable file `game/play.html` still contains all content inline (between marker comments) so it works with no build step or runtime dependency.
+Three source extractions are complete. The playable file `game/play.html` still contains all content inline (between marker comments) so it works with no build step or runtime dependency.
 
 | Source file | What it contains | In play.html |
 |-------------|-----------------|--------------|
 | `src/styles/game.css` | All CSS | Inline `<style>` block |
 | `src/data/encounter-data.js` | `encounters`, `encounterTables`, `hiddenSubtypePools` | Two inline JS regions |
+| `src/utils/core-utils.js` | Pure stateless helpers (clamp, roll, choice, clonePlain, escapeHtml, chooseWeighted, text-sanitisation helpers) | One inline JS region (~line 5835) |
 
-`scripts/build_play_html.mjs` inlines both source files back into `game/play.html`. All JavaScript engine code, HTML structure, and other data remain inside `game/play.html` for now.
+`scripts/build_play_html.mjs` inlines all source files back into `game/play.html`. All other JavaScript engine code, HTML structure, and game state remain inside `game/play.html` for now.
 
 ---
 
@@ -270,7 +271,8 @@ flowchart TD
 | 3631–4252 | World generation: terrain, habitats, altitude, water, clay deposits |
 | 4253–4791 | Player state object and dynamic world state (waterState, socialGroup, nearbyEntities) |
 | 4792–5829 | Achievements (50 defs), profiles, save/load, Field Journal, Fossil Record |
-| 5830–6036 | Core utilities: logging, cloning, clamping, debug tracing |
+| 5830–5924 | Core utilities — generated, source is `src/utils/core-utils.js`: pure helpers (clamp, roll, choice, clonePlain, escapeHtml, etc.) |
+| 5925–6036 | Remaining utilities: logging, debug helpers, narration setters |
 | 6037–6115 | hiddenSubtypePools — generated, source is `src/data/encounter-data.js` [2/2] |
 | 6116–7614 | Remaining utilities, turn flow: startTurn, endTurn, metabolism, ecology tick |
 | 7613–8429 | Nearby entity simulation: spawning, persistence, world registry |
@@ -302,7 +304,7 @@ The rebuild plan (see `docs/project-plan.md`) targets extraction in this rough o
 
 1. CSS and HTML templates — **CSS extracted to `src/styles/game.css`** ✓; HTML templates still inline
 2. Static encounter data and spawn tables — **`encounters`, `encounterTables`, `hiddenSubtypePools` extracted to `src/data/encounter-data.js`** ✓
-3. Pure helper functions with no side effects
+3. Pure helper functions with no side effects — **pure stateless helpers extracted to `src/utils/core-utils.js`** ✓
 4. State and save schema (player object, world state, profile schema)
 5. Turn engine (startTurn, endTurn, encounter resolution)
 6. Rendering layer
@@ -317,7 +319,8 @@ The rebuild plan (see `docs/project-plan.md`) targets extraction in this rough o
 | `src/styles/game.css` | `/* BEGIN/END GENERATED CSS: src/styles/game.css */` inside `<style>` |
 | `src/data/encounter-data.js` [1/2] | `// BEGIN/END GENERATED JS: src/data/encounter-data.js [1/2]` |
 | `src/data/encounter-data.js` [2/2] | `// BEGIN/END GENERATED JS: src/data/encounter-data.js [2/2]` |
+| `src/utils/core-utils.js` | `// BEGIN/END GENERATED JS: src/utils/core-utils.js` |
 
-The source file `src/data/encounter-data.js` contains a `// << SPLIT: hiddenSubtypePools >>` line dividing part 1 (encounters + encounterTables) from part 2 (hiddenSubtypePools). The build script splits on this marker and inlines each part into its respective location in `play.html`.
+The source file `src/data/encounter-data.js` contains a `// << SPLIT: hiddenSubtypePools >>` line dividing part 1 (encounters + encounterTables) from part 2 (hiddenSubtypePools). The build script splits on this marker and inlines each part into its respective location in `play.html`. `src/utils/core-utils.js` has no split marker — it maps to one contiguous region.
 
 Run `node scripts/build_play_html.mjs` after editing any source file. Do not hand-edit generated regions in `game/play.html`. This document will be updated as each further extraction completes.

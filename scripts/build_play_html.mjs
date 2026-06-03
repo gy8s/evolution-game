@@ -9,6 +9,7 @@
 //   2. src/data/encounter-data.js → two JS regions:
 //        [1/2] encounters + encounterTables  (~line 1040)
 //        [2/2] hiddenSubtypePools            (~line 6037)
+//   3. src/utils/core-utils.js    → one JS region (~line 5833)
 //
 // Why inline (not external files): game/play.html must open straight from
 // disk — or via the GitHub Pages link — with no build step and no runtime
@@ -26,9 +27,10 @@ import { dirname, resolve } from 'node:path';
 const here     = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(here, '..');
 
-const CSS_SOURCE  = resolve(repoRoot, 'src/styles/game.css');
-const DATA_SOURCE = resolve(repoRoot, 'src/data/encounter-data.js');
-const PLAY_HTML   = resolve(repoRoot, 'game/play.html');
+const CSS_SOURCE   = resolve(repoRoot, 'src/styles/game.css');
+const DATA_SOURCE  = resolve(repoRoot, 'src/data/encounter-data.js');
+const UTILS_SOURCE = resolve(repoRoot, 'src/utils/core-utils.js');
+const PLAY_HTML    = resolve(repoRoot, 'game/play.html');
 
 // CSS markers (CSS comment style, inside <style>)
 const CSS_BEGIN = '/* BEGIN GENERATED CSS: src/styles/game.css */';
@@ -39,6 +41,10 @@ const JS_BEGIN1 = '// BEGIN GENERATED JS: src/data/encounter-data.js [1/2]';
 const JS_END1   = '// END GENERATED JS: src/data/encounter-data.js [1/2]';
 const JS_BEGIN2 = '// BEGIN GENERATED JS: src/data/encounter-data.js [2/2]';
 const JS_END2   = '// END GENERATED JS: src/data/encounter-data.js [2/2]';
+
+// Core-utils markers (JS comment style, inside <script>)
+const JS_BEGIN_UTILS = '// BEGIN GENERATED JS: src/utils/core-utils.js';
+const JS_END_UTILS   = '// END GENERATED JS: src/utils/core-utils.js';
 
 // The split comment that divides the source file into part1 and part2.
 // It is NOT inlined into game/play.html.
@@ -64,13 +70,15 @@ function inlineRegion(html, beginMarker, endMarker, body, label) {
 }
 
 // --- Read sources ---
-if (!existsSync(CSS_SOURCE))  fail('cannot find src/styles/game.css');
-if (!existsSync(DATA_SOURCE)) fail('cannot find src/data/encounter-data.js');
-if (!existsSync(PLAY_HTML))   fail('cannot find game/play.html');
+if (!existsSync(CSS_SOURCE))   fail('cannot find src/styles/game.css');
+if (!existsSync(DATA_SOURCE))  fail('cannot find src/data/encounter-data.js');
+if (!existsSync(UTILS_SOURCE)) fail('cannot find src/utils/core-utils.js');
+if (!existsSync(PLAY_HTML))    fail('cannot find game/play.html');
 
-const css    = readFileSync(CSS_SOURCE,  'utf8');
-const jsData = readFileSync(DATA_SOURCE, 'utf8');
-let   html   = readFileSync(PLAY_HTML,   'utf8');
+const css      = readFileSync(CSS_SOURCE,   'utf8');
+const jsData   = readFileSync(DATA_SOURCE,  'utf8');
+const jsUtils  = readFileSync(UTILS_SOURCE, 'utf8');
+let   html     = readFileSync(PLAY_HTML,    'utf8');
 
 // --- Split encounter-data into two parts at the SPLIT marker ---
 const splitIdx = jsData.indexOf(JS_SPLIT);
@@ -80,9 +88,10 @@ const jsPart2 = jsData.slice(splitIdx + JS_SPLIT.length).replace(/^\n/, '').repl
 
 // --- Apply all three regions ---
 const original = html;
-html = inlineRegion(html, CSS_BEGIN, CSS_END, css.replace(/\s+$/, ''), 'CSS');
-html = inlineRegion(html, JS_BEGIN1, JS_END1, jsPart1, 'encounter-data [1/2]');
-html = inlineRegion(html, JS_BEGIN2, JS_END2, jsPart2, 'encounter-data [2/2]');
+html = inlineRegion(html, CSS_BEGIN,      CSS_END,      css.replace(/\s+$/, ''), 'CSS');
+html = inlineRegion(html, JS_BEGIN1,      JS_END1,      jsPart1, 'encounter-data [1/2]');
+html = inlineRegion(html, JS_BEGIN2,      JS_END2,      jsPart2, 'encounter-data [2/2]');
+html = inlineRegion(html, JS_BEGIN_UTILS, JS_END_UTILS, jsUtils.replace(/\s+$/, ''), 'core-utils');
 
 if (html === original) {
   console.log('build_play_html: no change — game/play.html already matches all source files.');
