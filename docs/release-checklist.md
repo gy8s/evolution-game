@@ -17,7 +17,8 @@ Run through this every time a new version becomes the stable build.
 - [ ] If `src/styles/game.css` was changed, `node scripts/build_play_html.mjs` was run to inline the CSS into `game/play.html`
 - [ ] If `src/data/encounter-data.js` was changed, `node scripts/build_play_html.mjs` was run to inline the encounter data into `game/play.html`
 - [ ] If `src/utils/core-utils.js` was changed, `node scripts/build_play_html.mjs` was run to inline the utility helpers into `game/play.html`
-- [ ] The generated regions in `game/play.html` were not hand-edited (CSS changes go in `src/styles/game.css`; encounter data changes go in `src/data/encounter-data.js`; utility helper changes go in `src/utils/core-utils.js`)
+- [ ] If `src/data/achievement-data.js` was changed, `node scripts/build_play_html.mjs` was run to inline the achievement definitions into `game/play.html`
+- [ ] The generated regions in `game/play.html` were not hand-edited (CSS changes go in `src/styles/game.css`; encounter data changes go in `src/data/encounter-data.js`; utility helper changes go in `src/utils/core-utils.js`; achievement definition changes go in `src/data/achievement-data.js`)
 
 ## Syntax and render check
 
