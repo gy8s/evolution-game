@@ -89,6 +89,9 @@ evolution-game/
 ├── game/
 │   ├── play.html                     Stable playable build used by public link/PWA
 │   └── evolution_game_v66_57.html    Versioned playable build
+├── src/
+│   └── styles/
+│       └── game.css                  CSS source (inlined into play.html by the build script)
 ├── docs/
 │   ├── current-game-structure.md     How the game works now: systems, flows, line ranges
 │   ├── documentation-map.md          What each doc covers and when to update it
