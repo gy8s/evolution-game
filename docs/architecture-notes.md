@@ -6,7 +6,7 @@ This document is a map of how the game HTML file is organised. Read this before 
 
 ## The single-file structure
 
-The game runs from one large HTML file (`game/play.html`, ~18,400 lines). There is no bundler and no separate JavaScript files: HTML structure and all JavaScript are inline.
+The entire game lives in one large HTML file (`game/play.html`, ~18,400 lines). There is no build step, no bundler, and no separate JavaScript files. Everything — CSS, HTML structure, and all JavaScript — is in one file.
 
 As of the first extraction step, **CSS is the exception**. Its source lives in `src/styles/game.css` and is inlined back into `game/play.html` by `scripts/build_play_html.mjs`, which replaces only the region between these marker comments inside the `<style>` block:
 
@@ -95,7 +95,6 @@ All rendering is done by a single `render()` call that redraws the map, UI panel
 - **`game/play.html` and `game/evolution_game_v66_57.html` must be kept in sync** on each release. If you edit one, copy the change to the other, or replace `play.html` entirely.
 - **`index.html` and `manifest.json` must both reference `game/play.html`.** The syntax check script verifies `index.html`. Check `manifest.json` manually on releases.
 - **`player.knowledge` / `player.classKnowledge`** accumulate across runs and feed the Field Journal. Incorrect resets at run boundaries lose journal data permanently.
-- **The CSS region in `game/play.html` is generated.** Editing it by hand will be overwritten on the next `node scripts/build_play_html.mjs`. Edit `src/styles/game.css` instead. Do not remove the BEGIN/END marker comments — the build script needs them to find the region.
 
 ---
 

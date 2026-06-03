@@ -74,7 +74,6 @@ This document explains what each documentation file covers, when it must be upda
 | Change type | Required doc updates |
 |-------------|---------------------|
 | New gameplay system or major feature | README, current-game-structure, project-plan, CHANGELOG |
-| Code extracted to a source file / build step added | README (layout + build notes), current-game-structure, architecture-notes, release-checklist, CHANGELOG |
 | System significantly changed | current-game-structure, architecture-notes, CHANGELOG |
 | Code moved or file structure changed | README (layout), architecture-notes, current-game-structure, CHANGELOG |
 | Bug introduced and fixed | bug-guardrails (new or updated entry), CHANGELOG |
