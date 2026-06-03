@@ -1037,6 +1037,7 @@ const GAME_VERSION = "v66.57_patch8_short_eco_cycles_2026-04-29";
 //
 // Poison fields:
 // - severity/rank/toxinType/lethal/turns/damage/criticalTimer/warning
+// BEGIN GENERATED JS: src/data/encounter-data.js [1/2]
 const encounters = {
   // small animals and invertebrates
   largeInsect: {
@@ -3497,6 +3498,7 @@ const encounterTables = {
     ["monitorLizard", 0.006], ["climbingHunter", 0.001]
   ]
 };
+// END GENERATED JS: src/data/encounter-data.js [1/2]
 
 
 
@@ -6032,6 +6034,7 @@ function clonePlain(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
 
+// BEGIN GENERATED JS: src/data/encounter-data.js [2/2]
 const hiddenSubtypePools = {
   redBerries: [
     {label: "mildly poisonous red berries", weight: 55, poison: {severity: "mild", rank: 1, toxinType: "plant", lethal: false, turns: 4, damage: 2, warning: "Mildly poisonous berries"}, energy: 14},
@@ -6109,6 +6112,7 @@ const hiddenSubtypePools = {
     {label: "severely irritant aroid shoots", weight: 20, poison: {severity: "moderate", rank: 2, toxinType: "oxalate", lethal: false, turns: 5, damage: 4, warning: "Dense raphide load — severe mucosal inflammation."}, energy: 5}
   ]
 };
+// END GENERATED JS: src/data/encounter-data.js [2/2]
 
 // @target [UTILS] Choose Weighted
 function chooseWeighted(items) {

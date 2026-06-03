@@ -10,7 +10,16 @@ Last updated: 2026-06-03 (Phase 1 documentation repair).
 
 Evolution Game is a browser-based single-player survival simulation. The player controls a small early primate navigating a procedurally generated prehistoric forest. The goal is to survive, explore, eat, drink, avoid predators, and learn about the world.
 
-The entire game is a single HTML file (`game/play.html`, ~18,400 lines). There is no build step, no bundler, and no server. Open the file in a browser and it works.
+The game runs from a single HTML file (`game/play.html`, ~18,400 lines). There is no bundler and no server. Open the file in a browser and it works.
+
+Two source extractions are complete. The playable file `game/play.html` still contains all content inline (between marker comments) so it works with no build step or runtime dependency.
+
+| Source file | What it contains | In play.html |
+|-------------|-----------------|--------------|
+| `src/styles/game.css` | All CSS | Inline `<style>` block |
+| `src/data/encounter-data.js` | `encounters`, `encounterTables`, `hiddenSubtypePools` | Two inline JS regions |
+
+`scripts/build_play_html.mjs` inlines both source files back into `game/play.html`. All JavaScript engine code, HTML structure, and other data remain inside `game/play.html` for now.
 
 ---
 
@@ -255,15 +264,15 @@ flowchart TD
 
 | Lines | Area |
 |-------|------|
-| 1–990 | HTML head, CSS styles, HTML body structure (UI panels, buttons, modals) |
+| 1–990 | HTML head, inline CSS (generated — source is `src/styles/game.css`), HTML body structure (UI panels, buttons, modals) |
 | 990–1020 | Game version constant |
-| 1021–3413 | Static data: encounter definitions (~100+ encounters with spawn, poison, natural-history blocks) |
-| 3414–3630 | Spawn tables: layer-based encounter probability lists |
+| 1021–3501 | Static data: encounter definitions + spawn tables — generated, source is `src/data/encounter-data.js` [1/2] |
 | 3631–4252 | World generation: terrain, habitats, altitude, water, clay deposits |
 | 4253–4791 | Player state object and dynamic world state (waterState, socialGroup, nearbyEntities) |
 | 4792–5829 | Achievements (50 defs), profiles, save/load, Field Journal, Fossil Record |
-| 5830–6281 | Core utilities: logging, cloning, clamping, debug tracing, invariant checks |
-| 6282–7612 | Turn flow: startTurn, endTurn, metabolism, time of day, ecology tick |
+| 5830–6036 | Core utilities: logging, cloning, clamping, debug tracing |
+| 6037–6115 | hiddenSubtypePools — generated, source is `src/data/encounter-data.js` [2/2] |
+| 6116–7614 | Remaining utilities, turn flow: startTurn, endTurn, metabolism, ecology tick |
 | 7613–8429 | Nearby entity simulation: spawning, persistence, world registry |
 | 8430–11327 | Social system, same-species encounters, group management, calls |
 | 11328–11826 | Threat and predator logic: pursuit, escalation, flee/fight resolution |
@@ -291,12 +300,24 @@ flowchart TD
 
 The rebuild plan (see `docs/project-plan.md`) targets extraction in this rough order:
 
-1. CSS and HTML templates (currently embedded in the `<style>` and `<body>` sections)
-2. Static encounter data and spawn tables (lines 1021–3630)
+1. CSS and HTML templates — **CSS extracted to `src/styles/game.css`** ✓; HTML templates still inline
+2. Static encounter data and spawn tables — **`encounters`, `encounterTables`, `hiddenSubtypePools` extracted to `src/data/encounter-data.js`** ✓
 3. Pure helper functions with no side effects
 4. State and save schema (player object, world state, profile schema)
 5. Turn engine (startTurn, endTurn, encounter resolution)
 6. Rendering layer
 7. Bot/QA tools
 
-No extraction has begun yet. This document will be updated as each phase completes.
+### Build scaffold
+
+`scripts/build_play_html.mjs` inlines all source files back into `game/play.html`:
+
+| Source | Markers in play.html |
+|--------|---------------------|
+| `src/styles/game.css` | `/* BEGIN/END GENERATED CSS: src/styles/game.css */` inside `<style>` |
+| `src/data/encounter-data.js` [1/2] | `// BEGIN/END GENERATED JS: src/data/encounter-data.js [1/2]` |
+| `src/data/encounter-data.js` [2/2] | `// BEGIN/END GENERATED JS: src/data/encounter-data.js [2/2]` |
+
+The source file `src/data/encounter-data.js` contains a `// << SPLIT: hiddenSubtypePools >>` line dividing part 1 (encounters + encounterTables) from part 2 (hiddenSubtypePools). The build script splits on this marker and inlines each part into its respective location in `play.html`.
+
+Run `node scripts/build_play_html.mjs` after editing any source file. Do not hand-edit generated regions in `game/play.html`. This document will be updated as each further extraction completes.

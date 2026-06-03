@@ -8,15 +8,32 @@ This document is a map of how the game HTML file is organised. Read this before 
 
 The entire game lives in one large HTML file (`game/play.html`, ~18,400 lines). There is no build step, no bundler, and no separate JavaScript files. Everything — CSS, HTML structure, and all JavaScript — is in one file.
 
-As of the first extraction step, **CSS is the exception**. Its source lives in `src/styles/game.css` and is inlined back into `game/play.html` by `scripts/build_play_html.mjs`, which replaces only the region between these marker comments inside the `<style>` block:
+Two source files have been extracted. `game/play.html` still ships all content inline so it works with no build step at runtime. `scripts/build_play_html.mjs` inlines them back using marker comments:
 
+**CSS** (inside `<style>` block):
 ```
 /* BEGIN GENERATED CSS: src/styles/game.css */
-...generated css...
+...generated...
 /* END GENERATED CSS: src/styles/game.css */
 ```
 
-The playable file still ships its CSS inline, so it works with no build step at runtime. **Edit CSS in `src/styles/game.css` and run `node scripts/build_play_html.mjs` — do not hand-edit the generated region.** The build script never touches JavaScript or HTML structure.
+**Encounter data — part 1** (inside `<script>` block, ~line 1040):
+```
+// BEGIN GENERATED JS: src/data/encounter-data.js [1/2]
+...const encounters = { ... };  const encounterTables = { ... };...
+// END GENERATED JS: src/data/encounter-data.js [1/2]
+```
+
+**Encounter data — part 2** (inside `<script>` block, ~line 6037):
+```
+// BEGIN GENERATED JS: src/data/encounter-data.js [2/2]
+...const hiddenSubtypePools = { ... };...
+// END GENERATED JS: src/data/encounter-data.js [2/2]
+```
+
+`src/data/encounter-data.js` uses `// << SPLIT: hiddenSubtypePools >>` to separate part 1 from part 2. The build script splits on this marker and inlines each part into its respective location.
+
+**Edit CSS in `src/styles/game.css`; edit encounter data in `src/data/encounter-data.js`. Run `node scripts/build_play_html.mjs`. Do not hand-edit the generated regions.** The build script never touches code outside the marked regions.
 
 `game/evolution_game_v66_57.html` is the versioned archive of an earlier build. It is a historical snapshot and is not kept byte-in-sync with `game/play.html` between releases; `game/play.html` is the stable public-facing copy that gets replaced on each release.
 
@@ -28,15 +45,15 @@ The playable file still ships its CSS inline, so it works with no build step at 
 
 | Lines | Area |
 |-------|------|
-| 1–990 | HTML head, CSS styles, HTML body structure (UI panels, buttons, modals) |
+| 1–990 | HTML head, inline CSS (generated — source in `src/styles/game.css`), HTML body structure |
 | 990–1020 | Game version constant (`GAME_VERSION`) |
-| 1021–3413 | Static data: encounter definitions (~100+ encounters with spawn, poison, natural-history blocks) |
-| 3414–3630 | Spawn tables: layer-based encounter probability lists |
-| 3631–4252 | World generation: terrain, habitats, altitude, water, clay deposits |
+| 1021–3501 | Static data: encounters + spawn tables — generated, source in `src/data/encounter-data.js` [1/2] |
+| 3502–4254 | World generation: terrain, habitats, altitude, water, clay deposits |
 | 4253–4791 | Player state object and dynamic world state (waterState, socialGroup, nearbyEntities) |
 | 4792–5829 | Achievements (50 defs), profiles, save/load, Field Journal, Fossil Record |
-| 5830–6281 | Core utilities: logging, clamping, cloning, debug tracing, invariant checks |
-| 6282–7612 | Turn flow: `startTurn`, `endTurn`, metabolism, time of day, ecology tick |
+| 5830–6036 | Core utilities: logging, clamping, cloning, debug tracing |
+| 6037–6115 | hiddenSubtypePools — generated, source in `src/data/encounter-data.js` [2/2] |
+| 6116–7614 | Remaining utilities + turn flow: `startTurn`, `endTurn`, metabolism, ecology tick |
 | 7613–8429 | Nearby entity simulation: spawning, persistence, world registry |
 | 8430–11327 | Social system, same-species encounters, group management, calls |
 | 11328–11826 | Threat and predator logic: pursuit, escalation, flee/fight resolution |
@@ -95,6 +112,7 @@ All rendering is done by a single `render()` call that redraws the map, UI panel
 - **`game/play.html` and `game/evolution_game_v66_57.html` must be kept in sync** on each release. If you edit one, copy the change to the other, or replace `play.html` entirely.
 - **`index.html` and `manifest.json` must both reference `game/play.html`.** The syntax check script verifies `index.html`. Check `manifest.json` manually on releases.
 - **`player.knowledge` / `player.classKnowledge`** accumulate across runs and feed the Field Journal. Incorrect resets at run boundaries lose journal data permanently.
+- **The CSS region and both encounter-data regions in `game/play.html` are generated.** Hand edits are overwritten on the next `node scripts/build_play_html.mjs`. Edit `src/styles/game.css` and `src/data/encounter-data.js` instead. Do not remove the BEGIN/END marker comments or the `// << SPLIT: hiddenSubtypePools >>` line — the build script requires all of them.
 
 ---
 
