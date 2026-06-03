@@ -129,6 +129,23 @@ Extract code in small PRs in a defined order, keeping the playable build working
 
 The rebuild is not a rewrite, not a framework migration, and not a gameplay redesign. See `docs/project-plan.md` for full detail.
 
+### Build scaffold
+
+Two source extractions are complete:
+
+| Source file | What it contains | Destination in play.html |
+|-------------|-----------------|--------------------------|
+| `src/styles/game.css` | All CSS | Inline `<style>` block |
+| `src/data/encounter-data.js` | `encounters`, `encounterTables`, `hiddenSubtypePools` | Two JS regions (~line 1040 and ~line 6035) |
+
+`game/play.html` keeps all content **inline** so it stays directly playable with no build step or runtime dependency. To regenerate `game/play.html` after editing any source file:
+
+```sh
+node scripts/build_play_html.mjs
+```
+
+The script replaces only the marked generated regions; it never touches code outside those regions. **Edit source in `src/`; do not hand-edit the generated regions in `game/play.html`.**
+
 ---
 
 ## Project planning documents

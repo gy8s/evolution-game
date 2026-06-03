@@ -28,15 +28,15 @@ The playable file still ships its CSS inline, so it works with no build step at 
 
 | Lines | Area |
 |-------|------|
-| 1–990 | HTML head, CSS styles, HTML body structure (UI panels, buttons, modals) |
+| 1–990 | HTML head, inline CSS (generated — source in `src/styles/game.css`), HTML body structure |
 | 990–1020 | Game version constant (`GAME_VERSION`) |
-| 1021–3413 | Static data: encounter definitions (~100+ encounters with spawn, poison, natural-history blocks) |
-| 3414–3630 | Spawn tables: layer-based encounter probability lists |
-| 3631–4252 | World generation: terrain, habitats, altitude, water, clay deposits |
+| 1021–3501 | Static data: encounters + spawn tables — generated, source in `src/data/encounter-data.js` [1/2] |
+| 3502–4254 | World generation: terrain, habitats, altitude, water, clay deposits |
 | 4253–4791 | Player state object and dynamic world state (waterState, socialGroup, nearbyEntities) |
 | 4792–5829 | Achievements (50 defs), profiles, save/load, Field Journal, Fossil Record |
-| 5830–6281 | Core utilities: logging, clamping, cloning, debug tracing, invariant checks |
-| 6282–7612 | Turn flow: `startTurn`, `endTurn`, metabolism, time of day, ecology tick |
+| 5830–6036 | Core utilities: logging, clamping, cloning, debug tracing |
+| 6037–6115 | hiddenSubtypePools — generated, source in `src/data/encounter-data.js` [2/2] |
+| 6116–7614 | Remaining utilities + turn flow: `startTurn`, `endTurn`, metabolism, ecology tick |
 | 7613–8429 | Nearby entity simulation: spawning, persistence, world registry |
 | 8430–11327 | Social system, same-species encounters, group management, calls |
 | 11328–11826 | Threat and predator logic: pursuit, escalation, flee/fight resolution |
@@ -95,6 +95,7 @@ All rendering is done by a single `render()` call that redraws the map, UI panel
 - **`game/play.html` and `game/evolution_game_v66_57.html` must be kept in sync** on each release. If you edit one, copy the change to the other, or replace `play.html` entirely.
 - **`index.html` and `manifest.json` must both reference `game/play.html`.** The syntax check script verifies `index.html`. Check `manifest.json` manually on releases.
 - **`player.knowledge` / `player.classKnowledge`** accumulate across runs and feed the Field Journal. Incorrect resets at run boundaries lose journal data permanently.
+- **The CSS region and both encounter-data regions in `game/play.html` are generated.** Hand edits are overwritten on the next `node scripts/build_play_html.mjs`. Edit `src/styles/game.css` and `src/data/encounter-data.js` instead. Do not remove the BEGIN/END marker comments or the `// << SPLIT: hiddenSubtypePools >>` line — the build script requires all of them.
 
 ---
 
