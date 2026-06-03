@@ -24,11 +24,42 @@ This is not a promise to build everything. It is a shared memory and prioritisat
 
 ## Current broad phase
 
-**Phase:** Early ecology and playability expansion.
+**Phase:** Controlled rebuild — Phase 1 (documentation repair and enforcement).
 
-The current build has enough basic systems to play and test, but many mechanics are still first-pass. The immediate goal is to make the ecosystem feel more alive while keeping the game stable and testable.
+The game has grown beyond what is safe to maintain as a single large HTML file. Rather than a rewrite, the plan is a structured, evidence-first rebuild that keeps the playable game stable throughout.
 
-Current emphasis:
+### Rebuild phases
+
+**Phase 1 — Documentation repair and enforcement** *(current)*  
+Repair all existing documentation to accurately describe the current game. Create `docs/current-game-structure.md` and `docs/documentation-map.md`. Make documentation checks mandatory in every PR via the PR template.
+
+**Phase 2 — Architecture plan** *(next)*  
+After documentation is in order, produce and agree a proposed modular structure. Likely shape:
+- `src/data/` — encounters, spawn tables, natural-history text
+- `src/state/` — player state, world state, profiles, save schema
+- `src/engine/` — turn logic, encounters, poison, ecology, group systems
+- `src/ui/` — rendering, map, player panel, modals, Field Journal
+- `src/qa/` — bot runner, invariant checks, report generation
+- `scripts/` — build and check tools
+
+**Phase 3 — Safe extraction** *(after Phase 2 is approved)*  
+Extract code in small PRs with a single purpose each. Probable order: CSS/templates → static data → pure helpers → state/save schema → turn engine → rendering → bot/QA tools.
+
+Each extraction PR must: have one purpose, avoid gameplay changes, update docs, update CHANGELOG, pass syntax/smoke checks, and keep the playable build working.
+
+### What the rebuild is not
+
+- Not a total rewrite
+- Not a framework migration
+- Not a gameplay redesign or balance pass
+- Not a feature expansion
+- Not moving fast and hoping it works
+
+### Previously active: early ecology and playability expansion
+
+*(Paused while Phase 1 completes. Will resume as gameplay work within the new structure.)*
+
+The earlier focus was making the ecosystem feel more alive:
 
 - richer encounter behaviour,
 - clearer survival pressures,

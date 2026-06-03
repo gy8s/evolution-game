@@ -51,6 +51,34 @@ If this check was not run, state clearly here:
 
 **GPT/Claude instruction:** Do not describe a PR as complete, safe, or ready to merge unless the changelog status is explicitly addressed.
 
+## Mandatory documentation gate
+
+Check `docs/documentation-map.md` to identify which documentation files apply to this PR.
+
+Tick every document checked:
+
+- [ ] `CHANGELOG.txt`
+- [ ] `README.md`
+- [ ] `docs/current-game-structure.md`
+- [ ] `docs/architecture-notes.md`
+- [ ] `docs/project-plan.md`
+- [ ] `docs/bug-guardrails.md`
+- [ ] `docs/release-checklist.md`
+- [ ] `.github/pull_request_template.md`
+- [ ] `CLAUDE.md`
+
+This PR body must include one of the following statements — no exceptions:
+
+> `Documentation updated: [list files updated]`
+
+or
+
+> `Documentation checked; no wider docs required because: [specific reason]`
+
+Silence on documentation impact is a process failure. A vague answer ("checked, none needed") does not count.
+
+**GPT/Claude instruction:** Do not describe a PR as complete, safe, or ready to merge unless one of these two statements is present in the PR body.
+
 ## Commit message check
 
 - [ ] No `claude.ai/code/session_...` URLs in any commit message on this PR (repo is public)

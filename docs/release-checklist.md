@@ -25,11 +25,17 @@ Run through this every time a new version becomes the stable build.
 - [ ] No new `ERR_*` errors compared to previous build
 - [ ] Consolidated report produced if multiple runs were done
 
-## Documentation
+## Documentation gate
+
+Check `docs/documentation-map.md` to identify which files apply to this release.
 
 - [ ] `CHANGELOG.txt` updated with a plain-English entry
+- [ ] `docs/current-game-structure.md` checked — line ranges and system descriptions still accurate
+- [ ] `docs/architecture-notes.md` checked — line ranges still accurate; new fragile areas noted
 - [ ] `docs/bug-guardrails.md` checked — any new lessons from this patch added
-- [ ] `docs/project-plan.md` updated if design changed
+- [ ] `docs/project-plan.md` updated if design or phase changed
+- [ ] `README.md` updated if build version, layout, or workflow changed
+- [ ] PR body includes documentation gate statement: `Documentation updated: [files]` or `Documentation checked; no wider docs required because: [reason]`
 
 ## GitHub
 

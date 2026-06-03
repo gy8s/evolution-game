@@ -117,6 +117,41 @@ If a compact report still shows mostly `unknown` while run-level context is pres
 
 ---
 
+## BG-004 — Documentation drift: docs not updated alongside code changes
+
+**Status:** Active guardrail
+
+**Observed failure:**
+Multiple PRs were merged without updating documentation that described the affected systems. Over time, `docs/architecture-notes.md` described line ranges from an earlier build (~13,400 lines) while the actual file had grown to ~18,400 lines. Systems added since the docs were last written (profiles, saves, Field Journal, Fossil Record, Achievements) were absent from architecture documentation entirely.
+
+**Player/tester symptom:**
+Not directly visible in gameplay, but the codebase became harder to oversee. Reviewers and AI assistants had to guess at structure rather than reading reliable documentation.
+
+**Root cause:**
+Documentation updates were not treated as a mandatory part of the PR process. No PR template section required authors to explicitly check whether docs were affected.
+
+**Known affected area:**
+- All documentation files whenever code, structure, systems, or workflow change.
+- Specifically: `README.md`, `docs/current-game-structure.md`, `docs/architecture-notes.md`, `docs/project-plan.md`, `docs/bug-guardrails.md`, `docs/release-checklist.md`, `.github/pull_request_template.md`, `CLAUDE.md`.
+
+**Future guardrail:**
+Every PR must explicitly confirm documentation status using one of these two forms in the PR body:
+
+- `Documentation updated: [list of files]`
+- `Documentation checked; no wider docs required because: [specific reason]`
+
+Silence on documentation impact is a process failure.
+
+**Required PR check:**
+- Check `docs/documentation-map.md` to identify which documents apply to the change.
+- Update any affected document in the same PR.
+- Include the documentation gate statement in the PR body.
+
+**Reviewer instruction:**
+Do not describe a PR as complete, safe, or ready to merge unless the documentation gate statement is present in the PR body.
+
+---
+
 ## Entry template for future bugs
 
 ```md
