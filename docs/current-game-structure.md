@@ -12,15 +12,16 @@ Evolution Game is a browser-based single-player survival simulation. The player 
 
 The game runs from a single HTML file (`game/play.html`, ~18,400 lines). There is no bundler and no server. Open the file in a browser and it works.
 
-Three source extractions are complete. The playable file `game/play.html` still contains all content inline (between marker comments) so it works with no build step or runtime dependency.
+Four source extractions are complete. The playable file `game/play.html` still contains all content inline (between marker comments) so it works with no build step or runtime dependency.
 
 | Source file | What it contains | In play.html |
 |-------------|-----------------|--------------|
 | `src/styles/game.css` | All CSS | Inline `<style>` block |
 | `src/data/encounter-data.js` | `encounters`, `encounterTables`, `hiddenSubtypePools` | Two inline JS regions |
 | `src/utils/core-utils.js` | Pure stateless helpers (clamp, roll, choice, clonePlain, escapeHtml, chooseWeighted, text-sanitisation helpers) | One inline JS region (~line 5835) |
+| `src/data/achievement-data.js` | `ACHIEVEMENT_DEFS` (definitions array only) | One inline JS region (~line 4798) |
 
-`scripts/build_play_html.mjs` inlines all source files back into `game/play.html`. All other JavaScript engine code, HTML structure, and game state remain inside `game/play.html` for now.
+`scripts/build_play_html.mjs` inlines all source files back into `game/play.html`. Only the `ACHIEVEMENT_DEFS` definitions array is extracted — achievement persistence, profile/save logic, `checkAchievements`, and achievement rendering/toast logic all remain inside `game/play.html`. All other JavaScript engine code, HTML structure, and game state also remain inside `game/play.html` for now.
 
 ---
 
@@ -270,7 +271,8 @@ flowchart TD
 | 1021–3501 | Static data: encounter definitions + spawn tables — generated, source is `src/data/encounter-data.js` [1/2] |
 | 3631–4252 | World generation: terrain, habitats, altitude, water, clay deposits |
 | 4253–4791 | Player state object and dynamic world state (waterState, socialGroup, nearbyEntities) |
-| 4792–5829 | Achievements (50 defs), profiles, save/load, Field Journal, Fossil Record |
+| 4798–4863 | Achievement definitions (`ACHIEVEMENT_DEFS`, 50 defs) — generated, source is `src/data/achievement-data.js` |
+| 4865–5829 | Achievement persistence (load/save/check), profiles, save/load, Field Journal, Fossil Record |
 | 5830–5924 | Core utilities — generated, source is `src/utils/core-utils.js`: pure helpers (clamp, roll, choice, clonePlain, escapeHtml, etc.) |
 | 5925–6036 | Remaining utilities: logging, debug helpers, narration setters |
 | 6037–6115 | hiddenSubtypePools — generated, source is `src/data/encounter-data.js` [2/2] |
@@ -320,7 +322,8 @@ The rebuild plan (see `docs/project-plan.md`) targets extraction in this rough o
 | `src/data/encounter-data.js` [1/2] | `// BEGIN/END GENERATED JS: src/data/encounter-data.js [1/2]` |
 | `src/data/encounter-data.js` [2/2] | `// BEGIN/END GENERATED JS: src/data/encounter-data.js [2/2]` |
 | `src/utils/core-utils.js` | `// BEGIN/END GENERATED JS: src/utils/core-utils.js` |
+| `src/data/achievement-data.js` | `// BEGIN/END GENERATED JS: src/data/achievement-data.js` |
 
-The source file `src/data/encounter-data.js` contains a `// << SPLIT: hiddenSubtypePools >>` line dividing part 1 (encounters + encounterTables) from part 2 (hiddenSubtypePools). The build script splits on this marker and inlines each part into its respective location in `play.html`. `src/utils/core-utils.js` has no split marker — it maps to one contiguous region.
+The source file `src/data/encounter-data.js` contains a `// << SPLIT: hiddenSubtypePools >>` line dividing part 1 (encounters + encounterTables) from part 2 (hiddenSubtypePools). The build script splits on this marker and inlines each part into its respective location in `play.html`. `src/utils/core-utils.js` and `src/data/achievement-data.js` have no split marker — each maps to one contiguous region.
 
 Run `node scripts/build_play_html.mjs` after editing any source file. Do not hand-edit generated regions in `game/play.html`. This document will be updated as each further extraction completes.

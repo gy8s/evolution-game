@@ -93,7 +93,8 @@ evolution-game/
 │   ├── styles/
 │   │   └── game.css                  CSS source (inlined into play.html by the build script)
 │   ├── data/
-│   │   └── encounter-data.js         Encounter + spawn-table source (inlined into play.html by the build script)
+│   │   ├── encounter-data.js         Encounter + spawn-table source (inlined into play.html by the build script)
+│   │   └── achievement-data.js       Achievement definitions source (inlined into play.html by the build script)
 │   └── utils/
 │       └── core-utils.js             Pure utility helpers source (inlined into play.html by the build script)
 ├── docs/
@@ -136,13 +137,14 @@ The rebuild is not a rewrite, not a framework migration, and not a gameplay rede
 
 ### Build scaffold
 
-Three source extractions are complete:
+Four source extractions are complete:
 
 | Source file | What it contains | Destination in play.html |
 |-------------|-----------------|--------------------------|
 | `src/styles/game.css` | All CSS | Inline `<style>` block |
 | `src/data/encounter-data.js` | `encounters`, `encounterTables`, `hiddenSubtypePools` | Two JS regions (~line 1040 and ~line 6037) |
 | `src/utils/core-utils.js` | Pure stateless helper functions | One JS region (~line 5835) |
+| `src/data/achievement-data.js` | `ACHIEVEMENT_DEFS` (definitions only; persistence stays in play.html) | One JS region (~line 4798) |
 
 `game/play.html` keeps all content **inline** so it stays directly playable with no build step or runtime dependency. To regenerate `game/play.html` after editing any source file:
 
