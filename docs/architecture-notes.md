@@ -8,15 +8,32 @@ This document is a map of how the game HTML file is organised. Read this before 
 
 The entire game lives in one large HTML file (`game/play.html`, ~18,400 lines). There is no build step, no bundler, and no separate JavaScript files. Everything — CSS, HTML structure, and all JavaScript — is in one file.
 
-As of the first extraction step, **CSS is the exception**. Its source lives in `src/styles/game.css` and is inlined back into `game/play.html` by `scripts/build_play_html.mjs`, which replaces only the region between these marker comments inside the `<style>` block:
+Two source files have been extracted and are inlined back into `game/play.html` by `scripts/build_play_html.mjs`. The playable file still ships all content inline, so it works with no build step at runtime. The build script replaces only the regions between these marker comments:
 
+**CSS** (inside the `<style>` block) — source `src/styles/game.css`:
 ```
 /* BEGIN GENERATED CSS: src/styles/game.css */
 ...generated css...
 /* END GENERATED CSS: src/styles/game.css */
 ```
 
-The playable file still ships its CSS inline, so it works with no build step at runtime. **Edit CSS in `src/styles/game.css` and run `node scripts/build_play_html.mjs` — do not hand-edit the generated region.** The build script never touches JavaScript or HTML structure.
+**Encounter data part 1** (inside the `<script>` block, ~line 1040) — `const encounters` + `const encounterTables`:
+```
+// BEGIN GENERATED JS: src/data/encounter-data.js [1/2]
+...generated js...
+// END GENERATED JS: src/data/encounter-data.js [1/2]
+```
+
+**Encounter data part 2** (inside the `<script>` block, ~line 6037) — `const hiddenSubtypePools`:
+```
+// BEGIN GENERATED JS: src/data/encounter-data.js [2/2]
+...generated js...
+// END GENERATED JS: src/data/encounter-data.js [2/2]
+```
+
+`src/data/encounter-data.js` uses a `// << SPLIT: hiddenSubtypePools >>` line to divide part 1 from part 2; the build script splits on it and inlines each part into its region. The split marker itself is not inlined.
+
+**Edit CSS in `src/styles/game.css` and encounter data in `src/data/encounter-data.js`, then run `node scripts/build_play_html.mjs` — do not hand-edit the generated regions.** The build script never touches code outside the marked regions.
 
 `game/evolution_game_v66_57.html` is the versioned archive of an earlier build. It is a historical snapshot and is not kept byte-in-sync with `game/play.html` between releases; `game/play.html` is the stable public-facing copy that gets replaced on each release.
 

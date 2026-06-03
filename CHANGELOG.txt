@@ -1,3 +1,13 @@
+[2026-06-03 fix-encounter-data-build-wiring | Claude]
+Corrective build-wiring patch — build script now actually inlines the encounter data source.
+
+- Context: the previous encounter-data extraction landed src/data/encounter-data.js and the generated JS markers in game/play.html, but scripts/build_play_html.mjs was left inlining only CSS. The encounter data source was therefore not wired into the build pipeline.
+- scripts/build_play_html.mjs: now inlines both src/styles/game.css and src/data/encounter-data.js. It splits the data source on "// << SPLIT: hiddenSubtypePools >>" into part 1 (encounters + encounterTables → region [1/2]) and part 2 (hiddenSubtypePools → region [2/2]); the split marker itself is not inlined. Fails clearly if either source file, the split marker, or any generated-region marker is missing, or if an END marker precedes its BEGIN. Idempotent.
+- Verification: running the corrected build reported "no change", confirming the content already inlined in game/play.html matches both source files exactly. Failure paths tested with fixtures (missing source, missing split marker, missing region marker, END-before-BEGIN) all exit non-zero with a clear message. node scripts/check_html_js_syntax.mjs passes. Browser render not manually verified in this environment.
+- docs/release-checklist.md: build-step check now covers src/data/encounter-data.js as well as src/styles/game.css.
+- docs/architecture-notes.md: single-file structure section updated so it no longer implies only CSS is handled by the build script; now documents the two encounter-data regions and the split marker.
+- No gameplay logic changed. No encounter values changed. No encounter keys renamed. No CSS changed. game/play.html unchanged (build is idempotent). src/data/encounter-data.js unchanged.
+
 [2026-06-03 extract-encounter-data-source | Claude]
 Second controlled extraction — static encounter data source extracted and build script extended.
 
