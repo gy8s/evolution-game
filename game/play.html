@@ -5832,6 +5832,7 @@ function normaliseEncounter(e, key = "unknown") {
 // ---------------------------------------------------------------------------
 // [UTILS] CORE HELPERS / LOGGING / CLONING
 // ---------------------------------------------------------------------------
+// BEGIN GENERATED JS: src/utils/core-utils.js
 // @target [UTILS] Strength Of
 function strengthOf(entity) {
   return Math.round((entity.size || 1) * 1.2);
@@ -5865,23 +5866,6 @@ function choice(list) {
   return list[Math.floor(Math.random() * list.length)];
 }
 
-function layerNarrationChoice(layerName) {
-  const options = (layerNarration[layerName] || layerNarration["Ground"] || []).filter(item => typeof item === "string");
-  return choice(options);
-}
-
-/**
- * Adds one player-facing event line and one structured debug-log entry.
- *
- * Player log design:
- * - Coordinates and layer are included for reproducible bug reports.
- * - The visible log is compacted where possible to avoid duplicated move lines.
- *
- * Developer log design:
- * - Keeps richer state than the visible log.
- * - Export is capped to prevent unbounded memory growth during long playthroughs.
- */
-// @target [UTILS] Add Log
 function sanitizeNarrativeText(value, fallback = "") {
   if (value === null || value === undefined) return fallback;
   if (typeof value === "string") return value.replace(/\[object Object\]/g, fallback || "forest").trim();
@@ -5915,6 +5899,46 @@ function cleanNarrative(str) {
   return str;
 }
 
+// @target [UTILS] Escape Html
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch] || ch));
+}
+
+// @target [UTILS] Clone Plain
+function clonePlain(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+// @target [UTILS] Choose Weighted
+function chooseWeighted(items) {
+  const total = items.reduce((s, item) => s + item.weight, 0);
+  let r = Math.random() * total;
+
+  for (const item of items) {
+    r -= item.weight;
+    if (r <= 0) return item;
+  }
+
+  return items[0];
+}
+// END GENERATED JS: src/utils/core-utils.js
+
+function layerNarrationChoice(layerName) {
+  const options = (layerNarration[layerName] || layerNarration["Ground"] || []).filter(item => typeof item === "string");
+  return choice(options);
+}
+
+/**
+ * Adds one player-facing event line and one structured debug-log entry.
+ *
+ * Player log design:
+ * - Coordinates and layer are included for reproducible bug reports.
+ * - The visible log is compacted where possible to avoid duplicated move lines.
+ *
+ * Developer log design:
+ * - Keeps richer state than the visible log.
+ * - Export is capped to prevent unbounded memory growth during long playthroughs.
+ */
 function safeNarrativeText(input, fallback = "") {
   const ensured = ensureNarrativeString(input);
   const base = sanitizeNarrativeText(ensured, fallback);
@@ -6004,11 +6028,6 @@ function setNarration(text) {
   lastNarration = raw || layerNarrationChoice(layers[player.z]);
 }
 
-// @target [UTILS] Escape Html
-function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch] || ch));
-}
-
 // @target [UTILS] Group scene notice helper
 function setGroupNotice(text) {
   const msg = safeNarrativeText(text, "").trim();
@@ -6028,11 +6047,6 @@ function setSmell(text) {
 }
 
 let nextInstanceId = 1;
-
-// @target [UTILS] Clone Plain
-function clonePlain(obj) {
-  return JSON.parse(JSON.stringify(obj));
-}
 
 // BEGIN GENERATED JS: src/data/encounter-data.js [2/2]
 const hiddenSubtypePools = {
@@ -6113,19 +6127,6 @@ const hiddenSubtypePools = {
   ]
 };
 // END GENERATED JS: src/data/encounter-data.js [2/2]
-
-// @target [UTILS] Choose Weighted
-function chooseWeighted(items) {
-  const total = items.reduce((s, item) => s + item.weight, 0);
-  let r = Math.random() * total;
-
-  for (const item of items) {
-    r -= item.weight;
-    if (r <= 0) return item;
-  }
-
-  return items[0];
-}
 
 // @target [UTILS] Apply Hidden Subtype
 function applyHiddenSubtype(e) {
