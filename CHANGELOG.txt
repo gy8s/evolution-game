@@ -1,3 +1,15 @@
+[2026-06-04 extract-game-init | Claude]
+Twenty-first controlled extraction — initGame extracted and build script extended.
+
+- Created src/bootstrap/game-init.js: one function extracted from game/play.html, byte-identical to the original.
+  - initGame(resumeChoice): configures run-tracking, clears toast queue, generates terrain and habitats, then either resumes an active run or starts a new one; updates the profile panel UI on completion.
+  - No function name changed. No function body changed. No startup order changed. No profile startup behaviour changed. No resume/new-run behaviour changed. No gameplay logic changed.
+- Edited game/play.html: function wrapped in a single generated region (~line 5441). The // ===== GAME INIT WITH PROFILE ===== banner stays outside the region. No code moved. No call sites changed.
+- Extended scripts/build_play_html.mjs: GAMEINIT_SOURCE constant; marker pair; existence check; read; inlineRegion call. Now handles 21 source files.
+- Docs: README.md (repo layout tree + build scaffold table), docs/current-game-structure.md (line-range table, build scaffold table, marker table), docs/architecture-notes.md (generated region entry, edit guidance), docs/release-checklist.md (build step check for new source file).
+- Verification: node scripts/build_play_html.mjs (idempotent — no change) and node scripts/check_html_js_syntax.mjs both pass. Inline region confirmed byte-identical to source file content.
+- Source/build structure change only. No gameplay logic, function body, call sites, startup behaviour, save/profile behaviour, or any other code changed.
+
 [2026-06-04 extract-profile-delete-startup-modal | Claude]
 Nineteenth and twentieth controlled extractions — profile delete and startup modal extracted and build script extended.
 
