@@ -1,3 +1,24 @@
+[2026-06-04 extract-profile-store-core | Claude]
+Eighth controlled extraction — profile store core helper functions extracted and build script extended.
+
+- Created src/state/profile-store-core.js: five profile store functions moved mechanically from game/play.html, byte-identical to the originals.
+  - profileLoadStore(): reads profile data from localStorage, returning profileEmptyStore() on parse failure.
+  - profileSaveStore(data): writes profile data to localStorage, returning true/false.
+  - profileCreateNew(name): creates a new profile entry, persists it, and sets currentProfileId.
+  - profileGetActive(): returns the current profile object or null.
+  - profileCheckBuildCompatibility(profile): compares profile.buildId to GAME_VERSION.
+  - No function names changed. No function bodies changed. No localStorage keys changed. No profile schema changed.
+- Edited game/play.html: the five functions replaced with a single // BEGIN/END GENERATED JS: src/state/profile-store-core.js region.
+  - The generated region sits immediately after the profile-factories region and before profileCaptureWorldArrays — preserving load order.
+  - The five functions were contiguous; no hoisting shuffle was required.
+  - Only the five approved functions were extracted. profileCaptureWorldArrays, profileCaptureState, profileRestoreState, profileUpdateStats, profileOnRunEnd, fossil record logic, active-run logic, achievement persistence, and save/load logic remain in game/play.html. No call sites changed.
+  - game/play.html remains the directly playable artifact.
+- Extended scripts/build_play_html.mjs: now inlines CSS, encounter data, core utils, achievement definitions, run-tracking state factory, profile/storage constants, profile factory helpers, and profile store core helpers. Fails clearly if src/state/profile-store-core.js or its region markers are missing. Idempotent.
+- game/evolution_game_v66_57.html NOT changed: historical archive, not kept byte-synced between releases.
+- Docs: README.md (repo layout tree + build scaffold table), docs/current-game-structure.md (line-range table, build scaffold table, marker table), docs/architecture-notes.md (generated region + markers, line-range table, fragile-area note), docs/release-checklist.md (build step check for profile-store-core).
+- Verification: node scripts/build_play_html.mjs (idempotent — no change) and node scripts/check_html_js_syntax.mjs both pass. Extracted source verified to match the inline region (excluding markers and trailing whitespace).
+- Source/build structure change only. No gameplay logic, function bodies, call sites, save/profile behaviour, localStorage keys, profile schema, achievement logic, fossil record logic, rendering, CSS, encounter data, core utility code, run-tracking code, profile/storage constants, or factory helpers changed.
+
 [2026-06-04 extract-profile-factories | Claude]
 Seventh controlled extraction — profile factory helper functions extracted and build script extended.
 

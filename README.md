@@ -100,7 +100,8 @@ evolution-game/
 │   └── state/
 │       ├── run-tracking.js           Run-tracking state factory source (inlined into play.html by the build script)
 │       ├── profile-storage-constants.js  Profile/storage constant declarations (inlined into play.html by the build script)
-│       └── profile-factories.js      Profile factory/helper functions source (inlined into play.html by the build script)
+│       ├── profile-factories.js      Profile factory/helper functions source (inlined into play.html by the build script)
+│       └── profile-store-core.js     Profile store core helpers source (inlined into play.html by the build script)
 ├── docs/
 │   ├── current-game-structure.md     How the game works now: systems, flows, line ranges
 │   ├── documentation-map.md          What each doc covers and when to update it
@@ -141,17 +142,18 @@ The rebuild is not a rewrite, not a framework migration, and not a gameplay rede
 
 ### Build scaffold
 
-Seven source extractions are complete:
+Eight source extractions are complete:
 
 | Source file | What it contains | Destination in play.html |
 |-------------|-----------------|--------------------------|
 | `src/styles/game.css` | All CSS | Inline `<style>` block |
 | `src/data/encounter-data.js` | `encounters`, `encounterTables`, `hiddenSubtypePools` | Two JS regions (~line 1040 and ~line 6037) |
 | `src/utils/core-utils.js` | Pure stateless helper functions | One JS region (~line 5835) |
-| `src/data/achievement-data.js` | `ACHIEVEMENT_DEFS` (definitions only; persistence stays in play.html) | One JS region (~line 4804) |
-| `src/state/run-tracking.js` | `freshRunTracking()` (factory only; save/profile logic stays in play.html) | One JS region (~line 4767) |
+| `src/data/achievement-data.js` | `ACHIEVEMENT_DEFS` (definitions only; persistence stays in play.html) | One JS region (~line 4806) |
+| `src/state/run-tracking.js` | `freshRunTracking()` (factory only; save/profile logic stays in play.html) | One JS region (~line 4769) |
 | `src/state/profile-storage-constants.js` | Profile/storage key constants (7 `const` declarations; all profile logic stays in play.html) | One JS region (~line 4481) |
 | `src/state/profile-factories.js` | Profile factory/helper functions (`profileGenerateId`, `profileEmptyStore`, `profileDefaultStats`; all other profile logic stays in play.html) | One JS region (~line 4500) |
+| `src/state/profile-store-core.js` | Profile store core helpers (`profileLoadStore`, `profileSaveStore`, `profileCreateNew`, `profileGetActive`, `profileCheckBuildCompatibility`; all other profile logic stays in play.html) | One JS region (~line 4514) |
 
 `game/play.html` keeps all content **inline** so it stays directly playable with no build step or runtime dependency. To regenerate `game/play.html` after editing any source file:
 
