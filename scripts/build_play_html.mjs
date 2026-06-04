@@ -20,6 +20,10 @@
 //        [1/3] knowledge/summary/stats helpers (~line 4720)
 //        [2/3] run-end + active-run save       (~line 5013)
 //        [3/3] start-new + resume helpers      (~line 5152)
+//  11. src/state/achievement-persistence.js → three JS regions:
+//        [1/3] loadAchievements + saveAchievements (~line 4877)
+//        [2/3] awardAchievement                   (~line 4901)
+//        [3/3] checkAchievements                  (~line 4944)
 //
 // Why inline (not external files): game/play.html must open straight from
 // disk — or via the GitHub Pages link — with no build step and no runtime
@@ -47,6 +51,7 @@ const PROFFACT_SOURCE    = resolve(repoRoot, 'src/state/profile-factories.js');
 const PROFCORE_SOURCE    = resolve(repoRoot, 'src/state/profile-store-core.js');
 const PROFSNAP_SOURCE    = resolve(repoRoot, 'src/state/profile-state-snapshot.js');
 const PROFLIFE_SOURCE    = resolve(repoRoot, 'src/state/profile-run-lifecycle.js');
+const ACHPERS_SOURCE     = resolve(repoRoot, 'src/state/achievement-persistence.js');
 const PLAY_HTML          = resolve(repoRoot, 'game/play.html');
 
 // CSS markers (CSS comment style, inside <style>)
@@ -95,6 +100,14 @@ const JS_END_PROFLIFE2   = '// END GENERATED JS: src/state/profile-run-lifecycle
 const JS_BEGIN_PROFLIFE3 = '// BEGIN GENERATED JS: src/state/profile-run-lifecycle.js [3/3]';
 const JS_END_PROFLIFE3   = '// END GENERATED JS: src/state/profile-run-lifecycle.js [3/3]';
 
+// Achievement-persistence markers (JS comment style, inside <script>) — three parts
+const JS_BEGIN_ACHPERS1 = '// BEGIN GENERATED JS: src/state/achievement-persistence.js [1/3]';
+const JS_END_ACHPERS1   = '// END GENERATED JS: src/state/achievement-persistence.js [1/3]';
+const JS_BEGIN_ACHPERS2 = '// BEGIN GENERATED JS: src/state/achievement-persistence.js [2/3]';
+const JS_END_ACHPERS2   = '// END GENERATED JS: src/state/achievement-persistence.js [2/3]';
+const JS_BEGIN_ACHPERS3 = '// BEGIN GENERATED JS: src/state/achievement-persistence.js [3/3]';
+const JS_END_ACHPERS3   = '// END GENERATED JS: src/state/achievement-persistence.js [3/3]';
+
 // The split comment that divides the source file into part1 and part2.
 // It is NOT inlined into game/play.html.
 const JS_SPLIT  = '// << SPLIT: hiddenSubtypePools >>';
@@ -103,6 +116,11 @@ const JS_SPLIT  = '// << SPLIT: hiddenSubtypePools >>';
 // They are NOT inlined into game/play.html.
 const JS_SPLIT_PROFLIFE_A = '// << SPLIT: profileOnRunEnd >>';
 const JS_SPLIT_PROFLIFE_B = '// << SPLIT: profileStartNewRun >>';
+
+// The two split comments that divide achievement-persistence.js into three parts.
+// They are NOT inlined into game/play.html.
+const JS_SPLIT_ACHPERS_A = '// << SPLIT: awardAchievement >>';
+const JS_SPLIT_ACHPERS_B = '// << SPLIT: checkAchievements >>';
 
 function fail(msg) {
   console.error(`build_play_html: ERROR: ${msg}`);
@@ -134,6 +152,7 @@ if (!existsSync(PROFFACT_SOURCE))  fail('cannot find src/state/profile-factories
 if (!existsSync(PROFCORE_SOURCE))  fail('cannot find src/state/profile-store-core.js');
 if (!existsSync(PROFSNAP_SOURCE))  fail('cannot find src/state/profile-state-snapshot.js');
 if (!existsSync(PROFLIFE_SOURCE))  fail('cannot find src/state/profile-run-lifecycle.js');
+if (!existsSync(ACHPERS_SOURCE))   fail('cannot find src/state/achievement-persistence.js');
 if (!existsSync(PLAY_HTML))        fail('cannot find game/play.html');
 
 const css          = readFileSync(CSS_SOURCE,       'utf8');
@@ -146,6 +165,7 @@ const jsProfFact   = readFileSync(PROFFACT_SOURCE,  'utf8');
 const jsProfCore   = readFileSync(PROFCORE_SOURCE,  'utf8');
 const jsProfSnap   = readFileSync(PROFSNAP_SOURCE,  'utf8');
 const jsProfLife   = readFileSync(PROFLIFE_SOURCE,  'utf8');
+const jsAchPers    = readFileSync(ACHPERS_SOURCE,   'utf8');
 let   html         = readFileSync(PLAY_HTML,        'utf8');
 
 // --- Split encounter-data into two parts at the SPLIT marker ---
@@ -164,6 +184,16 @@ const jsLife1 = jsProfLife.slice(0, lifeSplitA).replace(/\s+$/, '');
 const jsLife2 = jsProfLife.slice(lifeSplitA + JS_SPLIT_PROFLIFE_A.length, lifeSplitB).replace(/^\n/, '').replace(/\s+$/, '');
 const jsLife3 = jsProfLife.slice(lifeSplitB + JS_SPLIT_PROFLIFE_B.length).replace(/^\n/, '').replace(/\s+$/, '');
 
+// --- Split achievement-persistence into three parts at its two SPLIT markers ---
+const achPersSplitA = jsAchPers.indexOf(JS_SPLIT_ACHPERS_A);
+if (achPersSplitA === -1) fail(`missing split marker in src/state/achievement-persistence.js: ${JS_SPLIT_ACHPERS_A}`);
+const achPersSplitB = jsAchPers.indexOf(JS_SPLIT_ACHPERS_B);
+if (achPersSplitB === -1) fail(`missing split marker in src/state/achievement-persistence.js: ${JS_SPLIT_ACHPERS_B}`);
+if (achPersSplitB < achPersSplitA) fail('achievement-persistence split markers are out of order');
+const jsAchPers1 = jsAchPers.slice(0, achPersSplitA).replace(/\s+$/, '');
+const jsAchPers2 = jsAchPers.slice(achPersSplitA + JS_SPLIT_ACHPERS_A.length, achPersSplitB).replace(/^\n/, '').replace(/\s+$/, '');
+const jsAchPers3 = jsAchPers.slice(achPersSplitB + JS_SPLIT_ACHPERS_B.length).replace(/^\n/, '').replace(/\s+$/, '');
+
 // --- Apply all regions ---
 const original = html;
 html = inlineRegion(html, CSS_BEGIN,        CSS_END,        css.replace(/\s+$/, ''), 'CSS');
@@ -179,6 +209,9 @@ html = inlineRegion(html, JS_BEGIN_PROFSNAP,  JS_END_PROFSNAP,  jsProfSnap.repla
 html = inlineRegion(html, JS_BEGIN_PROFLIFE1, JS_END_PROFLIFE1, jsLife1, 'profile-run-lifecycle [1/3]');
 html = inlineRegion(html, JS_BEGIN_PROFLIFE2, JS_END_PROFLIFE2, jsLife2, 'profile-run-lifecycle [2/3]');
 html = inlineRegion(html, JS_BEGIN_PROFLIFE3, JS_END_PROFLIFE3, jsLife3, 'profile-run-lifecycle [3/3]');
+html = inlineRegion(html, JS_BEGIN_ACHPERS1, JS_END_ACHPERS1, jsAchPers1, 'achievement-persistence [1/3]');
+html = inlineRegion(html, JS_BEGIN_ACHPERS2, JS_END_ACHPERS2, jsAchPers2, 'achievement-persistence [2/3]');
+html = inlineRegion(html, JS_BEGIN_ACHPERS3, JS_END_ACHPERS3, jsAchPers3, 'achievement-persistence [3/3]');
 
 if (html === original) {
   console.log('build_play_html: no change — game/play.html already matches all source files.');
