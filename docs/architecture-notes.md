@@ -162,9 +162,33 @@ This region sits immediately after the achievement-ui [3/3] region and before th
 ```
 Part [1/2] sits immediately after the profile-run-lifecycle [3/3] region; part [2/2] sits after the `// ===== PROFILE PANEL UI =====` banner. Profile UI helpers should be edited in `src/ui/profile-ui.js`, not inside the generated regions of `game/play.html`.
 
-`src/data/encounter-data.js` uses a `// << SPLIT: hiddenSubtypePools >>` line to divide part 1 from part 2; the build script splits on it and inlines each part into its region. `src/state/profile-run-lifecycle.js` uses two split lines (`// << SPLIT: profileOnRunEnd >>` and `// << SPLIT: profileStartNewRun >>`) to divide its three parts. `src/state/achievement-persistence.js` uses two split lines (`// << SPLIT: awardAchievement >>` and `// << SPLIT: checkAchievements >>`) to divide its three parts. `src/ui/achievement-ui.js` uses two split lines (`// << SPLIT: toastHelpers >>` and `// << SPLIT: renderAchievements >>`) to divide its three parts. `src/ui/profile-ui.js` uses one split line (`// << SPLIT: profileUpdatePanelUI >>`) to divide its two parts. The split markers themselves are not inlined. All other source files have no split marker and each maps to one contiguous region.
+**Field Journal UI helpers** (inside the `<script>` block, ~line 12946) — `showEncounterJournalEntry` and `showFieldJournal`, inlined into ONE contiguous region:
+```
+// BEGIN GENERATED JS: src/ui/field-journal-ui.js   (~line 12946)
+...showEncounterJournalEntry, showFieldJournal...
+// END GENERATED JS: src/ui/field-journal-ui.js
+```
+Field Journal UI helpers should be edited in `src/ui/field-journal-ui.js`, not inside the generated region of `game/play.html`.
 
-**Edit CSS in `src/styles/game.css`, encounter data in `src/data/encounter-data.js`, pure utility helpers in `src/utils/core-utils.js`, achievement definitions in `src/data/achievement-data.js`, run-tracking factory in `src/state/run-tracking.js`, profile/storage constants in `src/state/profile-storage-constants.js`, profile factory helpers in `src/state/profile-factories.js`, profile store core helpers in `src/state/profile-store-core.js`, profile state snapshot helpers in `src/state/profile-state-snapshot.js`, profile run lifecycle helpers in `src/state/profile-run-lifecycle.js`, achievement persistence helpers in `src/state/achievement-persistence.js`, Field Journal state helpers in `src/state/field-journal-state.js`, achievement UI/support in `src/ui/achievement-ui.js`, run-tracking update in `src/state/run-tracking-update.js`, and profile UI helpers in `src/ui/profile-ui.js`, then run `node scripts/build_play_html.mjs` — do not hand-edit the generated regions.** The build script never touches code outside the marked regions.
+**Fossil Record persistence** (inside the `<script>` block, ~line 14311) — `saveFossilRecord` only, inlined into ONE region:
+```
+// BEGIN GENERATED JS: src/state/fossil-record-state.js   (~line 14311)
+...saveFossilRecord...
+// END GENERATED JS: src/state/fossil-record-state.js
+```
+The `// @fn showDeathModal` comment immediately above this region is a stale tag; it is outside the generated region and is not part of the source file. Fossil Record persistence should be edited in `src/state/fossil-record-state.js`, not inside the generated region of `game/play.html`.
+
+**Fossil Record UI helpers** (inside the `<script>` block, ~line 14330) — `renderFossilRecord` and `renderRunRecap`, inlined into ONE contiguous region:
+```
+// BEGIN GENERATED JS: src/ui/fossil-record-ui.js   (~line 14330)
+...renderFossilRecord, renderRunRecap...
+// END GENERATED JS: src/ui/fossil-record-ui.js
+```
+Fossil Record UI helpers should be edited in `src/ui/fossil-record-ui.js`, not inside the generated region of `game/play.html`.
+
+`src/data/encounter-data.js` uses a `// << SPLIT: hiddenSubtypePools >>` line to divide part 1 from part 2; the build script splits on it and inlines each part into its region. `src/state/profile-run-lifecycle.js` uses two split lines (`// << SPLIT: profileOnRunEnd >>` and `// << SPLIT: profileStartNewRun >>`) to divide its three parts. `src/state/achievement-persistence.js` uses two split lines (`// << SPLIT: awardAchievement >>` and `// << SPLIT: checkAchievements >>`) to divide its three parts. `src/ui/achievement-ui.js` uses two split lines (`// << SPLIT: toastHelpers >>` and `// << SPLIT: renderAchievements >>`) to divide its three parts. `src/ui/profile-ui.js` uses one split line (`// << SPLIT: profileUpdatePanelUI >>`) to divide its two parts. The split markers themselves are not inlined. All other source files — including `src/ui/field-journal-ui.js`, `src/state/fossil-record-state.js`, and `src/ui/fossil-record-ui.js` — have no split marker and each maps to one contiguous region.
+
+**Edit CSS in `src/styles/game.css`, encounter data in `src/data/encounter-data.js`, pure utility helpers in `src/utils/core-utils.js`, achievement definitions in `src/data/achievement-data.js`, run-tracking factory in `src/state/run-tracking.js`, profile/storage constants in `src/state/profile-storage-constants.js`, profile factory helpers in `src/state/profile-factories.js`, profile store core helpers in `src/state/profile-store-core.js`, profile state snapshot helpers in `src/state/profile-state-snapshot.js`, profile run lifecycle helpers in `src/state/profile-run-lifecycle.js`, achievement persistence helpers in `src/state/achievement-persistence.js`, Field Journal state helpers in `src/state/field-journal-state.js`, achievement UI/support in `src/ui/achievement-ui.js`, run-tracking update in `src/state/run-tracking-update.js`, profile UI helpers in `src/ui/profile-ui.js`, Field Journal UI helpers in `src/ui/field-journal-ui.js`, Fossil Record persistence in `src/state/fossil-record-state.js`, and Fossil Record UI helpers in `src/ui/fossil-record-ui.js`, then run `node scripts/build_play_html.mjs` — do not hand-edit the generated regions.** The build script never touches code outside the marked regions.
 
 `game/evolution_game_v66_57.html` is the versioned archive of an earlier build. It is a historical snapshot and is not kept byte-in-sync with `game/play.html` between releases; `game/play.html` is the stable public-facing copy that gets replaced on each release.
 
@@ -201,7 +225,7 @@ Part [1/2] sits immediately after the profile-run-lifecycle [3/3] region; part [
 | 5160–5210 | Profile run lifecycle [3/3] (profileStartNewRun, profileResumeActiveRun) — generated, source in `src/state/profile-run-lifecycle.js` |
 | 5222–5242 | Profile UI [1/2] (showWinModal, hideWinModal, onWinAchieved) — generated, source in `src/ui/profile-ui.js` |
 | 5246–5278 | Profile UI [2/2] (profileUpdatePanelUI) — generated, source in `src/ui/profile-ui.js` |
-| 5279–5855 | Profile delete, profileShowStartupModal, initGame, profiles, save/load, Field Journal render, Fossil Record |
+| 5279–5855 | Profile delete, profileShowStartupModal, initGame, profiles, save/load |
 | 5853–5942 | Core utility helpers — generated, source in `src/utils/core-utils.js`: pure stateless helpers (clamp, roll, choice, clonePlain, escapeHtml, chooseWeighted, text-sanitisation) |
 | 5943–6068 | Remaining [UTILS]: logging, narration setters, noise, risk memory (not extracted — side effects) |
 | 6069–6147 | hiddenSubtypePools — generated, source in `src/data/encounter-data.js` [2/2] |
@@ -210,8 +234,12 @@ Part [1/2] sits immediately after the profile-run-lifecycle [3/3] region; part [
 | 8462–11359 | Social system, same-species encounters, group management, calls |
 | 11360–11858 | Threat and predator logic: pursuit, escalation, flee/fight resolution |
 | 11859–12555 | Player action handlers: move, eat, drink, climb, wait, groom, look, etc. |
-| 12556–14503 | Investigation system, carcass interactions, encounter resolution helpers, Field Journal render |
-| 14504–15871 | Bot/QA: `botState`, strategy, step execution, goal planner, loop detection |
+| 12556–12945 | Investigation system, carcass interactions, encounter resolution helpers |
+| 12946–13068 | Field Journal UI — generated, source in `src/ui/field-journal-ui.js`: showEncounterJournalEntry, showFieldJournal |
+| 13069–14310 | Remaining investigation helpers, carcass system |
+| 14311–14325 | Fossil Record persistence — generated, source in `src/state/fossil-record-state.js`: saveFossilRecord |
+| 14330–14381 | Fossil Record UI — generated, source in `src/ui/fossil-record-ui.js`: renderFossilRecord, renderRunRecap |
+| 14382–15871 | showDeathModal, bot/QA: `botState`, strategy, step execution, goal planner, loop detection |
 | 15872–16719 | Debug helpers: compact/full report generation, GitHub API push, debug downloads |
 | 16720–17172 | Rendering helpers: encounter card HTML builder, button state logic |
 | 17173–18466 | Main `render()` function, event listeners, game initialisation call, tag extension pass |

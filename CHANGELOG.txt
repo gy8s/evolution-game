@@ -1,3 +1,28 @@
+[2026-06-04 extract-field-journal-fossil-record | Claude]
+Sixteenth, seventeenth, and eighteenth controlled extractions — Field Journal UI, Fossil Record state, and Fossil Record UI helpers extracted and build script extended.
+
+- Created src/ui/field-journal-ui.js: two Field Journal UI functions extracted from game/play.html, byte-identical to the originals.
+  - showEncounterJournalEntry(typeKey): opens the individual encounter journal entry modal with investigation progress and natural history sections.
+  - showFieldJournal(tab): opens the Field Journal modal, routing to fossil, awards, or fauna/flora/etc. tabs as appropriate.
+  - No function names changed. No variable names changed. No modal behaviour changed. No Field Journal output changed.
+- Created src/state/fossil-record-state.js: one Fossil Record persistence function extracted from game/play.html, byte-identical to the original.
+  - saveFossilRecord(deathMessage): saves the current run's death entry to localStorage under FOSSIL_RECORD_KEY, trims to FOSSIL_RECORD_CAP, and returns the filtered list for the active profile.
+  - No localStorage key changed. No Fossil Record schema changed. No save/profile behaviour changed.
+- Created src/ui/fossil-record-ui.js: two Fossil Record display functions extracted from game/play.html, byte-identical to the originals.
+  - renderFossilRecord(records): builds and returns the Fossil Record HTML string.
+  - renderRunRecap(): builds and returns the run summary HTML string (stats grid + achievement list).
+  - No Fossil Record output changed. No run recap output changed.
+- Edited game/play.html: all three function groups are contiguous at their original positions. Each group wrapped in a single generated region (no split markers needed). No code moved. No call sites changed. game/play.html remains the directly playable artifact.
+  - field-journal-ui: one region (~line 12946) wrapping showEncounterJournalEntry + showFieldJournal.
+  - fossil-record-state: one region (~line 14311) wrapping saveFossilRecord only.
+  - fossil-record-ui: one region (~line 14330) wrapping renderFossilRecord + renderRunRecap.
+  - The // @fn showDeathModal comment immediately above saveFossilRecord is a stale tag; it remains outside the generated region.
+- Extended scripts/build_play_html.mjs: now inlines all existing source files plus the three new source files (three new single regions, no split markers). Fails clearly if any new source file or its region markers are missing. Idempotent.
+- game/evolution_game_v66_57.html NOT changed: historical archive, not kept byte-synced between releases.
+- Docs: README.md (repo layout tree + build scaffold table), docs/current-game-structure.md (line-range table, build scaffold table, marker table), docs/architecture-notes.md (generated region entries, line-range table, edit guidance), docs/release-checklist.md (build step checks for all three new source files).
+- Verification: node scripts/build_play_html.mjs (idempotent — no change) and node scripts/check_html_js_syntax.mjs both pass. All inline regions confirmed byte-identical to their source file content.
+- Source/build structure change only. No gameplay logic, function bodies, call sites, Field Journal output, Fossil Record schema, run recap output, modal behaviour, save/profile behaviour, or any other code changed.
+
 [2026-06-04 extract-profile-journal-fossil-ui | Claude]
 Fifteenth controlled extraction — profile UI helpers extracted and build script extended.
 
