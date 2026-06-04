@@ -8,7 +8,7 @@ This document is a map of how the game HTML file is organised. Read this before 
 
 The entire game lives in one large HTML file (`game/play.html`, ~18,400 lines). There is no build step, no bundler, and no separate JavaScript files. Everything — CSS, HTML structure, and all JavaScript — is in one file.
 
-Nine source files have been extracted and are inlined back into `game/play.html` by `scripts/build_play_html.mjs`. The playable file still ships all content inline, so it works with no build step at runtime. The build script replaces only the regions between these marker comments:
+Ten source files have been extracted and are inlined back into `game/play.html` by `scripts/build_play_html.mjs`. The playable file still ships all content inline, so it works with no build step at runtime. The build script replaces only the regions between these marker comments:
 
 **CSS** (inside the `<style>` block) — source `src/styles/game.css`:
 ```
@@ -86,9 +86,25 @@ This region sits between the profile-stats update code and the `[ACHIEVEMENTS]` 
 ```
 This region sits between `freshRunTracking` and `loadAchievements`, preserving load order and access to surrounding functions/globals (e.g. the `check` callbacks reference `socialGroup`). Only the definitions array is extracted; achievement persistence (`loadAchievements`, `saveAchievements`, `checkAchievements`), profile/save logic, and achievement rendering/toast logic remain in `game/play.html`. Achievement definitions should be edited in `src/data/achievement-data.js`, not inside the generated region of `game/play.html`.
 
-`src/data/encounter-data.js` uses a `// << SPLIT: hiddenSubtypePools >>` line to divide part 1 from part 2; the build script splits on it and inlines each part into its region. The split marker itself is not inlined. All other source files have no split marker and each maps to one contiguous region.
+**Profile run lifecycle helpers** (inside the `<script>` block) — eight run-summary/run-lifecycle functions, inlined into THREE separate regions because the source functions are not contiguous in `game/play.html` (other already-generated regions and unrelated systems sit between them):
+```
+// BEGIN GENERATED JS: src/state/profile-run-lifecycle.js [1/3]   (~line 4720)
+...profileKnowledgeCount, profileBuildRunSummary, profileRunIsGodMode, profileUpdateStats...
+// END GENERATED JS: src/state/profile-run-lifecycle.js [1/3]
 
-**Edit CSS in `src/styles/game.css`, encounter data in `src/data/encounter-data.js`, pure utility helpers in `src/utils/core-utils.js`, achievement definitions in `src/data/achievement-data.js`, run-tracking factory in `src/state/run-tracking.js`, profile/storage constants in `src/state/profile-storage-constants.js`, profile factory helpers in `src/state/profile-factories.js`, profile store core helpers in `src/state/profile-store-core.js`, and profile state snapshot helpers in `src/state/profile-state-snapshot.js`, then run `node scripts/build_play_html.mjs` — do not hand-edit the generated regions.** The build script never touches code outside the marked regions.
+// BEGIN GENERATED JS: src/state/profile-run-lifecycle.js [2/3]   (~line 5013)
+...profileOnRunEnd, profileSaveActiveRun...
+// END GENERATED JS: src/state/profile-run-lifecycle.js [2/3]
+
+// BEGIN GENERATED JS: src/state/profile-run-lifecycle.js [3/3]   (~line 5152)
+...profileStartNewRun, profileResumeActiveRun...
+// END GENERATED JS: src/state/profile-run-lifecycle.js [3/3]
+```
+Part [1/3] sits between `profileRestoreState` and the run-tracking region; part [2/3] sits between `updateRunTracking` and `profileLoadFieldJournal`; part [3/3] sits between `journalMarkFirstSeen` and the win-modal section. The functions stay exactly where they were — no code was moved. The achievement system, Field Journal helpers, and run-tracking/achievement-data generated regions that sit between them are NOT part of this source file and remain in `game/play.html`. (`profileClearActiveRun` does not exist in the codebase, so it was not extracted.) Profile run lifecycle helpers should be edited in `src/state/profile-run-lifecycle.js`, not inside the generated regions of `game/play.html`.
+
+`src/data/encounter-data.js` uses a `// << SPLIT: hiddenSubtypePools >>` line to divide part 1 from part 2; the build script splits on it and inlines each part into its region. `src/state/profile-run-lifecycle.js` uses two split lines (`// << SPLIT: profileOnRunEnd >>` and `// << SPLIT: profileStartNewRun >>`) to divide its three parts. The split markers themselves are not inlined. All other source files have no split marker and each maps to one contiguous region.
+
+**Edit CSS in `src/styles/game.css`, encounter data in `src/data/encounter-data.js`, pure utility helpers in `src/utils/core-utils.js`, achievement definitions in `src/data/achievement-data.js`, run-tracking factory in `src/state/run-tracking.js`, profile/storage constants in `src/state/profile-storage-constants.js`, profile factory helpers in `src/state/profile-factories.js`, profile store core helpers in `src/state/profile-store-core.js`, profile state snapshot helpers in `src/state/profile-state-snapshot.js`, and profile run lifecycle helpers in `src/state/profile-run-lifecycle.js`, then run `node scripts/build_play_html.mjs` — do not hand-edit the generated regions.** The build script never touches code outside the marked regions.
 
 `game/evolution_game_v66_57.html` is the versioned archive of an earlier build. It is a historical snapshot and is not kept byte-in-sync with `game/play.html` between releases; `game/play.html` is the stable public-facing copy that gets replaced on each release.
 
@@ -110,23 +126,27 @@ This region sits between `freshRunTracking` and `loadAchievements`, preserving l
 | 4500–4512 | Profile factory helpers — generated, source in `src/state/profile-factories.js` |
 | 4514–4577 | Profile store core helpers — generated, source in `src/state/profile-store-core.js` |
 | 4579–4718 | Profile state snapshot helpers — generated, source in `src/state/profile-state-snapshot.js` |
-| 4720–4770 | Remaining profile functions (profileKnowledgeCount, profileBuildRunSummary, profileUpdateStats, profileOnRunEnd, etc.) |
-| 4771–4802 | Run-tracking state factory (`freshRunTracking`) — generated, source in `src/state/run-tracking.js` |
-| 4808–4873 | Achievement definitions (`ACHIEVEMENT_DEFS`, 50 defs) — generated, source in `src/data/achievement-data.js` |
-| 4867–5829 | Achievement persistence (load/save/check), profile stats, profiles, save/load, Field Journal, Fossil Record |
-| 5830–5924 | Core utility helpers — generated, source in `src/utils/core-utils.js`: pure stateless helpers (clamp, roll, choice, clonePlain, escapeHtml, chooseWeighted, text-sanitisation) |
-| 5925–6036 | Remaining [UTILS]: logging, narration setters, noise, risk memory (not extracted — side effects) |
-| 6037–6115 | hiddenSubtypePools — generated, source in `src/data/encounter-data.js` [2/2] |
-| 6116–7614 | Remaining utilities + turn flow: `startTurn`, `endTurn`, metabolism, ecology tick |
-| 7613–8429 | Nearby entity simulation: spawning, persistence, world registry |
-| 8430–11327 | Social system, same-species encounters, group management, calls |
-| 11328–11826 | Threat and predator logic: pursuit, escalation, flee/fight resolution |
-| 11827–12523 | Player action handlers: move, eat, drink, climb, wait, groom, look, etc. |
-| 12524–14471 | Investigation system, carcass interactions, encounter resolution helpers, Field Journal render |
-| 14472–15839 | Bot/QA: `botState`, strategy, step execution, goal planner, loop detection |
-| 15840–16687 | Debug helpers: compact/full report generation, GitHub API push, debug downloads |
-| 16688–17140 | Rendering helpers: encounter card HTML builder, button state logic |
-| 17141–18434 | Main `render()` function, event listeners, game initialisation call, tag extension pass |
+| 4720–4771 | Profile run lifecycle [1/3] (profileKnowledgeCount, profileBuildRunSummary, profileRunIsGodMode, profileUpdateStats) — generated, source in `src/state/profile-run-lifecycle.js` |
+| 4773–4804 | Run-tracking state factory (`freshRunTracking`) — generated, source in `src/state/run-tracking.js` |
+| 4810–4875 | Achievement definitions (`ACHIEVEMENT_DEFS`, 50 defs) — generated, source in `src/data/achievement-data.js` |
+| 4877–5012 | Achievement persistence (load/save/check), toast queue, `updateRunTracking` |
+| 5013–5099 | Profile run lifecycle [2/3] (profileOnRunEnd, profileSaveActiveRun) — generated, source in `src/state/profile-run-lifecycle.js` |
+| 5101–5151 | Field Journal helpers (profileLoadFieldJournal, profileWriteJournalEntry, getEncounterLogCategory, journalMarkFirstSeen) |
+| 5152–5202 | Profile run lifecycle [3/3] (profileStartNewRun, profileResumeActiveRun) — generated, source in `src/state/profile-run-lifecycle.js` |
+| 5204–5851 | Win modal, profile panel UI, profile stats, profiles, save/load, Field Journal render, Fossil Record |
+| 5853–5942 | Core utility helpers — generated, source in `src/utils/core-utils.js`: pure stateless helpers (clamp, roll, choice, clonePlain, escapeHtml, chooseWeighted, text-sanitisation) |
+| 5943–6068 | Remaining [UTILS]: logging, narration setters, noise, risk memory (not extracted — side effects) |
+| 6069–6147 | hiddenSubtypePools — generated, source in `src/data/encounter-data.js` [2/2] |
+| 6148–7646 | Remaining utilities + turn flow: `startTurn`, `endTurn`, metabolism, ecology tick |
+| 7645–8461 | Nearby entity simulation: spawning, persistence, world registry |
+| 8462–11359 | Social system, same-species encounters, group management, calls |
+| 11360–11858 | Threat and predator logic: pursuit, escalation, flee/fight resolution |
+| 11859–12555 | Player action handlers: move, eat, drink, climb, wait, groom, look, etc. |
+| 12556–14503 | Investigation system, carcass interactions, encounter resolution helpers, Field Journal render |
+| 14504–15871 | Bot/QA: `botState`, strategy, step execution, goal planner, loop detection |
+| 15872–16719 | Debug helpers: compact/full report generation, GitHub API push, debug downloads |
+| 16720–17172 | Rendering helpers: encounter card HTML builder, button state logic |
+| 17173–18466 | Main `render()` function, event listeners, game initialisation call, tag extension pass |
 
 ---
 
@@ -176,7 +196,7 @@ All rendering is done by a single `render()` call that redraws the map, UI panel
 - **`game/play.html` and `game/evolution_game_v66_57.html` must be kept in sync** on each release. If you edit one, copy the change to the other, or replace `play.html` entirely.
 - **`index.html` and `manifest.json` must both reference `game/play.html`.** The syntax check script verifies `index.html`. Check `manifest.json` manually on releases.
 - **`player.knowledge` / `player.classKnowledge`** accumulate across runs and feed the Field Journal. Incorrect resets at run boundaries lose journal data permanently.
-- **The CSS region, both encounter-data regions, the core-utils region, the achievement-data region, the run-tracking region, the profile-storage-constants region, the profile-factories region, the profile-store-core region, and the profile-state-snapshot region in `game/play.html` are generated.** Hand edits are overwritten on the next `node scripts/build_play_html.mjs`. Edit `src/styles/game.css`, `src/data/encounter-data.js`, `src/utils/core-utils.js`, `src/data/achievement-data.js`, `src/state/run-tracking.js`, `src/state/profile-storage-constants.js`, `src/state/profile-factories.js`, `src/state/profile-store-core.js`, and `src/state/profile-state-snapshot.js` instead. Do not remove any BEGIN/END marker comments or the `// << SPLIT: hiddenSubtypePools >>` line — the build script requires all of them.
+- **The CSS region, both encounter-data regions, the core-utils region, the achievement-data region, the run-tracking region, the profile-storage-constants region, the profile-factories region, the profile-store-core region, the profile-state-snapshot region, and the three profile-run-lifecycle regions in `game/play.html` are generated.** Hand edits are overwritten on the next `node scripts/build_play_html.mjs`. Edit `src/styles/game.css`, `src/data/encounter-data.js`, `src/utils/core-utils.js`, `src/data/achievement-data.js`, `src/state/run-tracking.js`, `src/state/profile-storage-constants.js`, `src/state/profile-factories.js`, `src/state/profile-store-core.js`, `src/state/profile-state-snapshot.js`, and `src/state/profile-run-lifecycle.js` instead. Do not remove any BEGIN/END marker comments, the `// << SPLIT: hiddenSubtypePools >>` line, or the `// << SPLIT: profileOnRunEnd >>` / `// << SPLIT: profileStartNewRun >>` lines — the build script requires all of them.
 
 ---
 
