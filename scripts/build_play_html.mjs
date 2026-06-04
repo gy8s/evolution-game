@@ -13,6 +13,7 @@
 //   4. src/data/achievement-data.js → one JS region (~line 4800)
 //   5. src/state/run-tracking.js   → one JS region (~line 4763)
 //   6. src/state/profile-storage-constants.js → one JS region (~line 4481)
+//   7. src/state/profile-factories.js → one JS region (~line 4500)
 //
 // Why inline (not external files): game/play.html must open straight from
 // disk — or via the GitHub Pages link — with no build step and no runtime
@@ -35,8 +36,9 @@ const DATA_SOURCE     = resolve(repoRoot, 'src/data/encounter-data.js');
 const UTILS_SOURCE    = resolve(repoRoot, 'src/utils/core-utils.js');
 const ACHIEVE_SOURCE  = resolve(repoRoot, 'src/data/achievement-data.js');
 const RUNTRACK_SOURCE = resolve(repoRoot, 'src/state/run-tracking.js');
-const PROFCONST_SOURCE = resolve(repoRoot, 'src/state/profile-storage-constants.js');
-const PLAY_HTML       = resolve(repoRoot, 'game/play.html');
+const PROFCONST_SOURCE   = resolve(repoRoot, 'src/state/profile-storage-constants.js');
+const PROFFACT_SOURCE    = resolve(repoRoot, 'src/state/profile-factories.js');
+const PLAY_HTML          = resolve(repoRoot, 'game/play.html');
 
 // CSS markers (CSS comment style, inside <style>)
 const CSS_BEGIN = '/* BEGIN GENERATED CSS: src/styles/game.css */';
@@ -63,6 +65,10 @@ const JS_END_RUNTRACK    = '// END GENERATED JS: src/state/run-tracking.js';
 // Profile-storage-constants markers (JS comment style, inside <script>)
 const JS_BEGIN_PROFCONST = '// BEGIN GENERATED JS: src/state/profile-storage-constants.js';
 const JS_END_PROFCONST   = '// END GENERATED JS: src/state/profile-storage-constants.js';
+
+// Profile-factories markers (JS comment style, inside <script>)
+const JS_BEGIN_PROFFACT = '// BEGIN GENERATED JS: src/state/profile-factories.js';
+const JS_END_PROFFACT   = '// END GENERATED JS: src/state/profile-factories.js';
 
 // The split comment that divides the source file into part1 and part2.
 // It is NOT inlined into game/play.html.
@@ -94,6 +100,7 @@ if (!existsSync(UTILS_SOURCE))    fail('cannot find src/utils/core-utils.js');
 if (!existsSync(ACHIEVE_SOURCE))  fail('cannot find src/data/achievement-data.js');
 if (!existsSync(RUNTRACK_SOURCE))  fail('cannot find src/state/run-tracking.js');
 if (!existsSync(PROFCONST_SOURCE)) fail('cannot find src/state/profile-storage-constants.js');
+if (!existsSync(PROFFACT_SOURCE))  fail('cannot find src/state/profile-factories.js');
 if (!existsSync(PLAY_HTML))        fail('cannot find game/play.html');
 
 const css          = readFileSync(CSS_SOURCE,       'utf8');
@@ -102,6 +109,7 @@ const jsUtils      = readFileSync(UTILS_SOURCE,     'utf8');
 const jsAchieve    = readFileSync(ACHIEVE_SOURCE,   'utf8');
 const jsRunTrack   = readFileSync(RUNTRACK_SOURCE,  'utf8');
 const jsProfConst  = readFileSync(PROFCONST_SOURCE, 'utf8');
+const jsProfFact   = readFileSync(PROFFACT_SOURCE,  'utf8');
 let   html         = readFileSync(PLAY_HTML,        'utf8');
 
 // --- Split encounter-data into two parts at the SPLIT marker ---
@@ -119,6 +127,7 @@ html = inlineRegion(html, JS_BEGIN_UTILS,   JS_END_UTILS,   jsUtils.replace(/\s+
 html = inlineRegion(html, JS_BEGIN_ACHIEVE,  JS_END_ACHIEVE,  jsAchieve.replace(/\s+$/, ''),  'achievement-data');
 html = inlineRegion(html, JS_BEGIN_RUNTRACK,  JS_END_RUNTRACK,  jsRunTrack.replace(/\s+$/, ''),  'run-tracking');
 html = inlineRegion(html, JS_BEGIN_PROFCONST, JS_END_PROFCONST, jsProfConst.replace(/\s+$/, ''), 'profile-storage-constants');
+html = inlineRegion(html, JS_BEGIN_PROFFACT,  JS_END_PROFFACT,  jsProfFact.replace(/\s+$/, ''),  'profile-factories');
 
 if (html === original) {
   console.log('build_play_html: no change — game/play.html already matches all source files.');

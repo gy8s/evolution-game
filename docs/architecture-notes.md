@@ -8,7 +8,7 @@ This document is a map of how the game HTML file is organised. Read this before 
 
 The entire game lives in one large HTML file (`game/play.html`, ~18,400 lines). There is no build step, no bundler, and no separate JavaScript files. Everything — CSS, HTML structure, and all JavaScript — is in one file.
 
-Five source files have been extracted and are inlined back into `game/play.html` by `scripts/build_play_html.mjs`. The playable file still ships all content inline, so it works with no build step at runtime. The build script replaces only the regions between these marker comments:
+Seven source files have been extracted and are inlined back into `game/play.html` by `scripts/build_play_html.mjs`. The playable file still ships all content inline, so it works with no build step at runtime. The build script replaces only the regions between these marker comments:
 
 **CSS** (inside the `<style>` block) — source `src/styles/game.css`:
 ```
@@ -46,6 +46,14 @@ Five source files have been extracted and are inlined back into `game/play.html`
 ```
 This region sits immediately after the `// ===== PROFILE SAVE SYSTEM =====` banner and before `let currentProfileId = null;`, preserving load order. Only the key/cap constants are extracted; all profile functions (`profileLoadStore`, `profileSaveStore`, `profileCreateNew`, etc.), fossil record logic, active-run logic, achievement persistence, and save/load logic remain in `game/play.html`. Profile/storage constants should be edited in `src/state/profile-storage-constants.js`, not inside the generated region of `game/play.html`.
 
+**Profile factory helpers** (inside the `<script>` block, ~line 4500) — three factory/helper functions:
+```
+// BEGIN GENERATED JS: src/state/profile-factories.js
+...generated js...
+// END GENERATED JS: src/state/profile-factories.js
+```
+This region sits after the profile state variables and before `profileLoadStore`, preserving load order. Only `profileGenerateId`, `profileEmptyStore`, and `profileDefaultStats` are extracted; `profileLoadStore`, `profileSaveStore`, `profileCreateNew`, fossil record logic, active-run logic, achievement persistence, and save/load logic remain in `game/play.html`. The three functions were not contiguous in the original file; they have been consolidated into this single region (safe because `function` declarations are hoisted). Profile factory helpers should be edited in `src/state/profile-factories.js`, not inside the generated region of `game/play.html`.
+
 **Run-tracking state factory** (inside the `<script>` block, ~line 4763) — the `freshRunTracking()` function only:
 ```
 // BEGIN GENERATED JS: src/state/run-tracking.js
@@ -64,7 +72,7 @@ This region sits between `freshRunTracking` and `loadAchievements`, preserving l
 
 `src/data/encounter-data.js` uses a `// << SPLIT: hiddenSubtypePools >>` line to divide part 1 from part 2; the build script splits on it and inlines each part into its region. The split marker itself is not inlined. All other source files have no split marker and each maps to one contiguous region.
 
-**Edit CSS in `src/styles/game.css`, encounter data in `src/data/encounter-data.js`, pure utility helpers in `src/utils/core-utils.js`, achievement definitions in `src/data/achievement-data.js`, run-tracking factory in `src/state/run-tracking.js`, and profile/storage constants in `src/state/profile-storage-constants.js`, then run `node scripts/build_play_html.mjs` — do not hand-edit the generated regions.** The build script never touches code outside the marked regions.
+**Edit CSS in `src/styles/game.css`, encounter data in `src/data/encounter-data.js`, pure utility helpers in `src/utils/core-utils.js`, achievement definitions in `src/data/achievement-data.js`, run-tracking factory in `src/state/run-tracking.js`, profile/storage constants in `src/state/profile-storage-constants.js`, and profile factory helpers in `src/state/profile-factories.js`, then run `node scripts/build_play_html.mjs` — do not hand-edit the generated regions.** The build script never touches code outside the marked regions.
 
 `game/evolution_game_v66_57.html` is the versioned archive of an earlier build. It is a historical snapshot and is not kept byte-in-sync with `game/play.html` between releases; `game/play.html` is the stable public-facing copy that gets replaced on each release.
 
@@ -82,9 +90,11 @@ This region sits between `freshRunTracking` and `loadAchievements`, preserving l
 | 3502–4254 | World generation: terrain, habitats, altitude, water, clay deposits |
 | 4253–4478 | Player state object and dynamic world state (waterState, socialGroup, nearbyEntities) |
 | 4479–4489 | Profile/storage constants — generated, source in `src/state/profile-storage-constants.js` |
-| 4491–4762 | Profile state variables and profile functions (currentProfileId, profileLoadStore, profileSaveStore, etc.) |
-| 4763–4794 | Run-tracking state factory (`freshRunTracking`) — generated, source in `src/state/run-tracking.js` |
-| 4800–4865 | Achievement definitions (`ACHIEVEMENT_DEFS`, 50 defs) — generated, source in `src/data/achievement-data.js` |
+| 4491–4499 | Profile state variables (currentProfileId, currentRunId, runGodModeUsed, etc.) |
+| 4500–4512 | Profile factory helpers — generated, source in `src/state/profile-factories.js` |
+| 4514–4766 | Profile functions (profileLoadStore, profileSaveStore, profileCreateNew, etc.) |
+| 4767–4798 | Run-tracking state factory (`freshRunTracking`) — generated, source in `src/state/run-tracking.js` |
+| 4804–4869 | Achievement definitions (`ACHIEVEMENT_DEFS`, 50 defs) — generated, source in `src/data/achievement-data.js` |
 | 4867–5829 | Achievement persistence (load/save/check), profile stats, profiles, save/load, Field Journal, Fossil Record |
 | 5830–5924 | Core utility helpers — generated, source in `src/utils/core-utils.js`: pure stateless helpers (clamp, roll, choice, clonePlain, escapeHtml, chooseWeighted, text-sanitisation) |
 | 5925–6036 | Remaining [UTILS]: logging, narration setters, noise, risk memory (not extracted — side effects) |
@@ -148,7 +158,7 @@ All rendering is done by a single `render()` call that redraws the map, UI panel
 - **`game/play.html` and `game/evolution_game_v66_57.html` must be kept in sync** on each release. If you edit one, copy the change to the other, or replace `play.html` entirely.
 - **`index.html` and `manifest.json` must both reference `game/play.html`.** The syntax check script verifies `index.html`. Check `manifest.json` manually on releases.
 - **`player.knowledge` / `player.classKnowledge`** accumulate across runs and feed the Field Journal. Incorrect resets at run boundaries lose journal data permanently.
-- **The CSS region, both encounter-data regions, the core-utils region, the achievement-data region, the run-tracking region, and the profile-storage-constants region in `game/play.html` are generated.** Hand edits are overwritten on the next `node scripts/build_play_html.mjs`. Edit `src/styles/game.css`, `src/data/encounter-data.js`, `src/utils/core-utils.js`, `src/data/achievement-data.js`, `src/state/run-tracking.js`, and `src/state/profile-storage-constants.js` instead. Do not remove any BEGIN/END marker comments or the `// << SPLIT: hiddenSubtypePools >>` line — the build script requires all of them.
+- **The CSS region, both encounter-data regions, the core-utils region, the achievement-data region, the run-tracking region, the profile-storage-constants region, and the profile-factories region in `game/play.html` are generated.** Hand edits are overwritten on the next `node scripts/build_play_html.mjs`. Edit `src/styles/game.css`, `src/data/encounter-data.js`, `src/utils/core-utils.js`, `src/data/achievement-data.js`, `src/state/run-tracking.js`, `src/state/profile-storage-constants.js`, and `src/state/profile-factories.js` instead. Do not remove any BEGIN/END marker comments or the `// << SPLIT: hiddenSubtypePools >>` line — the build script requires all of them.
 
 ---
 
