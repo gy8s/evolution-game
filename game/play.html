@@ -4511,6 +4511,7 @@ function profileDefaultStats() {
 }
 // END GENERATED JS: src/state/profile-factories.js
 
+// BEGIN GENERATED JS: src/state/profile-store-core.js
 function profileLoadStore() {
   try {
     const raw = localStorage.getItem(PROFILE_STORE_KEY);
@@ -4573,6 +4574,7 @@ function profileCheckBuildCompatibility(profile) {
   if (!compatible) addDebugTrace("profile-build-mismatch", {savedBuild, localBuild, profileId: profile.profileId});
   return {compatible, savedBuild, localBuild};
 }
+// END GENERATED JS: src/state/profile-store-core.js
 
 function profileCaptureWorldArrays() {
   return {

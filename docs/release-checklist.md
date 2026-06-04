@@ -21,7 +21,8 @@ Run through this every time a new version becomes the stable build.
 - [ ] If `src/state/run-tracking.js` was changed, `node scripts/build_play_html.mjs` was run to inline the run-tracking factory into `game/play.html`
 - [ ] If `src/state/profile-storage-constants.js` was changed, `node scripts/build_play_html.mjs` was run to inline the profile/storage constants into `game/play.html`
 - [ ] If `src/state/profile-factories.js` was changed, `node scripts/build_play_html.mjs` was run to inline the profile factory helpers into `game/play.html`
-- [ ] The generated regions in `game/play.html` were not hand-edited (CSS → `src/styles/game.css`; encounter data → `src/data/encounter-data.js`; utility helpers → `src/utils/core-utils.js`; achievement defs → `src/data/achievement-data.js`; run-tracking factory → `src/state/run-tracking.js`; profile/storage constants → `src/state/profile-storage-constants.js`; profile factory helpers → `src/state/profile-factories.js`)
+- [ ] If `src/state/profile-store-core.js` was changed, `node scripts/build_play_html.mjs` was run to inline the profile store core helpers into `game/play.html`
+- [ ] The generated regions in `game/play.html` were not hand-edited (CSS → `src/styles/game.css`; encounter data → `src/data/encounter-data.js`; utility helpers → `src/utils/core-utils.js`; achievement defs → `src/data/achievement-data.js`; run-tracking factory → `src/state/run-tracking.js`; profile/storage constants → `src/state/profile-storage-constants.js`; profile factory helpers → `src/state/profile-factories.js`; profile store core helpers → `src/state/profile-store-core.js`)
 
 ## Syntax and render check
 
