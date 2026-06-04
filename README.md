@@ -101,6 +101,7 @@ evolution-game/
 │   │   ├── achievement-ui.js         Achievement UI/support source (inlined into play.html by the build script)
 │   │   ├── field-journal-ui.js       Field Journal UI helpers source (inlined into play.html by the build script)
 │   │   ├── fossil-record-ui.js       Fossil Record display helpers source (inlined into play.html by the build script)
+│   │   ├── profile-startup-modal.js  Profile selection/startup modal source (inlined into play.html by the build script)
 │   │   └── profile-ui.js             Profile/win-modal UI helpers source (inlined into play.html by the build script)
 │   └── state/
 │       ├── run-tracking.js           Run-tracking state factory source (inlined into play.html by the build script)
@@ -112,6 +113,7 @@ evolution-game/
 │       ├── achievement-persistence.js Achievement persistence helpers source (inlined into play.html by the build script)
 │       ├── field-journal-state.js    Field Journal state/persistence helpers source (inlined into play.html by the build script)
 │       ├── fossil-record-state.js    Fossil Record persistence helper source (inlined into play.html by the build script)
+│       ├── profile-delete.js         Profile deletion helper source (inlined into play.html by the build script)
 │       └── run-tracking-update.js    Run-tracking update function source (inlined into play.html by the build script)
 ├── docs/
 │   ├── current-game-structure.md     How the game works now: systems, flows, line ranges
@@ -153,7 +155,7 @@ The rebuild is not a rewrite, not a framework migration, and not a gameplay rede
 
 ### Build scaffold
 
-Eighteen source extractions are complete:
+Twenty source extractions are complete:
 
 | Source file | What it contains | Destination in play.html |
 |-------------|-----------------|--------------------------|
@@ -175,6 +177,8 @@ Eighteen source extractions are complete:
 | `src/ui/field-journal-ui.js` | Field Journal UI helpers (`showEncounterJournalEntry`, `showFieldJournal`) | One JS region (~line 12946) |
 | `src/state/fossil-record-state.js` | Fossil Record persistence (`saveFossilRecord`) | One JS region (~line 14311) |
 | `src/ui/fossil-record-ui.js` | Fossil Record display helpers (`renderFossilRecord`, `renderRunRecap`) | One JS region (~line 14330) |
+| `src/state/profile-delete.js` | Profile deletion helper (`deleteProfile`) | One JS region (~line 5280) |
+| `src/ui/profile-startup-modal.js` | Profile selection/startup modal (`profileShowStartupModal`) | One JS region (~line 5311) |
 
 `game/play.html` keeps all content **inline** so it stays directly playable with no build step or runtime dependency. To regenerate `game/play.html` after editing any source file:
 

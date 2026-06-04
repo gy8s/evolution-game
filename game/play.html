@@ -5277,6 +5277,7 @@ function profileUpdatePanelUI() {
 
 // ===== PROFILE DELETE =====
 
+// BEGIN GENERATED JS: src/state/profile-delete.js
 function deleteProfile(profileId) {
   if (!profileId) return;
   const store = profileLoadStore();
@@ -5303,9 +5304,11 @@ function deleteProfile(profileId) {
   } catch (_) {}
   if (currentProfileId === profileId) currentProfileId = null;
 }
+// END GENERATED JS: src/state/profile-delete.js
 
 // ===== PROFILE STARTUP MODAL =====
 
+// BEGIN GENERATED JS: src/ui/profile-startup-modal.js
 function profileShowStartupModal(onChoiceMade) {
   const modal = document.getElementById("profileModal");
   const body = document.getElementById("profileModalBody");
@@ -5431,6 +5434,7 @@ function profileShowStartupModal(onChoiceMade) {
   modal.setAttribute("aria-hidden", "false");
   renderModalContent();
 }
+// END GENERATED JS: src/ui/profile-startup-modal.js
 
 // ===== GAME INIT WITH PROFILE =====
 

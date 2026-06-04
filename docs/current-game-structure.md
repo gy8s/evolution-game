@@ -12,7 +12,7 @@ Evolution Game is a browser-based single-player survival simulation. The player 
 
 The game runs from a single HTML file (`game/play.html`, ~18,400 lines). There is no bundler and no server. Open the file in a browser and it works.
 
-Eighteen source extractions are complete. The playable file `game/play.html` still contains all content inline (between marker comments) so it works with no build step or runtime dependency.
+Twenty source extractions are complete. The playable file `game/play.html` still contains all content inline (between marker comments) so it works with no build step or runtime dependency.
 
 | Source file | What it contains | In play.html |
 |-------------|-----------------|--------------|
@@ -34,6 +34,8 @@ Eighteen source extractions are complete. The playable file `game/play.html` sti
 | `src/ui/field-journal-ui.js` | Field Journal UI helpers (`showEncounterJournalEntry`, `showFieldJournal`) | One inline JS region (~line 12946) |
 | `src/state/fossil-record-state.js` | Fossil Record persistence (`saveFossilRecord`) | One inline JS region (~line 14311) |
 | `src/ui/fossil-record-ui.js` | Fossil Record display helpers (`renderFossilRecord`, `renderRunRecap`) | One inline JS region (~line 14330) |
+| `src/state/profile-delete.js` | Profile deletion helper (`deleteProfile`) | One inline JS region (~line 5280) |
+| `src/ui/profile-startup-modal.js` | Profile selection/startup modal (`profileShowStartupModal`) | One inline JS region (~line 5311) |
 
 `scripts/build_play_html.mjs` inlines all source files back into `game/play.html`. Only configuration-like declarations and simple factory/helper functions are extracted — `profileCaptureWorldArrays`, `profileCaptureState`, `profileRestoreState`, `profileUpdateStats`, `profileOnRunEnd`, active-run logic, save/load logic, and all other game code remain inside `game/play.html`. All JavaScript engine code and HTML structure also remain inside `game/play.html` for now.
 
@@ -305,7 +307,9 @@ flowchart TD
 | 5160–5210 | Profile run lifecycle [3/3] (profileStartNewRun, profileResumeActiveRun) — generated, source is `src/state/profile-run-lifecycle.js` |
 | 5222–5242 | Profile UI [1/2] (showWinModal, hideWinModal, onWinAchieved) — generated, source is `src/ui/profile-ui.js` |
 | 5246–5278 | Profile UI [2/2] (profileUpdatePanelUI) — generated, source is `src/ui/profile-ui.js` |
-| 5279–5855 | Profile delete, profileShowStartupModal, initGame, profiles, save/load |
+| 5280–5307 | Profile delete — generated, source is `src/state/profile-delete.js` |
+| 5311–5437 | Profile startup modal — generated, source is `src/ui/profile-startup-modal.js` |
+| 5439–5470 | initGame and game state initialisation |
 | 12946–13068 | Field Journal UI — generated, source is `src/ui/field-journal-ui.js`: showEncounterJournalEntry, showFieldJournal |
 | 14311–14325 | Fossil Record state — generated, source is `src/state/fossil-record-state.js`: saveFossilRecord |
 | 14330–14381 | Fossil Record UI — generated, source is `src/ui/fossil-record-ui.js`: renderFossilRecord, renderRunRecap |
@@ -380,7 +384,9 @@ The rebuild plan (see `docs/project-plan.md`) targets extraction in this rough o
 | `src/ui/field-journal-ui.js` | `// BEGIN/END GENERATED JS: src/ui/field-journal-ui.js` |
 | `src/state/fossil-record-state.js` | `// BEGIN/END GENERATED JS: src/state/fossil-record-state.js` |
 | `src/ui/fossil-record-ui.js` | `// BEGIN/END GENERATED JS: src/ui/fossil-record-ui.js` |
+| `src/state/profile-delete.js` | `// BEGIN/END GENERATED JS: src/state/profile-delete.js` |
+| `src/ui/profile-startup-modal.js` | `// BEGIN/END GENERATED JS: src/ui/profile-startup-modal.js` |
 
-The source file `src/data/encounter-data.js` contains a `// << SPLIT: hiddenSubtypePools >>` line dividing part 1 from part 2. `src/state/profile-run-lifecycle.js` contains two split lines (`// << SPLIT: profileOnRunEnd >>` and `// << SPLIT: profileStartNewRun >>`) dividing it into three parts. `src/state/achievement-persistence.js` contains two split lines (`// << SPLIT: awardAchievement >>` and `// << SPLIT: checkAchievements >>`) dividing it into three parts. `src/ui/achievement-ui.js` contains two split lines (`// << SPLIT: toastHelpers >>` and `// << SPLIT: renderAchievements >>`) dividing it into three parts, because the achievement-persistence [2/3] and [3/3] generated regions sit between the target groups in `play.html`. `src/ui/profile-ui.js` contains one split line (`// << SPLIT: profileUpdatePanelUI >>`) dividing it into two parts, because the `// ===== PROFILE PANEL UI =====` banner comment sits between the two groups in `play.html`. All other source files — including `src/ui/field-journal-ui.js`, `src/state/fossil-record-state.js`, and `src/ui/fossil-record-ui.js` — have no split marker and each maps to one contiguous region.
+The source file `src/data/encounter-data.js` contains a `// << SPLIT: hiddenSubtypePools >>` line dividing part 1 from part 2. `src/state/profile-run-lifecycle.js` contains two split lines (`// << SPLIT: profileOnRunEnd >>` and `// << SPLIT: profileStartNewRun >>`) dividing it into three parts. `src/state/achievement-persistence.js` contains two split lines (`// << SPLIT: awardAchievement >>` and `// << SPLIT: checkAchievements >>`) dividing it into three parts. `src/ui/achievement-ui.js` contains two split lines (`// << SPLIT: toastHelpers >>` and `// << SPLIT: renderAchievements >>`) dividing it into three parts, because the achievement-persistence [2/3] and [3/3] generated regions sit between the target groups in `play.html`. `src/ui/profile-ui.js` contains one split line (`// << SPLIT: profileUpdatePanelUI >>`) dividing it into two parts, because the `// ===== PROFILE PANEL UI =====` banner comment sits between the two groups in `play.html`. All other source files — including `src/ui/field-journal-ui.js`, `src/state/fossil-record-state.js`, `src/ui/fossil-record-ui.js`, `src/state/profile-delete.js`, and `src/ui/profile-startup-modal.js` — have no split marker and each maps to one contiguous region.
 
 Run `node scripts/build_play_html.mjs` after editing any source file. Do not hand-edit generated regions in `game/play.html`. This document will be updated as each further extraction completes.
