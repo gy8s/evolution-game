@@ -4576,6 +4576,7 @@ function profileCheckBuildCompatibility(profile) {
 }
 // END GENERATED JS: src/state/profile-store-core.js
 
+// BEGIN GENERATED JS: src/state/profile-state-snapshot.js
 function profileCaptureWorldArrays() {
   return {
     terrain: terrain.map(row => row.slice()),
@@ -4714,6 +4715,7 @@ function profileRestoreState(state) {
     });
   }
 }
+// END GENERATED JS: src/state/profile-state-snapshot.js
 
 function profileKnowledgeCount() {
   return Object.keys(player.knowledgeByEncounterKey || {}).length;
