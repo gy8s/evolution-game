@@ -1,3 +1,21 @@
+[2026-06-04 extract-profile-delete-startup-modal | Claude]
+Nineteenth and twentieth controlled extractions — profile delete and startup modal extracted and build script extended.
+
+- Created src/state/profile-delete.js: one function extracted from game/play.html, byte-identical to the original.
+  - deleteProfile(profileId): removes the profile's store entry, achievement data, Fossil Record entries, and active-profile marker from localStorage; clears currentProfileId if it matches.
+  - No localStorage keys changed. No profile schema changed. No deletion behaviour changed.
+- Created src/ui/profile-startup-modal.js: one function extracted from game/play.html, byte-identical to the original.
+  - profileShowStartupModal(onChoiceMade): renders the profile selection/creation modal including profile list, run history, resume/new-run/delete flows, and the New Profile prompt. Calls onChoiceMade with the chosen profile on confirmation.
+  - No nested handler logic changed. No button behaviour changed. No modal behaviour changed. No startup/resume/new-run behaviour changed.
+- Edited game/play.html: both functions are contiguous at their original positions (separated only by the // ===== PROFILE STARTUP MODAL ===== banner, which stays outside both generated regions). Each function wrapped in its own single generated region. No code moved. No call sites changed.
+  - profile-delete: one region (~line 5280) wrapping deleteProfile only.
+  - profile-startup-modal: one region (~line 5311) wrapping profileShowStartupModal only.
+- Extended scripts/build_play_html.mjs: PROFDELETE_SOURCE and PROFSM_SOURCE constants; two marker pairs; two existence checks; two reads; two inlineRegion calls. Now handles 20 source files.
+- game/evolution_game_v66_57.html NOT changed: historical archive, not kept byte-synced between releases.
+- Docs: README.md (repo layout tree + build scaffold table), docs/current-game-structure.md (line-range table, build scaffold table, marker table), docs/architecture-notes.md (generated region entries, line-range table, edit guidance), docs/release-checklist.md (build step checks for both new source files).
+- Verification: node scripts/build_play_html.mjs (idempotent — no change) and node scripts/check_html_js_syntax.mjs both pass. All inline regions confirmed byte-identical to their source file content.
+- Source/build structure change only. No gameplay logic, function bodies, call sites, deletion behaviour, startup modal behaviour, save/profile behaviour, or any other code changed.
+
 [2026-06-04 extract-field-journal-fossil-record | Claude]
 Sixteenth, seventeenth, and eighteenth controlled extractions — Field Journal UI, Fossil Record state, and Fossil Record UI helpers extracted and build script extended.
 

@@ -36,6 +36,8 @@
 //  16. src/ui/field-journal-ui.js → one JS region (~line 12946)
 //  17. src/state/fossil-record-state.js → one JS region (~line 14311)
 //  18. src/ui/fossil-record-ui.js → one JS region (~line 14330)
+//  19. src/state/profile-delete.js → one JS region (~line 5280)
+//  20. src/ui/profile-startup-modal.js → one JS region (~line 5311)
 //
 // Why inline (not external files): game/play.html must open straight from
 // disk — or via the GitHub Pages link — with no build step and no runtime
@@ -71,6 +73,8 @@ const PROFUI_SOURCE      = resolve(repoRoot, 'src/ui/profile-ui.js');
 const FJUI_SOURCE        = resolve(repoRoot, 'src/ui/field-journal-ui.js');
 const FOSSSTATE_SOURCE   = resolve(repoRoot, 'src/state/fossil-record-state.js');
 const FOSSUI_SOURCE      = resolve(repoRoot, 'src/ui/fossil-record-ui.js');
+const PROFDELETE_SOURCE  = resolve(repoRoot, 'src/state/profile-delete.js');
+const PROFSM_SOURCE      = resolve(repoRoot, 'src/ui/profile-startup-modal.js');
 const PLAY_HTML          = resolve(repoRoot, 'game/play.html');
 
 // CSS markers (CSS comment style, inside <style>)
@@ -184,6 +188,14 @@ const JS_END_FOSSSTATE   = '// END GENERATED JS: src/state/fossil-record-state.j
 const JS_BEGIN_FOSSUI = '// BEGIN GENERATED JS: src/ui/fossil-record-ui.js';
 const JS_END_FOSSUI   = '// END GENERATED JS: src/ui/fossil-record-ui.js';
 
+// Profile-delete markers (JS comment style, inside <script>)
+const JS_BEGIN_PROFDELETE = '// BEGIN GENERATED JS: src/state/profile-delete.js';
+const JS_END_PROFDELETE   = '// END GENERATED JS: src/state/profile-delete.js';
+
+// Profile-startup-modal markers (JS comment style, inside <script>)
+const JS_BEGIN_PROFSM = '// BEGIN GENERATED JS: src/ui/profile-startup-modal.js';
+const JS_END_PROFSM   = '// END GENERATED JS: src/ui/profile-startup-modal.js';
+
 function fail(msg) {
   console.error(`build_play_html: ERROR: ${msg}`);
   process.exit(1);
@@ -222,6 +234,8 @@ if (!existsSync(PROFUI_SOURCE))      fail('cannot find src/ui/profile-ui.js');
 if (!existsSync(FJUI_SOURCE))        fail('cannot find src/ui/field-journal-ui.js');
 if (!existsSync(FOSSSTATE_SOURCE))   fail('cannot find src/state/fossil-record-state.js');
 if (!existsSync(FOSSUI_SOURCE))      fail('cannot find src/ui/fossil-record-ui.js');
+if (!existsSync(PROFDELETE_SOURCE))  fail('cannot find src/state/profile-delete.js');
+if (!existsSync(PROFSM_SOURCE))      fail('cannot find src/ui/profile-startup-modal.js');
 if (!existsSync(PLAY_HTML))          fail('cannot find game/play.html');
 
 const css          = readFileSync(CSS_SOURCE,       'utf8');
@@ -242,6 +256,8 @@ const jsProfUI     = readFileSync(PROFUI_SOURCE,      'utf8');
 const jsFJUI       = readFileSync(FJUI_SOURCE,        'utf8');
 const jsFossState  = readFileSync(FOSSSTATE_SOURCE,   'utf8');
 const jsFossUI     = readFileSync(FOSSUI_SOURCE,      'utf8');
+const jsProfDelete = readFileSync(PROFDELETE_SOURCE,  'utf8');
+const jsProfSM     = readFileSync(PROFSM_SOURCE,      'utf8');
 let   html         = readFileSync(PLAY_HTML,         'utf8');
 
 // --- Split encounter-data into two parts at the SPLIT marker ---
@@ -314,6 +330,8 @@ html = inlineRegion(html, JS_BEGIN_PROFUI2, JS_END_PROFUI2, jsProfUI2, 'profile-
 html = inlineRegion(html, JS_BEGIN_FJUI,     JS_END_FJUI,     jsFJUI.replace(/\s+$/, ''),     'field-journal-ui');
 html = inlineRegion(html, JS_BEGIN_FOSSSTATE, JS_END_FOSSSTATE, jsFossState.replace(/\s+$/, ''), 'fossil-record-state');
 html = inlineRegion(html, JS_BEGIN_FOSSUI,   JS_END_FOSSUI,   jsFossUI.replace(/\s+$/, ''),   'fossil-record-ui');
+html = inlineRegion(html, JS_BEGIN_PROFDELETE, JS_END_PROFDELETE, jsProfDelete.replace(/\s+$/, ''), 'profile-delete');
+html = inlineRegion(html, JS_BEGIN_PROFSM,   JS_END_PROFSM,   jsProfSM.replace(/\s+$/, ''),   'profile-startup-modal');
 
 if (html === original) {
   console.log('build_play_html: no change — game/play.html already matches all source files.');
