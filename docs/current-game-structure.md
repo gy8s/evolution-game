@@ -12,7 +12,7 @@ Evolution Game is a browser-based single-player survival simulation. The player 
 
 The game runs from a single HTML file (`game/play.html`, ~18,400 lines). There is no bundler and no server. Open the file in a browser and it works.
 
-Five source extractions are complete. The playable file `game/play.html` still contains all content inline (between marker comments) so it works with no build step or runtime dependency.
+Six source extractions are complete. The playable file `game/play.html` still contains all content inline (between marker comments) so it works with no build step or runtime dependency.
 
 | Source file | What it contains | In play.html |
 |-------------|-----------------|--------------|
@@ -21,8 +21,9 @@ Five source extractions are complete. The playable file `game/play.html` still c
 | `src/utils/core-utils.js` | Pure stateless helpers (clamp, roll, choice, clonePlain, escapeHtml, chooseWeighted, text-sanitisation helpers) | One inline JS region (~line 5835) |
 | `src/data/achievement-data.js` | `ACHIEVEMENT_DEFS` (definitions array only) | One inline JS region (~line 4800) |
 | `src/state/run-tracking.js` | `freshRunTracking()` factory (run-tracking schema only) | One inline JS region (~line 4763) |
+| `src/state/profile-storage-constants.js` | Profile/storage key constants (7 `const` declarations) | One inline JS region (~line 4481) |
 
-`scripts/build_play_html.mjs` inlines all source files back into `game/play.html`. Only the `ACHIEVEMENT_DEFS` definitions array and the `freshRunTracking()` factory function are extracted — achievement persistence, profile/save logic, `checkAchievements`, achievement rendering/toast logic, and all other game state management remain inside `game/play.html`. All other JavaScript engine code and HTML structure also remain inside `game/play.html` for now.
+`scripts/build_play_html.mjs` inlines all source files back into `game/play.html`. Only configuration-like declarations are extracted — all profile functions (`profileLoadStore`, `profileSaveStore`, `profileCreateNew`, etc.), achievement persistence, fossil record logic, active-run logic, save/load logic, and all other game code remain inside `game/play.html`. All JavaScript engine code and HTML structure also remain inside `game/play.html` for now.
 
 ---
 
@@ -271,7 +272,9 @@ flowchart TD
 | 990–1020 | Game version constant |
 | 1021–3501 | Static data: encounter definitions + spawn tables — generated, source is `src/data/encounter-data.js` [1/2] |
 | 3631–4252 | World generation: terrain, habitats, altitude, water, clay deposits |
-| 4253–4791 | Player state object and dynamic world state (waterState, socialGroup, nearbyEntities) |
+| 4253–4478 | Player state object and dynamic world state (waterState, socialGroup, nearbyEntities) |
+| 4479–4489 | Profile/storage constants — generated, source is `src/state/profile-storage-constants.js` |
+| 4491–4762 | Profile state variables and profile functions (currentProfileId, profileLoadStore, profileSaveStore, etc.) |
 | 4763–4794 | Run-tracking state factory (`freshRunTracking`) — generated, source is `src/state/run-tracking.js` |
 | 4800–4865 | Achievement definitions (`ACHIEVEMENT_DEFS`, 50 defs) — generated, source is `src/data/achievement-data.js` |
 | 4867–5829 | Achievement persistence (load/save/check), profile stats, profiles, save/load, Field Journal, Fossil Record |
@@ -326,6 +329,7 @@ The rebuild plan (see `docs/project-plan.md`) targets extraction in this rough o
 | `src/utils/core-utils.js` | `// BEGIN/END GENERATED JS: src/utils/core-utils.js` |
 | `src/data/achievement-data.js` | `// BEGIN/END GENERATED JS: src/data/achievement-data.js` |
 | `src/state/run-tracking.js` | `// BEGIN/END GENERATED JS: src/state/run-tracking.js` |
+| `src/state/profile-storage-constants.js` | `// BEGIN/END GENERATED JS: src/state/profile-storage-constants.js` |
 
 The source file `src/data/encounter-data.js` contains a `// << SPLIT: hiddenSubtypePools >>` line dividing part 1 (encounters + encounterTables) from part 2 (hiddenSubtypePools). The build script splits on this marker and inlines each part into its respective location in `play.html`. All other source files have no split marker — each maps to one contiguous region.
 
