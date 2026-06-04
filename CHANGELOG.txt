@@ -1,3 +1,22 @@
+[2026-06-04 extract-profile-factories | Claude]
+Seventh controlled extraction — profile factory helper functions extracted and build script extended.
+
+- Created src/state/profile-factories.js: three factory/helper functions moved mechanically from game/play.html, byte-identical to the originals.
+  - profileGenerateId(prefix): generates a unique timestamped ID string.
+  - profileEmptyStore(): returns a minimal empty profile store object.
+  - profileDefaultStats(): returns a zeroed stats object for a new profile.
+  - No function names changed. No function bodies changed.
+- Edited game/play.html: all three functions replaced with a single // BEGIN/END GENERATED JS: src/state/profile-factories.js region.
+  - The functions were not contiguous in the original; they have been consolidated into one region before profileLoadStore. This is safe because function declarations are hoisted.
+  - The generated region sits after the profile state variables (currentProfileId, etc.) and before profileLoadStore — preserving load order.
+  - Only the three approved functions were extracted. profileLoadStore, profileSaveStore, profileCreateNew, fossil record logic, active-run logic, achievement persistence, and save/load logic remain in game/play.html. No call sites changed.
+  - game/play.html remains the directly playable artifact.
+- Extended scripts/build_play_html.mjs: now inlines CSS, encounter data, core utils, achievement definitions, run-tracking state factory, profile/storage constants, and profile factory helpers. Fails clearly if src/state/profile-factories.js or its region markers are missing. Idempotent.
+- game/evolution_game_v66_57.html NOT changed: historical archive, not kept byte-synced between releases.
+- Docs: README.md (repo layout tree + build scaffold table), docs/current-game-structure.md (line-range table, build scaffold table), docs/architecture-notes.md (generated region + markers, line-range table, fragile-area note), docs/release-checklist.md (build step check for profile-factories).
+- Verification: node scripts/build_play_html.mjs (idempotent — no change) and node scripts/check_html_js_syntax.mjs both pass. Extracted source verified to match the inline region (excluding markers and trailing whitespace).
+- Source/build structure change only. No gameplay logic, function bodies, call sites, save/profile behaviour, achievement logic, fossil record logic, rendering, CSS, encounter data, core utility code, run-tracking code, or profile/storage constants changed.
+
 [2026-06-04 extract-profile-storage-constants | Claude]
 Sixth controlled extraction — profile/storage constant declarations extracted and build script extended.
 
