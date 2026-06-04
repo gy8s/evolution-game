@@ -1,3 +1,22 @@
+[2026-06-04 extract-profile-state-snapshot | Claude]
+Ninth controlled extraction — profile active-run state capture/restore helpers extracted and build script extended.
+
+- Created src/state/profile-state-snapshot.js: three profile state snapshot functions moved mechanically from game/play.html, byte-identical to the originals.
+  - profileCaptureWorldArrays(): returns a deep copy of the six world-grid arrays (terrain, altitude, landform, habitat, muddyShallows, lianaBridges).
+  - profileCaptureState(): builds the full active-run snapshot object (player, world state, encounters, social state, environment, time, log lines, etc.).
+  - profileRestoreState(state): writes a captured snapshot back into the live game state, including the log DOM.
+  - No function names changed. No function bodies changed. No saved field names changed. No restored field names changed. No save schema changed. No restore order changed.
+- Edited game/play.html: the three functions replaced with a single // BEGIN/END GENERATED JS: src/state/profile-state-snapshot.js region.
+  - The generated region sits immediately after the profile-store-core region and before profileKnowledgeCount — preserving load order.
+  - The three functions were contiguous; no hoisting shuffle was required.
+  - Only the three approved functions were extracted. profileKnowledgeCount, profileBuildRunSummary, profileRunIsGodMode, profileUpdateStats, profileOnRunEnd, active-run lifecycle logic, fossil record logic, achievement persistence, and save/load logic remain in game/play.html. No call sites changed.
+  - game/play.html remains the directly playable artifact.
+- Extended scripts/build_play_html.mjs: now inlines CSS, encounter data, core utils, achievement definitions, run-tracking state factory, profile/storage constants, profile factory helpers, profile store core helpers, and profile state snapshot helpers. Fails clearly if src/state/profile-state-snapshot.js or its region markers are missing. Idempotent.
+- game/evolution_game_v66_57.html NOT changed: historical archive, not kept byte-synced between releases.
+- Docs: README.md (repo layout tree + build scaffold table), docs/current-game-structure.md (line-range table, build scaffold table, marker table), docs/architecture-notes.md (generated region + markers, line-range table, fragile-area note), docs/release-checklist.md (build step check for profile-state-snapshot).
+- Verification: node scripts/build_play_html.mjs (idempotent — no change) and node scripts/check_html_js_syntax.mjs both pass. Extracted source verified to match the inline region (excluding markers and trailing whitespace).
+- Source/build structure change only. No gameplay logic, function bodies, call sites, save schema, saved/restored field names, restore order, active-run behaviour, achievement logic, fossil record logic, rendering, CSS, encounter data, core utility code, run-tracking code, profile/storage constants, profile factories, or profile-store-core code changed.
+
 [2026-06-04 extract-profile-store-core | Claude]
 Eighth controlled extraction — profile store core helper functions extracted and build script extended.
 

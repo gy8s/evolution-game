@@ -12,7 +12,7 @@ Evolution Game is a browser-based single-player survival simulation. The player 
 
 The game runs from a single HTML file (`game/play.html`, ~18,400 lines). There is no bundler and no server. Open the file in a browser and it works.
 
-Eight source extractions are complete. The playable file `game/play.html` still contains all content inline (between marker comments) so it works with no build step or runtime dependency.
+Nine source extractions are complete. The playable file `game/play.html` still contains all content inline (between marker comments) so it works with no build step or runtime dependency.
 
 | Source file | What it contains | In play.html |
 |-------------|-----------------|--------------|
@@ -24,6 +24,7 @@ Eight source extractions are complete. The playable file `game/play.html` still 
 | `src/state/profile-storage-constants.js` | Profile/storage key constants (7 `const` declarations) | One inline JS region (~line 4481) |
 | `src/state/profile-factories.js` | Profile factory helpers (`profileGenerateId`, `profileEmptyStore`, `profileDefaultStats`) | One inline JS region (~line 4500) |
 | `src/state/profile-store-core.js` | Profile store core helpers (`profileLoadStore`, `profileSaveStore`, `profileCreateNew`, `profileGetActive`, `profileCheckBuildCompatibility`) | One inline JS region (~line 4514) |
+| `src/state/profile-state-snapshot.js` | Profile active-run capture/restore helpers (`profileCaptureWorldArrays`, `profileCaptureState`, `profileRestoreState`) | One inline JS region (~line 4579) |
 
 `scripts/build_play_html.mjs` inlines all source files back into `game/play.html`. Only configuration-like declarations and simple factory/helper functions are extracted — `profileCaptureWorldArrays`, `profileCaptureState`, `profileRestoreState`, `profileUpdateStats`, `profileOnRunEnd`, fossil record logic, active-run logic, achievement persistence, save/load logic, and all other game code remain inside `game/play.html`. All JavaScript engine code and HTML structure also remain inside `game/play.html` for now.
 
@@ -279,9 +280,10 @@ flowchart TD
 | 4491–4499 | Profile state variables (currentProfileId, currentRunId, runGodModeUsed, etc.) |
 | 4500–4512 | Profile factory helpers — generated, source is `src/state/profile-factories.js` |
 | 4514–4577 | Profile store core helpers — generated, source is `src/state/profile-store-core.js` |
-| 4579–4768 | Remaining profile functions (profileCaptureWorldArrays, profileCaptureState, profileRestoreState, profileUpdateStats, profileOnRunEnd, etc.) |
-| 4769–4800 | Run-tracking state factory (`freshRunTracking`) — generated, source is `src/state/run-tracking.js` |
-| 4806–4871 | Achievement definitions (`ACHIEVEMENT_DEFS`, 50 defs) — generated, source is `src/data/achievement-data.js` |
+| 4579–4718 | Profile state snapshot helpers — generated, source is `src/state/profile-state-snapshot.js` |
+| 4720–4770 | Remaining profile functions (profileKnowledgeCount, profileBuildRunSummary, profileUpdateStats, profileOnRunEnd, etc.) |
+| 4771–4802 | Run-tracking state factory (`freshRunTracking`) — generated, source is `src/state/run-tracking.js` |
+| 4808–4873 | Achievement definitions (`ACHIEVEMENT_DEFS`, 50 defs) — generated, source is `src/data/achievement-data.js` |
 | 4867–5829 | Achievement persistence (load/save/check), profile stats, profiles, save/load, Field Journal, Fossil Record |
 | 5830–5924 | Core utilities — generated, source is `src/utils/core-utils.js`: pure helpers (clamp, roll, choice, clonePlain, escapeHtml, etc.) |
 | 5925–6036 | Remaining utilities: logging, debug helpers, narration setters |
@@ -337,6 +339,7 @@ The rebuild plan (see `docs/project-plan.md`) targets extraction in this rough o
 | `src/state/profile-storage-constants.js` | `// BEGIN/END GENERATED JS: src/state/profile-storage-constants.js` |
 | `src/state/profile-factories.js` | `// BEGIN/END GENERATED JS: src/state/profile-factories.js` |
 | `src/state/profile-store-core.js` | `// BEGIN/END GENERATED JS: src/state/profile-store-core.js` |
+| `src/state/profile-state-snapshot.js` | `// BEGIN/END GENERATED JS: src/state/profile-state-snapshot.js` |
 
 The source file `src/data/encounter-data.js` contains a `// << SPLIT: hiddenSubtypePools >>` line dividing part 1 (encounters + encounterTables) from part 2 (hiddenSubtypePools). The build script splits on this marker and inlines each part into its respective location in `play.html`. All other source files have no split marker — each maps to one contiguous region.
 

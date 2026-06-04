@@ -15,6 +15,7 @@
 //   6. src/state/profile-storage-constants.js → one JS region (~line 4481)
 //   7. src/state/profile-factories.js → one JS region (~line 4500)
 //   8. src/state/profile-store-core.js → one JS region (~line 4514)
+//   9. src/state/profile-state-snapshot.js → one JS region (~line 4579)
 //
 // Why inline (not external files): game/play.html must open straight from
 // disk — or via the GitHub Pages link — with no build step and no runtime
@@ -40,6 +41,7 @@ const RUNTRACK_SOURCE = resolve(repoRoot, 'src/state/run-tracking.js');
 const PROFCONST_SOURCE   = resolve(repoRoot, 'src/state/profile-storage-constants.js');
 const PROFFACT_SOURCE    = resolve(repoRoot, 'src/state/profile-factories.js');
 const PROFCORE_SOURCE    = resolve(repoRoot, 'src/state/profile-store-core.js');
+const PROFSNAP_SOURCE    = resolve(repoRoot, 'src/state/profile-state-snapshot.js');
 const PLAY_HTML          = resolve(repoRoot, 'game/play.html');
 
 // CSS markers (CSS comment style, inside <style>)
@@ -76,6 +78,10 @@ const JS_END_PROFFACT   = '// END GENERATED JS: src/state/profile-factories.js';
 const JS_BEGIN_PROFCORE = '// BEGIN GENERATED JS: src/state/profile-store-core.js';
 const JS_END_PROFCORE   = '// END GENERATED JS: src/state/profile-store-core.js';
 
+// Profile-state-snapshot markers (JS comment style, inside <script>)
+const JS_BEGIN_PROFSNAP = '// BEGIN GENERATED JS: src/state/profile-state-snapshot.js';
+const JS_END_PROFSNAP   = '// END GENERATED JS: src/state/profile-state-snapshot.js';
+
 // The split comment that divides the source file into part1 and part2.
 // It is NOT inlined into game/play.html.
 const JS_SPLIT  = '// << SPLIT: hiddenSubtypePools >>';
@@ -108,6 +114,7 @@ if (!existsSync(RUNTRACK_SOURCE))  fail('cannot find src/state/run-tracking.js')
 if (!existsSync(PROFCONST_SOURCE)) fail('cannot find src/state/profile-storage-constants.js');
 if (!existsSync(PROFFACT_SOURCE))  fail('cannot find src/state/profile-factories.js');
 if (!existsSync(PROFCORE_SOURCE))  fail('cannot find src/state/profile-store-core.js');
+if (!existsSync(PROFSNAP_SOURCE))  fail('cannot find src/state/profile-state-snapshot.js');
 if (!existsSync(PLAY_HTML))        fail('cannot find game/play.html');
 
 const css          = readFileSync(CSS_SOURCE,       'utf8');
@@ -118,6 +125,7 @@ const jsRunTrack   = readFileSync(RUNTRACK_SOURCE,  'utf8');
 const jsProfConst  = readFileSync(PROFCONST_SOURCE, 'utf8');
 const jsProfFact   = readFileSync(PROFFACT_SOURCE,  'utf8');
 const jsProfCore   = readFileSync(PROFCORE_SOURCE,  'utf8');
+const jsProfSnap   = readFileSync(PROFSNAP_SOURCE,  'utf8');
 let   html         = readFileSync(PLAY_HTML,        'utf8');
 
 // --- Split encounter-data into two parts at the SPLIT marker ---
@@ -137,6 +145,7 @@ html = inlineRegion(html, JS_BEGIN_RUNTRACK,  JS_END_RUNTRACK,  jsRunTrack.repla
 html = inlineRegion(html, JS_BEGIN_PROFCONST, JS_END_PROFCONST, jsProfConst.replace(/\s+$/, ''), 'profile-storage-constants');
 html = inlineRegion(html, JS_BEGIN_PROFFACT,  JS_END_PROFFACT,  jsProfFact.replace(/\s+$/, ''),  'profile-factories');
 html = inlineRegion(html, JS_BEGIN_PROFCORE,  JS_END_PROFCORE,  jsProfCore.replace(/\s+$/, ''),  'profile-store-core');
+html = inlineRegion(html, JS_BEGIN_PROFSNAP,  JS_END_PROFSNAP,  jsProfSnap.replace(/\s+$/, ''),  'profile-state-snapshot');
 
 if (html === original) {
   console.log('build_play_html: no change — game/play.html already matches all source files.');
