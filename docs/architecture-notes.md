@@ -150,9 +150,21 @@ Part [1/3] sits between the achievement-persistence [1/3] and [2/3] regions; par
 ```
 This region sits immediately after the achievement-ui [3/3] region and before the profile-run-lifecycle [2/3] region. Only `updateRunTracking` is extracted. Run-tracking update should be edited in `src/state/run-tracking-update.js`, not inside the generated region of `game/play.html`.
 
-`src/data/encounter-data.js` uses a `// << SPLIT: hiddenSubtypePools >>` line to divide part 1 from part 2; the build script splits on it and inlines each part into its region. `src/state/profile-run-lifecycle.js` uses two split lines (`// << SPLIT: profileOnRunEnd >>` and `// << SPLIT: profileStartNewRun >>`) to divide its three parts. `src/state/achievement-persistence.js` uses two split lines (`// << SPLIT: awardAchievement >>` and `// << SPLIT: checkAchievements >>`) to divide its three parts. `src/ui/achievement-ui.js` uses two split lines (`// << SPLIT: toastHelpers >>` and `// << SPLIT: renderAchievements >>`) to divide its three parts. The split markers themselves are not inlined. All other source files have no split marker and each maps to one contiguous region.
+**Profile UI helpers** (inside the `<script>` block) — four profile/win-modal UI functions (`showWinModal`, `hideWinModal`, `onWinAchieved`, `profileUpdatePanelUI`), inlined into TWO separate regions because the `// ===== PROFILE PANEL UI =====` banner comment sits between the two groups in `game/play.html`:
+```
+// BEGIN GENERATED JS: src/ui/profile-ui.js [1/2]   (~line 5222)
+...showWinModal, hideWinModal, onWinAchieved...
+// END GENERATED JS: src/ui/profile-ui.js [1/2]
 
-**Edit CSS in `src/styles/game.css`, encounter data in `src/data/encounter-data.js`, pure utility helpers in `src/utils/core-utils.js`, achievement definitions in `src/data/achievement-data.js`, run-tracking factory in `src/state/run-tracking.js`, profile/storage constants in `src/state/profile-storage-constants.js`, profile factory helpers in `src/state/profile-factories.js`, profile store core helpers in `src/state/profile-store-core.js`, profile state snapshot helpers in `src/state/profile-state-snapshot.js`, profile run lifecycle helpers in `src/state/profile-run-lifecycle.js`, achievement persistence helpers in `src/state/achievement-persistence.js`, Field Journal state helpers in `src/state/field-journal-state.js`, achievement UI/support in `src/ui/achievement-ui.js`, and run-tracking update in `src/state/run-tracking-update.js`, then run `node scripts/build_play_html.mjs` — do not hand-edit the generated regions.** The build script never touches code outside the marked regions.
+// BEGIN GENERATED JS: src/ui/profile-ui.js [2/2]   (~line 5246)
+...profileUpdatePanelUI...
+// END GENERATED JS: src/ui/profile-ui.js [2/2]
+```
+Part [1/2] sits immediately after the profile-run-lifecycle [3/3] region; part [2/2] sits after the `// ===== PROFILE PANEL UI =====` banner. Profile UI helpers should be edited in `src/ui/profile-ui.js`, not inside the generated regions of `game/play.html`.
+
+`src/data/encounter-data.js` uses a `// << SPLIT: hiddenSubtypePools >>` line to divide part 1 from part 2; the build script splits on it and inlines each part into its region. `src/state/profile-run-lifecycle.js` uses two split lines (`// << SPLIT: profileOnRunEnd >>` and `// << SPLIT: profileStartNewRun >>`) to divide its three parts. `src/state/achievement-persistence.js` uses two split lines (`// << SPLIT: awardAchievement >>` and `// << SPLIT: checkAchievements >>`) to divide its three parts. `src/ui/achievement-ui.js` uses two split lines (`// << SPLIT: toastHelpers >>` and `// << SPLIT: renderAchievements >>`) to divide its three parts. `src/ui/profile-ui.js` uses one split line (`// << SPLIT: profileUpdatePanelUI >>`) to divide its two parts. The split markers themselves are not inlined. All other source files have no split marker and each maps to one contiguous region.
+
+**Edit CSS in `src/styles/game.css`, encounter data in `src/data/encounter-data.js`, pure utility helpers in `src/utils/core-utils.js`, achievement definitions in `src/data/achievement-data.js`, run-tracking factory in `src/state/run-tracking.js`, profile/storage constants in `src/state/profile-storage-constants.js`, profile factory helpers in `src/state/profile-factories.js`, profile store core helpers in `src/state/profile-store-core.js`, profile state snapshot helpers in `src/state/profile-state-snapshot.js`, profile run lifecycle helpers in `src/state/profile-run-lifecycle.js`, achievement persistence helpers in `src/state/achievement-persistence.js`, Field Journal state helpers in `src/state/field-journal-state.js`, achievement UI/support in `src/ui/achievement-ui.js`, run-tracking update in `src/state/run-tracking-update.js`, and profile UI helpers in `src/ui/profile-ui.js`, then run `node scripts/build_play_html.mjs` — do not hand-edit the generated regions.** The build script never touches code outside the marked regions.
 
 `game/evolution_game_v66_57.html` is the versioned archive of an earlier build. It is a historical snapshot and is not kept byte-in-sync with `game/play.html` between releases; `game/play.html` is the stable public-facing copy that gets replaced on each release.
 
@@ -187,7 +199,9 @@ This region sits immediately after the achievement-ui [3/3] region and before th
 | 5013–5099 | Profile run lifecycle [2/3] (profileOnRunEnd, profileSaveActiveRun) — generated, source in `src/state/profile-run-lifecycle.js` |
 | 5107–5158 | Field Journal state/persistence helpers — generated, source in `src/state/field-journal-state.js` |
 | 5160–5210 | Profile run lifecycle [3/3] (profileStartNewRun, profileResumeActiveRun) — generated, source in `src/state/profile-run-lifecycle.js` |
-| 5204–5851 | Win modal, profile panel UI, profile stats, profiles, save/load, Field Journal render, Fossil Record |
+| 5222–5242 | Profile UI [1/2] (showWinModal, hideWinModal, onWinAchieved) — generated, source in `src/ui/profile-ui.js` |
+| 5246–5278 | Profile UI [2/2] (profileUpdatePanelUI) — generated, source in `src/ui/profile-ui.js` |
+| 5279–5855 | Profile delete, profileShowStartupModal, initGame, profiles, save/load, Field Journal render, Fossil Record |
 | 5853–5942 | Core utility helpers — generated, source in `src/utils/core-utils.js`: pure stateless helpers (clamp, roll, choice, clonePlain, escapeHtml, chooseWeighted, text-sanitisation) |
 | 5943–6068 | Remaining [UTILS]: logging, narration setters, noise, risk memory (not extracted — side effects) |
 | 6069–6147 | hiddenSubtypePools — generated, source in `src/data/encounter-data.js` [2/2] |

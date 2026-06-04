@@ -98,7 +98,8 @@ evolution-game/
 │   ├── utils/
 │   │   └── core-utils.js             Pure utility helpers source (inlined into play.html by the build script)
 │   ├── ui/
-│   │   └── achievement-ui.js         Achievement UI/support source (inlined into play.html by the build script)
+│   │   ├── achievement-ui.js         Achievement UI/support source (inlined into play.html by the build script)
+│   │   └── profile-ui.js             Profile/win-modal UI helpers source (inlined into play.html by the build script)
 │   └── state/
 │       ├── run-tracking.js           Run-tracking state factory source (inlined into play.html by the build script)
 │       ├── profile-storage-constants.js  Profile/storage constant declarations (inlined into play.html by the build script)
@@ -149,7 +150,7 @@ The rebuild is not a rewrite, not a framework migration, and not a gameplay rede
 
 ### Build scaffold
 
-Fourteen source extractions are complete:
+Fifteen source extractions are complete:
 
 | Source file | What it contains | Destination in play.html |
 |-------------|-----------------|--------------------------|
@@ -167,6 +168,7 @@ Fourteen source extractions are complete:
 | `src/state/field-journal-state.js` | Field Journal state/persistence helpers (`profileLoadFieldJournal`, `profileWriteJournalEntry`, `getEncounterLogCategory`, `journalMarkFirstSeen`; Field Journal rendering stays in play.html) | One JS region (~line 5107) |
 | `src/ui/achievement-ui.js` | Achievement UI/support (`getProfileAchievements`, `_toastQueue`, `_toastActive`, `clearToastQueue`, `showAchievementToast`, `_processToastQueue`, `renderAchievements`) | Three JS regions (~line 4896, ~line 4919, ~line 4968) |
 | `src/state/run-tracking-update.js` | Run-tracking update (`updateRunTracking`) | One JS region (~line 4999) |
+| `src/ui/profile-ui.js` | Profile/win-modal UI helpers (`showWinModal`, `hideWinModal`, `onWinAchieved`, `profileUpdatePanelUI`) | Two JS regions (~line 5222, ~line 5246) |
 
 `game/play.html` keeps all content **inline** so it stays directly playable with no build step or runtime dependency. To regenerate `game/play.html` after editing any source file:
 
