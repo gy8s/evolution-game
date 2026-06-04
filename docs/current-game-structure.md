@@ -12,7 +12,7 @@ Evolution Game is a browser-based single-player survival simulation. The player 
 
 The game runs from a single HTML file (`game/play.html`, ~18,400 lines). There is no bundler and no server. Open the file in a browser and it works.
 
-Eleven source extractions are complete. The playable file `game/play.html` still contains all content inline (between marker comments) so it works with no build step or runtime dependency.
+Twelve source extractions are complete. The playable file `game/play.html` still contains all content inline (between marker comments) so it works with no build step or runtime dependency.
 
 | Source file | What it contains | In play.html |
 |-------------|-----------------|--------------|
@@ -27,6 +27,7 @@ Eleven source extractions are complete. The playable file `game/play.html` still
 | `src/state/profile-state-snapshot.js` | Profile active-run capture/restore helpers (`profileCaptureWorldArrays`, `profileCaptureState`, `profileRestoreState`) | One inline JS region (~line 4579) |
 | `src/state/profile-run-lifecycle.js` | Profile run summary/lifecycle helpers (`profileKnowledgeCount`, `profileBuildRunSummary`, `profileRunIsGodMode`, `profileUpdateStats`, `profileOnRunEnd`, `profileSaveActiveRun`, `profileStartNewRun`, `profileResumeActiveRun`) | Three inline JS regions (~line 4720, ~line 5013, ~line 5152) |
 | `src/state/achievement-persistence.js` | Achievement persistence helpers (`loadAchievements`, `saveAchievements`, `awardAchievement`, `checkAchievements`) | Three inline JS regions (~line 4877, ~line 4901, ~line 4946) |
+| `src/state/field-journal-state.js` | Field Journal state/persistence helpers (`profileLoadFieldJournal`, `profileWriteJournalEntry`, `getEncounterLogCategory`, `journalMarkFirstSeen`) | One inline JS region (~line 5107) |
 
 `scripts/build_play_html.mjs` inlines all source files back into `game/play.html`. Only configuration-like declarations and simple factory/helper functions are extracted — `profileCaptureWorldArrays`, `profileCaptureState`, `profileRestoreState`, `profileUpdateStats`, `profileOnRunEnd`, fossil record logic, active-run logic, `getProfileAchievements`, toast system, `renderAchievements`, `updateRunTracking`, save/load logic, and all other game code remain inside `game/play.html`. All JavaScript engine code and HTML structure also remain inside `game/play.html` for now.
 
@@ -293,8 +294,8 @@ flowchart TD
 | 4946–4962 | Achievement persistence [3/3] (checkAchievements) — generated, source is `src/state/achievement-persistence.js` |
 | 4964–5014 | renderAchievements, updateRunTracking (not extracted) |
 | 5013–5099 | Profile run lifecycle [2/3] (profileOnRunEnd, profileSaveActiveRun) — generated, source is `src/state/profile-run-lifecycle.js` |
-| 5101–5151 | Field Journal helpers (profileLoadFieldJournal, profileWriteJournalEntry, getEncounterLogCategory, journalMarkFirstSeen) |
-| 5152–5202 | Profile run lifecycle [3/3] (profileStartNewRun, profileResumeActiveRun) — generated, source is `src/state/profile-run-lifecycle.js` |
+| 5107–5158 | Field Journal state/persistence helpers — generated, source is `src/state/field-journal-state.js` |
+| 5160–5210 | Profile run lifecycle [3/3] (profileStartNewRun, profileResumeActiveRun) — generated, source is `src/state/profile-run-lifecycle.js` |
 | 5204–5851 | Win modal, profile panel UI, profile stats, profiles, save/load, Field Journal render, Fossil Record |
 | 5853–5942 | Core utilities — generated, source is `src/utils/core-utils.js`: pure helpers (clamp, roll, choice, clonePlain, escapeHtml, etc.) |
 | 5943–6068 | Remaining utilities: logging, debug helpers, narration setters |
@@ -357,7 +358,8 @@ The rebuild plan (see `docs/project-plan.md`) targets extraction in this rough o
 | `src/state/achievement-persistence.js` [1/3] | `// BEGIN/END GENERATED JS: src/state/achievement-persistence.js [1/3]` |
 | `src/state/achievement-persistence.js` [2/3] | `// BEGIN/END GENERATED JS: src/state/achievement-persistence.js [2/3]` |
 | `src/state/achievement-persistence.js` [3/3] | `// BEGIN/END GENERATED JS: src/state/achievement-persistence.js [3/3]` |
+| `src/state/field-journal-state.js` | `// BEGIN/END GENERATED JS: src/state/field-journal-state.js` |
 
-The source file `src/data/encounter-data.js` contains a `// << SPLIT: hiddenSubtypePools >>` line dividing part 1 from part 2. `src/state/profile-run-lifecycle.js` contains two split lines (`// << SPLIT: profileOnRunEnd >>` and `// << SPLIT: profileStartNewRun >>`) dividing it into three parts. `src/state/achievement-persistence.js` contains two split lines (`// << SPLIT: awardAchievement >>` and `// << SPLIT: checkAchievements >>`) dividing it into three parts, because `getProfileAchievements` (not extracted) and the toast system (not extracted) sit between the four target functions in `play.html`. The build script splits on all these markers and inlines each part into its respective location in `play.html`. All other source files have no split marker — each maps to one contiguous region.
+The source file `src/data/encounter-data.js` contains a `// << SPLIT: hiddenSubtypePools >>` line dividing part 1 from part 2. `src/state/profile-run-lifecycle.js` contains two split lines (`// << SPLIT: profileOnRunEnd >>` and `// << SPLIT: profileStartNewRun >>`) dividing it into three parts. `src/state/achievement-persistence.js` contains two split lines (`// << SPLIT: awardAchievement >>` and `// << SPLIT: checkAchievements >>`) dividing it into three parts, because `getProfileAchievements` (not extracted) and the toast system (not extracted) sit between the four target functions in `play.html`. All other source files have no split marker — each maps to one contiguous region.
 
 Run `node scripts/build_play_html.mjs` after editing any source file. Do not hand-edit generated regions in `game/play.html`. This document will be updated as each further extraction completes.
