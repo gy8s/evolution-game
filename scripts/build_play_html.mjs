@@ -25,6 +25,11 @@
 //        [2/3] awardAchievement                   (~line 4901)
 //        [3/3] checkAchievements                  (~line 4944)
 //  12. src/state/field-journal-state.js → one JS region (~line 5107)
+//  13. src/ui/achievement-ui.js → three JS regions:
+//        [1/3] getProfileAchievements             (~line 4896)
+//        [2/3] toast queue/helpers                (~line 4919)
+//        [3/3] renderAchievements                 (~line 4968)
+//  14. src/state/run-tracking-update.js → one JS region (~line 4999)
 //
 // Why inline (not external files): game/play.html must open straight from
 // disk — or via the GitHub Pages link — with no build step and no runtime
@@ -54,6 +59,8 @@ const PROFSNAP_SOURCE    = resolve(repoRoot, 'src/state/profile-state-snapshot.j
 const PROFLIFE_SOURCE    = resolve(repoRoot, 'src/state/profile-run-lifecycle.js');
 const ACHPERS_SOURCE     = resolve(repoRoot, 'src/state/achievement-persistence.js');
 const FJSTATE_SOURCE     = resolve(repoRoot, 'src/state/field-journal-state.js');
+const ACHIEVUI_SOURCE    = resolve(repoRoot, 'src/ui/achievement-ui.js');
+const RUNTRUPDATE_SOURCE = resolve(repoRoot, 'src/state/run-tracking-update.js');
 const PLAY_HTML          = resolve(repoRoot, 'game/play.html');
 
 // CSS markers (CSS comment style, inside <style>)
@@ -106,6 +113,18 @@ const JS_END_PROFLIFE3   = '// END GENERATED JS: src/state/profile-run-lifecycle
 const JS_BEGIN_FJSTATE = '// BEGIN GENERATED JS: src/state/field-journal-state.js';
 const JS_END_FJSTATE   = '// END GENERATED JS: src/state/field-journal-state.js';
 
+// Achievement-ui markers (JS comment style, inside <script>) — three parts
+const JS_BEGIN_ACHIEVUI1 = '// BEGIN GENERATED JS: src/ui/achievement-ui.js [1/3]';
+const JS_END_ACHIEVUI1   = '// END GENERATED JS: src/ui/achievement-ui.js [1/3]';
+const JS_BEGIN_ACHIEVUI2 = '// BEGIN GENERATED JS: src/ui/achievement-ui.js [2/3]';
+const JS_END_ACHIEVUI2   = '// END GENERATED JS: src/ui/achievement-ui.js [2/3]';
+const JS_BEGIN_ACHIEVUI3 = '// BEGIN GENERATED JS: src/ui/achievement-ui.js [3/3]';
+const JS_END_ACHIEVUI3   = '// END GENERATED JS: src/ui/achievement-ui.js [3/3]';
+
+// Run-tracking-update markers (JS comment style, inside <script>)
+const JS_BEGIN_RUNTRUPDATE = '// BEGIN GENERATED JS: src/state/run-tracking-update.js';
+const JS_END_RUNTRUPDATE   = '// END GENERATED JS: src/state/run-tracking-update.js';
+
 // Achievement-persistence markers (JS comment style, inside <script>) — three parts
 const JS_BEGIN_ACHPERS1 = '// BEGIN GENERATED JS: src/state/achievement-persistence.js [1/3]';
 const JS_END_ACHPERS1   = '// END GENERATED JS: src/state/achievement-persistence.js [1/3]';
@@ -127,6 +146,11 @@ const JS_SPLIT_PROFLIFE_B = '// << SPLIT: profileStartNewRun >>';
 // They are NOT inlined into game/play.html.
 const JS_SPLIT_ACHPERS_A = '// << SPLIT: awardAchievement >>';
 const JS_SPLIT_ACHPERS_B = '// << SPLIT: checkAchievements >>';
+
+// The two split comments that divide achievement-ui.js into three parts.
+// They are NOT inlined into game/play.html.
+const JS_SPLIT_ACHIEVUI_A = '// << SPLIT: toastHelpers >>';
+const JS_SPLIT_ACHIEVUI_B = '// << SPLIT: renderAchievements >>';
 
 function fail(msg) {
   console.error(`build_play_html: ERROR: ${msg}`);
@@ -159,8 +183,10 @@ if (!existsSync(PROFCORE_SOURCE))  fail('cannot find src/state/profile-store-cor
 if (!existsSync(PROFSNAP_SOURCE))  fail('cannot find src/state/profile-state-snapshot.js');
 if (!existsSync(PROFLIFE_SOURCE))  fail('cannot find src/state/profile-run-lifecycle.js');
 if (!existsSync(ACHPERS_SOURCE))   fail('cannot find src/state/achievement-persistence.js');
-if (!existsSync(FJSTATE_SOURCE))   fail('cannot find src/state/field-journal-state.js');
-if (!existsSync(PLAY_HTML))        fail('cannot find game/play.html');
+if (!existsSync(FJSTATE_SOURCE))     fail('cannot find src/state/field-journal-state.js');
+if (!existsSync(ACHIEVUI_SOURCE))    fail('cannot find src/ui/achievement-ui.js');
+if (!existsSync(RUNTRUPDATE_SOURCE)) fail('cannot find src/state/run-tracking-update.js');
+if (!existsSync(PLAY_HTML))          fail('cannot find game/play.html');
 
 const css          = readFileSync(CSS_SOURCE,       'utf8');
 const jsData       = readFileSync(DATA_SOURCE,      'utf8');
@@ -173,8 +199,10 @@ const jsProfCore   = readFileSync(PROFCORE_SOURCE,  'utf8');
 const jsProfSnap   = readFileSync(PROFSNAP_SOURCE,  'utf8');
 const jsProfLife   = readFileSync(PROFLIFE_SOURCE,  'utf8');
 const jsAchPers    = readFileSync(ACHPERS_SOURCE,   'utf8');
-const jsFJState    = readFileSync(FJSTATE_SOURCE,   'utf8');
-let   html         = readFileSync(PLAY_HTML,        'utf8');
+const jsFJState    = readFileSync(FJSTATE_SOURCE,    'utf8');
+const jsAchievUI   = readFileSync(ACHIEVUI_SOURCE,   'utf8');
+const jsRunTrUpdate = readFileSync(RUNTRUPDATE_SOURCE, 'utf8');
+let   html         = readFileSync(PLAY_HTML,         'utf8');
 
 // --- Split encounter-data into two parts at the SPLIT marker ---
 const splitIdx = jsData.indexOf(JS_SPLIT);
@@ -191,6 +219,16 @@ if (lifeSplitB < lifeSplitA) fail('profile-run-lifecycle split markers are out o
 const jsLife1 = jsProfLife.slice(0, lifeSplitA).replace(/\s+$/, '');
 const jsLife2 = jsProfLife.slice(lifeSplitA + JS_SPLIT_PROFLIFE_A.length, lifeSplitB).replace(/^\n/, '').replace(/\s+$/, '');
 const jsLife3 = jsProfLife.slice(lifeSplitB + JS_SPLIT_PROFLIFE_B.length).replace(/^\n/, '').replace(/\s+$/, '');
+
+// --- Split achievement-ui into three parts at its two SPLIT markers ---
+const achievUISplitA = jsAchievUI.indexOf(JS_SPLIT_ACHIEVUI_A);
+if (achievUISplitA === -1) fail(`missing split marker in src/ui/achievement-ui.js: ${JS_SPLIT_ACHIEVUI_A}`);
+const achievUISplitB = jsAchievUI.indexOf(JS_SPLIT_ACHIEVUI_B);
+if (achievUISplitB === -1) fail(`missing split marker in src/ui/achievement-ui.js: ${JS_SPLIT_ACHIEVUI_B}`);
+if (achievUISplitB < achievUISplitA) fail('achievement-ui split markers are out of order');
+const jsAchievUI1 = jsAchievUI.slice(0, achievUISplitA).replace(/\s+$/, '');
+const jsAchievUI2 = jsAchievUI.slice(achievUISplitA + JS_SPLIT_ACHIEVUI_A.length, achievUISplitB).replace(/^\n/, '').replace(/\s+$/, '');
+const jsAchievUI3 = jsAchievUI.slice(achievUISplitB + JS_SPLIT_ACHIEVUI_B.length).replace(/^\n/, '').replace(/\s+$/, '');
 
 // --- Split achievement-persistence into three parts at its two SPLIT markers ---
 const achPersSplitA = jsAchPers.indexOf(JS_SPLIT_ACHPERS_A);
@@ -220,7 +258,11 @@ html = inlineRegion(html, JS_BEGIN_PROFLIFE3, JS_END_PROFLIFE3, jsLife3, 'profil
 html = inlineRegion(html, JS_BEGIN_ACHPERS1, JS_END_ACHPERS1, jsAchPers1, 'achievement-persistence [1/3]');
 html = inlineRegion(html, JS_BEGIN_ACHPERS2, JS_END_ACHPERS2, jsAchPers2, 'achievement-persistence [2/3]');
 html = inlineRegion(html, JS_BEGIN_ACHPERS3, JS_END_ACHPERS3, jsAchPers3, 'achievement-persistence [3/3]');
-html = inlineRegion(html, JS_BEGIN_FJSTATE,  JS_END_FJSTATE,  jsFJState.replace(/\s+$/, ''), 'field-journal-state');
+html = inlineRegion(html, JS_BEGIN_FJSTATE,    JS_END_FJSTATE,    jsFJState.replace(/\s+$/, ''),       'field-journal-state');
+html = inlineRegion(html, JS_BEGIN_ACHIEVUI1,  JS_END_ACHIEVUI1,  jsAchievUI1,                         'achievement-ui [1/3]');
+html = inlineRegion(html, JS_BEGIN_ACHIEVUI2,  JS_END_ACHIEVUI2,  jsAchievUI2,                         'achievement-ui [2/3]');
+html = inlineRegion(html, JS_BEGIN_ACHIEVUI3,  JS_END_ACHIEVUI3,  jsAchievUI3,                         'achievement-ui [3/3]');
+html = inlineRegion(html, JS_BEGIN_RUNTRUPDATE, JS_END_RUNTRUPDATE, jsRunTrUpdate.replace(/\s+$/, ''), 'run-tracking-update');
 
 if (html === original) {
   console.log('build_play_html: no change — game/play.html already matches all source files.');

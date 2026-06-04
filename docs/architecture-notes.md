@@ -124,11 +124,35 @@ This region sits between the profile-run-lifecycle [2/3] generated region and th
 ...checkAchievements...
 // END GENERATED JS: src/state/achievement-persistence.js [3/3]
 ```
-Part [1/3] sits immediately after the achievement-data generated region; part [2/3] sits between `getProfileAchievements` and the toast helpers; part [3/3] sits between the toast helpers and `renderAchievements`. The functions stay exactly where they were — no code was moved. `getProfileAchievements`, the toast system, `renderAchievements`, and `updateRunTracking` remain in `game/play.html`. Achievement persistence helpers should be edited in `src/state/achievement-persistence.js`, not inside the generated regions of `game/play.html`.
+Part [1/3] sits immediately after the achievement-data generated region; part [2/3] sits between the achievement-ui [1/3] and [2/3] regions; part [3/3] sits between the achievement-ui [2/3] and [3/3] regions. The functions stay exactly where they were — no code was moved. Achievement persistence helpers should be edited in `src/state/achievement-persistence.js`, not inside the generated regions of `game/play.html`.
 
-`src/data/encounter-data.js` uses a `// << SPLIT: hiddenSubtypePools >>` line to divide part 1 from part 2; the build script splits on it and inlines each part into its region. `src/state/profile-run-lifecycle.js` uses two split lines (`// << SPLIT: profileOnRunEnd >>` and `// << SPLIT: profileStartNewRun >>`) to divide its three parts. `src/state/achievement-persistence.js` uses two split lines (`// << SPLIT: awardAchievement >>` and `// << SPLIT: checkAchievements >>`) to divide its three parts. The split markers themselves are not inlined. All other source files have no split marker and each maps to one contiguous region.
+**Achievement UI/support** (inside the `<script>` block) — seven items (`getProfileAchievements`, `_toastQueue`, `_toastActive`, `clearToastQueue`, `showAchievementToast`, `_processToastQueue`, `renderAchievements`), inlined into THREE separate regions because the achievement-persistence [2/3] and [3/3] generated regions sit between the target groups in `game/play.html`:
+```
+// BEGIN GENERATED JS: src/ui/achievement-ui.js [1/3]   (~line 4896)
+...getProfileAchievements...
+// END GENERATED JS: src/ui/achievement-ui.js [1/3]
 
-**Edit CSS in `src/styles/game.css`, encounter data in `src/data/encounter-data.js`, pure utility helpers in `src/utils/core-utils.js`, achievement definitions in `src/data/achievement-data.js`, run-tracking factory in `src/state/run-tracking.js`, profile/storage constants in `src/state/profile-storage-constants.js`, profile factory helpers in `src/state/profile-factories.js`, profile store core helpers in `src/state/profile-store-core.js`, profile state snapshot helpers in `src/state/profile-state-snapshot.js`, profile run lifecycle helpers in `src/state/profile-run-lifecycle.js`, achievement persistence helpers in `src/state/achievement-persistence.js`, and Field Journal state helpers in `src/state/field-journal-state.js`, then run `node scripts/build_play_html.mjs` — do not hand-edit the generated regions.** The build script never touches code outside the marked regions.
+// BEGIN GENERATED JS: src/ui/achievement-ui.js [2/3]   (~line 4919)
+..._toastQueue, _toastActive, clearToastQueue, showAchievementToast, _processToastQueue...
+// END GENERATED JS: src/ui/achievement-ui.js [2/3]
+
+// BEGIN GENERATED JS: src/ui/achievement-ui.js [3/3]   (~line 4968)
+...renderAchievements...
+// END GENERATED JS: src/ui/achievement-ui.js [3/3]
+```
+Part [1/3] sits between the achievement-persistence [1/3] and [2/3] regions; part [2/3] sits between the achievement-persistence [2/3] and [3/3] regions; part [3/3] sits between the achievement-persistence [3/3] region and the run-tracking-update region. Achievement UI/support should be edited in `src/ui/achievement-ui.js`, not inside the generated regions of `game/play.html`.
+
+**Run-tracking update** (inside the `<script>` block, ~line 4999) — the `updateRunTracking` function only:
+```
+// BEGIN GENERATED JS: src/state/run-tracking-update.js
+...updateRunTracking...
+// END GENERATED JS: src/state/run-tracking-update.js
+```
+This region sits immediately after the achievement-ui [3/3] region and before the profile-run-lifecycle [2/3] region. Only `updateRunTracking` is extracted. Run-tracking update should be edited in `src/state/run-tracking-update.js`, not inside the generated region of `game/play.html`.
+
+`src/data/encounter-data.js` uses a `// << SPLIT: hiddenSubtypePools >>` line to divide part 1 from part 2; the build script splits on it and inlines each part into its region. `src/state/profile-run-lifecycle.js` uses two split lines (`// << SPLIT: profileOnRunEnd >>` and `// << SPLIT: profileStartNewRun >>`) to divide its three parts. `src/state/achievement-persistence.js` uses two split lines (`// << SPLIT: awardAchievement >>` and `// << SPLIT: checkAchievements >>`) to divide its three parts. `src/ui/achievement-ui.js` uses two split lines (`// << SPLIT: toastHelpers >>` and `// << SPLIT: renderAchievements >>`) to divide its three parts. The split markers themselves are not inlined. All other source files have no split marker and each maps to one contiguous region.
+
+**Edit CSS in `src/styles/game.css`, encounter data in `src/data/encounter-data.js`, pure utility helpers in `src/utils/core-utils.js`, achievement definitions in `src/data/achievement-data.js`, run-tracking factory in `src/state/run-tracking.js`, profile/storage constants in `src/state/profile-storage-constants.js`, profile factory helpers in `src/state/profile-factories.js`, profile store core helpers in `src/state/profile-store-core.js`, profile state snapshot helpers in `src/state/profile-state-snapshot.js`, profile run lifecycle helpers in `src/state/profile-run-lifecycle.js`, achievement persistence helpers in `src/state/achievement-persistence.js`, Field Journal state helpers in `src/state/field-journal-state.js`, achievement UI/support in `src/ui/achievement-ui.js`, and run-tracking update in `src/state/run-tracking-update.js`, then run `node scripts/build_play_html.mjs` — do not hand-edit the generated regions.** The build script never touches code outside the marked regions.
 
 `game/evolution_game_v66_57.html` is the versioned archive of an earlier build. It is a historical snapshot and is not kept byte-in-sync with `game/play.html` between releases; `game/play.html` is the stable public-facing copy that gets replaced on each release.
 
@@ -154,11 +178,12 @@ Part [1/3] sits immediately after the achievement-data generated region; part [2
 | 4773–4804 | Run-tracking state factory (`freshRunTracking`) — generated, source in `src/state/run-tracking.js` |
 | 4810–4875 | Achievement definitions (`ACHIEVEMENT_DEFS`, 50 defs) — generated, source in `src/data/achievement-data.js` |
 | 4877–4894 | Achievement persistence [1/3] (loadAchievements, saveAchievements) — generated, source in `src/state/achievement-persistence.js` |
-| 4896–4900 | getProfileAchievements (not extracted) |
-| 4901–4915 | Achievement persistence [2/3] (awardAchievement) — generated, source in `src/state/achievement-persistence.js` |
-| 4917–4945 | Toast queue and helpers (not extracted) |
-| 4946–4962 | Achievement persistence [3/3] (checkAchievements) — generated, source in `src/state/achievement-persistence.js` |
-| 4964–5014 | renderAchievements, updateRunTracking (not extracted) |
+| 4896–4901 | Achievement UI [1/3] (getProfileAchievements) — generated, source in `src/ui/achievement-ui.js` |
+| 4903–4917 | Achievement persistence [2/3] (awardAchievement) — generated, source in `src/state/achievement-persistence.js` |
+| 4919–4948 | Achievement UI [2/3] (toast queue/helpers) — generated, source in `src/ui/achievement-ui.js` |
+| 4950–4966 | Achievement persistence [3/3] (checkAchievements) — generated, source in `src/state/achievement-persistence.js` |
+| 4968–4997 | Achievement UI [3/3] (renderAchievements) — generated, source in `src/ui/achievement-ui.js` |
+| 4999–5025 | Run-tracking update — generated, source in `src/state/run-tracking-update.js` |
 | 5013–5099 | Profile run lifecycle [2/3] (profileOnRunEnd, profileSaveActiveRun) — generated, source in `src/state/profile-run-lifecycle.js` |
 | 5107–5158 | Field Journal state/persistence helpers — generated, source in `src/state/field-journal-state.js` |
 | 5160–5210 | Profile run lifecycle [3/3] (profileStartNewRun, profileResumeActiveRun) — generated, source in `src/state/profile-run-lifecycle.js` |

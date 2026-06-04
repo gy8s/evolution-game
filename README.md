@@ -97,6 +97,8 @@ evolution-game/
 │   │   └── achievement-data.js       Achievement definitions source (inlined into play.html by the build script)
 │   ├── utils/
 │   │   └── core-utils.js             Pure utility helpers source (inlined into play.html by the build script)
+│   ├── ui/
+│   │   └── achievement-ui.js         Achievement UI/support source (inlined into play.html by the build script)
 │   └── state/
 │       ├── run-tracking.js           Run-tracking state factory source (inlined into play.html by the build script)
 │       ├── profile-storage-constants.js  Profile/storage constant declarations (inlined into play.html by the build script)
@@ -105,7 +107,8 @@ evolution-game/
 │       ├── profile-state-snapshot.js Profile state capture/restore helpers source (inlined into play.html by the build script)
 │       ├── profile-run-lifecycle.js  Profile run summary/lifecycle helpers source (inlined into play.html by the build script)
 │       ├── achievement-persistence.js Achievement persistence helpers source (inlined into play.html by the build script)
-│       └── field-journal-state.js    Field Journal state/persistence helpers source (inlined into play.html by the build script)
+│       ├── field-journal-state.js    Field Journal state/persistence helpers source (inlined into play.html by the build script)
+│       └── run-tracking-update.js    Run-tracking update function source (inlined into play.html by the build script)
 ├── docs/
 │   ├── current-game-structure.md     How the game works now: systems, flows, line ranges
 │   ├── documentation-map.md          What each doc covers and when to update it
@@ -146,7 +149,7 @@ The rebuild is not a rewrite, not a framework migration, and not a gameplay rede
 
 ### Build scaffold
 
-Twelve source extractions are complete:
+Fourteen source extractions are complete:
 
 | Source file | What it contains | Destination in play.html |
 |-------------|-----------------|--------------------------|
@@ -162,6 +165,8 @@ Twelve source extractions are complete:
 | `src/state/profile-run-lifecycle.js` | Profile run summary/lifecycle helpers (`profileKnowledgeCount`, `profileBuildRunSummary`, `profileRunIsGodMode`, `profileUpdateStats`, `profileOnRunEnd`, `profileSaveActiveRun`, `profileStartNewRun`, `profileResumeActiveRun`; all other profile logic stays in play.html) | Three JS regions (~line 4720, ~line 5013, ~line 5152) |
 | `src/state/achievement-persistence.js` | Achievement persistence helpers (`loadAchievements`, `saveAchievements`, `awardAchievement`, `checkAchievements`; `getProfileAchievements`, toast system, `renderAchievements`, `updateRunTracking` stay in play.html) | Three JS regions (~line 4877, ~line 4901, ~line 4946) |
 | `src/state/field-journal-state.js` | Field Journal state/persistence helpers (`profileLoadFieldJournal`, `profileWriteJournalEntry`, `getEncounterLogCategory`, `journalMarkFirstSeen`; Field Journal rendering stays in play.html) | One JS region (~line 5107) |
+| `src/ui/achievement-ui.js` | Achievement UI/support (`getProfileAchievements`, `_toastQueue`, `_toastActive`, `clearToastQueue`, `showAchievementToast`, `_processToastQueue`, `renderAchievements`) | Three JS regions (~line 4896, ~line 4919, ~line 4968) |
+| `src/state/run-tracking-update.js` | Run-tracking update (`updateRunTracking`) | One JS region (~line 4999) |
 
 `game/play.html` keeps all content **inline** so it stays directly playable with no build step or runtime dependency. To regenerate `game/play.html` after editing any source file:
 
