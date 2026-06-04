@@ -1,3 +1,19 @@
+[2026-06-04 extract-field-journal-state | Claude]
+Twelfth controlled extraction — Field Journal state/persistence helpers extracted and build script extended.
+
+- Created src/state/field-journal-state.js: four Field Journal state helper functions moved mechanically from game/play.html, byte-identical to the originals.
+  - profileLoadFieldJournal(): reads the fieldJournal map for the active profile from the profile store.
+  - profileWriteJournalEntry(typeKey, entry): persists a single journal entry into the active profile's fieldJournal.
+  - getEncounterLogCategory(e): maps an encounter object to a log category string (fauna/flora/misc).
+  - journalMarkFirstSeen(e): marks the first-seen flag on the player's knowledge entry and calls profileWriteJournalEntry.
+  - No function names changed. No function bodies changed. No journal schema changed. No journal key names changed. No first-seen behaviour changed. No category mapping behaviour changed.
+- Edited game/play.html: the four functions were already contiguous. Wrapped with a single // BEGIN/END GENERATED JS: src/state/field-journal-state.js region. No code moved. No call sites changed. game/play.html remains the directly playable artifact.
+- Extended scripts/build_play_html.mjs: now inlines CSS, encounter data, core utils, achievement definitions, run-tracking state factory, profile/storage constants, profile factory helpers, profile store core helpers, profile state snapshot helpers, profile run lifecycle helpers, achievement persistence helpers, and Field Journal state helpers. Fails clearly if src/state/field-journal-state.js or its region markers are missing. Idempotent.
+- game/evolution_game_v66_57.html NOT changed: historical archive, not kept byte-synced between releases.
+- Docs: README.md (repo layout tree + build scaffold table), docs/current-game-structure.md (line-range table, build scaffold table, marker table), docs/architecture-notes.md (generated region entry, line-range table, edit guidance, profile-run-lifecycle region note updated), docs/release-checklist.md (build step check for field-journal-state).
+- Verification: node scripts/build_play_html.mjs (idempotent — no change) and node scripts/check_html_js_syntax.mjs both pass. Inline region confirmed byte-identical to the source file.
+- Source/build structure change only. No gameplay logic, function bodies, call sites, journal schema, journal key names, first-seen behaviour, category mapping, profile behaviour, achievement behaviour, save/resume behaviour, Field Journal rendering, or any other code changed.
+
 [2026-06-04 extract-achievement-persistence | Claude]
 Eleventh controlled extraction — achievement persistence helpers extracted and build script extended.
 

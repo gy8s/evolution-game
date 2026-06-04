@@ -5104,6 +5104,7 @@ function profileSaveActiveRun() {
 }
 // END GENERATED JS: src/state/profile-run-lifecycle.js [2/3]
 
+// BEGIN GENERATED JS: src/state/field-journal-state.js
 function profileLoadFieldJournal() {
   if (!currentProfileId) return {};
   try {
@@ -5154,6 +5155,7 @@ function journalMarkFirstSeen(e) {
   player.knowledgeByEncounterKey[typeKey] = entry;
   profileWriteJournalEntry(typeKey, entry);
 }
+// END GENERATED JS: src/state/field-journal-state.js
 
 // BEGIN GENERATED JS: src/state/profile-run-lifecycle.js [3/3]
 function profileStartNewRun() {

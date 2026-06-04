@@ -100,7 +100,15 @@ This region sits between `freshRunTracking` and `loadAchievements`, preserving l
 ...profileStartNewRun, profileResumeActiveRun...
 // END GENERATED JS: src/state/profile-run-lifecycle.js [3/3]
 ```
-Part [1/3] sits between `profileRestoreState` and the run-tracking region; part [2/3] sits between `updateRunTracking` and `profileLoadFieldJournal`; part [3/3] sits between `journalMarkFirstSeen` and the win-modal section. The functions stay exactly where they were — no code was moved. The achievement system, Field Journal helpers, and run-tracking/achievement-data generated regions that sit between them are NOT part of this source file and remain in `game/play.html`. (`profileClearActiveRun` does not exist in the codebase, so it was not extracted.) Profile run lifecycle helpers should be edited in `src/state/profile-run-lifecycle.js`, not inside the generated regions of `game/play.html`.
+Part [1/3] sits between `profileRestoreState` and the run-tracking region; part [2/3] sits between `updateRunTracking` and the field-journal-state generated region; part [3/3] sits between the field-journal-state generated region and the win-modal section. The functions stay exactly where they were — no code was moved. The achievement system, Field Journal state helpers (now a generated region), and run-tracking/achievement-data generated regions that sit between them are NOT part of this source file. (`profileClearActiveRun` does not exist in the codebase, so it was not extracted.) Profile run lifecycle helpers should be edited in `src/state/profile-run-lifecycle.js`, not inside the generated regions of `game/play.html`.
+
+**Field Journal state/persistence helpers** (inside the `<script>` block, ~line 5107) — four journal helper functions:
+```
+// BEGIN GENERATED JS: src/state/field-journal-state.js
+...profileLoadFieldJournal, profileWriteJournalEntry, getEncounterLogCategory, journalMarkFirstSeen...
+// END GENERATED JS: src/state/field-journal-state.js
+```
+This region sits between the profile-run-lifecycle [2/3] generated region and the profile-run-lifecycle [3/3] generated region. The four functions were contiguous; no split marker was needed. Only these four helpers are extracted; Field Journal rendering, Fossil Record rendering, profile panel rendering, and all other Field Journal code remain in `game/play.html`. Field Journal state helpers should be edited in `src/state/field-journal-state.js`, not inside the generated region of `game/play.html`.
 
 **Achievement persistence helpers** (inside the `<script>` block) — four achievement persistence functions (`loadAchievements`, `saveAchievements`, `awardAchievement`, `checkAchievements`), inlined into THREE separate regions because `getProfileAchievements` (not extracted) and the toast system (`clearToastQueue`, `showAchievementToast`, `_processToastQueue` — not extracted) sit between the four target functions in `game/play.html`:
 ```
@@ -120,7 +128,7 @@ Part [1/3] sits immediately after the achievement-data generated region; part [2
 
 `src/data/encounter-data.js` uses a `// << SPLIT: hiddenSubtypePools >>` line to divide part 1 from part 2; the build script splits on it and inlines each part into its region. `src/state/profile-run-lifecycle.js` uses two split lines (`// << SPLIT: profileOnRunEnd >>` and `// << SPLIT: profileStartNewRun >>`) to divide its three parts. `src/state/achievement-persistence.js` uses two split lines (`// << SPLIT: awardAchievement >>` and `// << SPLIT: checkAchievements >>`) to divide its three parts. The split markers themselves are not inlined. All other source files have no split marker and each maps to one contiguous region.
 
-**Edit CSS in `src/styles/game.css`, encounter data in `src/data/encounter-data.js`, pure utility helpers in `src/utils/core-utils.js`, achievement definitions in `src/data/achievement-data.js`, run-tracking factory in `src/state/run-tracking.js`, profile/storage constants in `src/state/profile-storage-constants.js`, profile factory helpers in `src/state/profile-factories.js`, profile store core helpers in `src/state/profile-store-core.js`, profile state snapshot helpers in `src/state/profile-state-snapshot.js`, profile run lifecycle helpers in `src/state/profile-run-lifecycle.js`, and achievement persistence helpers in `src/state/achievement-persistence.js`, then run `node scripts/build_play_html.mjs` — do not hand-edit the generated regions.** The build script never touches code outside the marked regions.
+**Edit CSS in `src/styles/game.css`, encounter data in `src/data/encounter-data.js`, pure utility helpers in `src/utils/core-utils.js`, achievement definitions in `src/data/achievement-data.js`, run-tracking factory in `src/state/run-tracking.js`, profile/storage constants in `src/state/profile-storage-constants.js`, profile factory helpers in `src/state/profile-factories.js`, profile store core helpers in `src/state/profile-store-core.js`, profile state snapshot helpers in `src/state/profile-state-snapshot.js`, profile run lifecycle helpers in `src/state/profile-run-lifecycle.js`, achievement persistence helpers in `src/state/achievement-persistence.js`, and Field Journal state helpers in `src/state/field-journal-state.js`, then run `node scripts/build_play_html.mjs` — do not hand-edit the generated regions.** The build script never touches code outside the marked regions.
 
 `game/evolution_game_v66_57.html` is the versioned archive of an earlier build. It is a historical snapshot and is not kept byte-in-sync with `game/play.html` between releases; `game/play.html` is the stable public-facing copy that gets replaced on each release.
 
@@ -152,8 +160,8 @@ Part [1/3] sits immediately after the achievement-data generated region; part [2
 | 4946–4962 | Achievement persistence [3/3] (checkAchievements) — generated, source in `src/state/achievement-persistence.js` |
 | 4964–5014 | renderAchievements, updateRunTracking (not extracted) |
 | 5013–5099 | Profile run lifecycle [2/3] (profileOnRunEnd, profileSaveActiveRun) — generated, source in `src/state/profile-run-lifecycle.js` |
-| 5101–5151 | Field Journal helpers (profileLoadFieldJournal, profileWriteJournalEntry, getEncounterLogCategory, journalMarkFirstSeen) |
-| 5152–5202 | Profile run lifecycle [3/3] (profileStartNewRun, profileResumeActiveRun) — generated, source in `src/state/profile-run-lifecycle.js` |
+| 5107–5158 | Field Journal state/persistence helpers — generated, source in `src/state/field-journal-state.js` |
+| 5160–5210 | Profile run lifecycle [3/3] (profileStartNewRun, profileResumeActiveRun) — generated, source in `src/state/profile-run-lifecycle.js` |
 | 5204–5851 | Win modal, profile panel UI, profile stats, profiles, save/load, Field Journal render, Fossil Record |
 | 5853–5942 | Core utility helpers — generated, source in `src/utils/core-utils.js`: pure stateless helpers (clamp, roll, choice, clonePlain, escapeHtml, chooseWeighted, text-sanitisation) |
 | 5943–6068 | Remaining [UTILS]: logging, narration setters, noise, risk memory (not extracted — side effects) |

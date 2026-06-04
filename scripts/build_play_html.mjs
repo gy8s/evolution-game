@@ -24,6 +24,7 @@
 //        [1/3] loadAchievements + saveAchievements (~line 4877)
 //        [2/3] awardAchievement                   (~line 4901)
 //        [3/3] checkAchievements                  (~line 4944)
+//  12. src/state/field-journal-state.js → one JS region (~line 5107)
 //
 // Why inline (not external files): game/play.html must open straight from
 // disk — or via the GitHub Pages link — with no build step and no runtime
@@ -52,6 +53,7 @@ const PROFCORE_SOURCE    = resolve(repoRoot, 'src/state/profile-store-core.js');
 const PROFSNAP_SOURCE    = resolve(repoRoot, 'src/state/profile-state-snapshot.js');
 const PROFLIFE_SOURCE    = resolve(repoRoot, 'src/state/profile-run-lifecycle.js');
 const ACHPERS_SOURCE     = resolve(repoRoot, 'src/state/achievement-persistence.js');
+const FJSTATE_SOURCE     = resolve(repoRoot, 'src/state/field-journal-state.js');
 const PLAY_HTML          = resolve(repoRoot, 'game/play.html');
 
 // CSS markers (CSS comment style, inside <style>)
@@ -99,6 +101,10 @@ const JS_BEGIN_PROFLIFE2 = '// BEGIN GENERATED JS: src/state/profile-run-lifecyc
 const JS_END_PROFLIFE2   = '// END GENERATED JS: src/state/profile-run-lifecycle.js [2/3]';
 const JS_BEGIN_PROFLIFE3 = '// BEGIN GENERATED JS: src/state/profile-run-lifecycle.js [3/3]';
 const JS_END_PROFLIFE3   = '// END GENERATED JS: src/state/profile-run-lifecycle.js [3/3]';
+
+// Field-journal-state markers (JS comment style, inside <script>)
+const JS_BEGIN_FJSTATE = '// BEGIN GENERATED JS: src/state/field-journal-state.js';
+const JS_END_FJSTATE   = '// END GENERATED JS: src/state/field-journal-state.js';
 
 // Achievement-persistence markers (JS comment style, inside <script>) — three parts
 const JS_BEGIN_ACHPERS1 = '// BEGIN GENERATED JS: src/state/achievement-persistence.js [1/3]';
@@ -153,6 +159,7 @@ if (!existsSync(PROFCORE_SOURCE))  fail('cannot find src/state/profile-store-cor
 if (!existsSync(PROFSNAP_SOURCE))  fail('cannot find src/state/profile-state-snapshot.js');
 if (!existsSync(PROFLIFE_SOURCE))  fail('cannot find src/state/profile-run-lifecycle.js');
 if (!existsSync(ACHPERS_SOURCE))   fail('cannot find src/state/achievement-persistence.js');
+if (!existsSync(FJSTATE_SOURCE))   fail('cannot find src/state/field-journal-state.js');
 if (!existsSync(PLAY_HTML))        fail('cannot find game/play.html');
 
 const css          = readFileSync(CSS_SOURCE,       'utf8');
@@ -166,6 +173,7 @@ const jsProfCore   = readFileSync(PROFCORE_SOURCE,  'utf8');
 const jsProfSnap   = readFileSync(PROFSNAP_SOURCE,  'utf8');
 const jsProfLife   = readFileSync(PROFLIFE_SOURCE,  'utf8');
 const jsAchPers    = readFileSync(ACHPERS_SOURCE,   'utf8');
+const jsFJState    = readFileSync(FJSTATE_SOURCE,   'utf8');
 let   html         = readFileSync(PLAY_HTML,        'utf8');
 
 // --- Split encounter-data into two parts at the SPLIT marker ---
@@ -212,6 +220,7 @@ html = inlineRegion(html, JS_BEGIN_PROFLIFE3, JS_END_PROFLIFE3, jsLife3, 'profil
 html = inlineRegion(html, JS_BEGIN_ACHPERS1, JS_END_ACHPERS1, jsAchPers1, 'achievement-persistence [1/3]');
 html = inlineRegion(html, JS_BEGIN_ACHPERS2, JS_END_ACHPERS2, jsAchPers2, 'achievement-persistence [2/3]');
 html = inlineRegion(html, JS_BEGIN_ACHPERS3, JS_END_ACHPERS3, jsAchPers3, 'achievement-persistence [3/3]');
+html = inlineRegion(html, JS_BEGIN_FJSTATE,  JS_END_FJSTATE,  jsFJState.replace(/\s+$/, ''), 'field-journal-state');
 
 if (html === original) {
   console.log('build_play_html: no change — game/play.html already matches all source files.');
