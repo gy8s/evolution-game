@@ -90,6 +90,8 @@ evolution-game/
 │   ├── play.html                     Stable playable build used by public link/PWA
 │   └── evolution_game_v66_57.html    Versioned playable build
 ├── src/
+│   ├── bootstrap/
+│   │   └── game-init.js              Game bootstrap source (inlined into play.html by the build script)
 │   ├── styles/
 │   │   └── game.css                  CSS source (inlined into play.html by the build script)
 │   ├── data/
@@ -155,7 +157,7 @@ The rebuild is not a rewrite, not a framework migration, and not a gameplay rede
 
 ### Build scaffold
 
-Twenty source extractions are complete:
+Twenty-one source extractions are complete:
 
 | Source file | What it contains | Destination in play.html |
 |-------------|-----------------|--------------------------|
@@ -179,6 +181,7 @@ Twenty source extractions are complete:
 | `src/ui/fossil-record-ui.js` | Fossil Record display helpers (`renderFossilRecord`, `renderRunRecap`) | One JS region (~line 14330) |
 | `src/state/profile-delete.js` | Profile deletion helper (`deleteProfile`) | One JS region (~line 5280) |
 | `src/ui/profile-startup-modal.js` | Profile selection/startup modal (`profileShowStartupModal`) | One JS region (~line 5311) |
+| `src/bootstrap/game-init.js` | Game bootstrap (`initGame`) | One JS region (~line 5441) |
 
 `game/play.html` keeps all content **inline** so it stays directly playable with no build step or runtime dependency. To regenerate `game/play.html` after editing any source file:
 
