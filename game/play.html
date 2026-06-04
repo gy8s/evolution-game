@@ -12942,6 +12942,7 @@ function getEncounterGroup(typeKey) {
   return FJ_GROUP_MAP[typeKey] || "Other";
 }
 
+// BEGIN GENERATED JS: src/ui/field-journal-ui.js
 // @target [INVESTIGATION] Show Encounter Journal Entry (single creature window)
 function showEncounterJournalEntry(typeKey) {
   if (!typeKey) return;
@@ -13064,6 +13065,7 @@ function showFieldJournal(tab) {
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
 }
+// END GENERATED JS: src/ui/field-journal-ui.js
 
 // @target [INVESTIGATION] Investigation Diminishing Text
 function investigationDiminishingText(e, ceiling) {
@@ -14302,6 +14304,7 @@ function deathTipFor(message) {
 }
 
 // @fn showDeathModal
+// BEGIN GENERATED JS: src/state/fossil-record-state.js
 function saveFossilRecord(deathMessage) {
   let records = [];
   try { records = JSON.parse(localStorage.getItem(FOSSIL_RECORD_KEY) || "[]"); } catch (_) {}
@@ -14318,7 +14321,9 @@ function saveFossilRecord(deathMessage) {
   try { localStorage.setItem(FOSSIL_RECORD_KEY, JSON.stringify(records)); } catch (_) {}
   return records.filter(r => !r.profileId || r.profileId === currentProfileId);
 }
+// END GENERATED JS: src/state/fossil-record-state.js
 
+// BEGIN GENERATED JS: src/ui/fossil-record-ui.js
 function renderFossilRecord(records) {
   if (!records || records.length === 0) {
     return '<div class="fossilRecordTitle">Fossil Record</div><div class="fossilRecordEmpty">No specimens yet.</div>';
@@ -14372,6 +14377,7 @@ function renderRunRecap() {
 
   return `<div class="runRecap"><div class="runRecapTitle">Run summary</div><div class="runRecapGrid">${gridHtml}</div>${achHtml}</div>`;
 }
+// END GENERATED JS: src/ui/fossil-record-ui.js
 
 function showDeathModal(message) {
   const modal = document.getElementById("deathModal");

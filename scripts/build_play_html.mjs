@@ -33,6 +33,9 @@
 //  15. src/ui/profile-ui.js → two JS regions:
 //        [1/2] showWinModal + hideWinModal + onWinAchieved (~line 5222)
 //        [2/2] profileUpdatePanelUI                        (~line 5246)
+//  16. src/ui/field-journal-ui.js → one JS region (~line 12946)
+//  17. src/state/fossil-record-state.js → one JS region (~line 14311)
+//  18. src/ui/fossil-record-ui.js → one JS region (~line 14330)
 //
 // Why inline (not external files): game/play.html must open straight from
 // disk — or via the GitHub Pages link — with no build step and no runtime
@@ -65,6 +68,9 @@ const FJSTATE_SOURCE     = resolve(repoRoot, 'src/state/field-journal-state.js')
 const ACHIEVUI_SOURCE    = resolve(repoRoot, 'src/ui/achievement-ui.js');
 const RUNTRUPDATE_SOURCE = resolve(repoRoot, 'src/state/run-tracking-update.js');
 const PROFUI_SOURCE      = resolve(repoRoot, 'src/ui/profile-ui.js');
+const FJUI_SOURCE        = resolve(repoRoot, 'src/ui/field-journal-ui.js');
+const FOSSSTATE_SOURCE   = resolve(repoRoot, 'src/state/fossil-record-state.js');
+const FOSSUI_SOURCE      = resolve(repoRoot, 'src/ui/fossil-record-ui.js');
 const PLAY_HTML          = resolve(repoRoot, 'game/play.html');
 
 // CSS markers (CSS comment style, inside <style>)
@@ -166,6 +172,18 @@ const JS_SPLIT_ACHIEVUI_B = '// << SPLIT: renderAchievements >>';
 // It is NOT inlined into game/play.html.
 const JS_SPLIT_PROFUI = '// << SPLIT: profileUpdatePanelUI >>';
 
+// Field-journal-ui markers (JS comment style, inside <script>)
+const JS_BEGIN_FJUI = '// BEGIN GENERATED JS: src/ui/field-journal-ui.js';
+const JS_END_FJUI   = '// END GENERATED JS: src/ui/field-journal-ui.js';
+
+// Fossil-record-state markers (JS comment style, inside <script>)
+const JS_BEGIN_FOSSSTATE = '// BEGIN GENERATED JS: src/state/fossil-record-state.js';
+const JS_END_FOSSSTATE   = '// END GENERATED JS: src/state/fossil-record-state.js';
+
+// Fossil-record-ui markers (JS comment style, inside <script>)
+const JS_BEGIN_FOSSUI = '// BEGIN GENERATED JS: src/ui/fossil-record-ui.js';
+const JS_END_FOSSUI   = '// END GENERATED JS: src/ui/fossil-record-ui.js';
+
 function fail(msg) {
   console.error(`build_play_html: ERROR: ${msg}`);
   process.exit(1);
@@ -201,6 +219,9 @@ if (!existsSync(FJSTATE_SOURCE))     fail('cannot find src/state/field-journal-s
 if (!existsSync(ACHIEVUI_SOURCE))    fail('cannot find src/ui/achievement-ui.js');
 if (!existsSync(RUNTRUPDATE_SOURCE)) fail('cannot find src/state/run-tracking-update.js');
 if (!existsSync(PROFUI_SOURCE))      fail('cannot find src/ui/profile-ui.js');
+if (!existsSync(FJUI_SOURCE))        fail('cannot find src/ui/field-journal-ui.js');
+if (!existsSync(FOSSSTATE_SOURCE))   fail('cannot find src/state/fossil-record-state.js');
+if (!existsSync(FOSSUI_SOURCE))      fail('cannot find src/ui/fossil-record-ui.js');
 if (!existsSync(PLAY_HTML))          fail('cannot find game/play.html');
 
 const css          = readFileSync(CSS_SOURCE,       'utf8');
@@ -218,6 +239,9 @@ const jsFJState    = readFileSync(FJSTATE_SOURCE,    'utf8');
 const jsAchievUI   = readFileSync(ACHIEVUI_SOURCE,   'utf8');
 const jsRunTrUpdate = readFileSync(RUNTRUPDATE_SOURCE, 'utf8');
 const jsProfUI     = readFileSync(PROFUI_SOURCE,      'utf8');
+const jsFJUI       = readFileSync(FJUI_SOURCE,        'utf8');
+const jsFossState  = readFileSync(FOSSSTATE_SOURCE,   'utf8');
+const jsFossUI     = readFileSync(FOSSUI_SOURCE,      'utf8');
 let   html         = readFileSync(PLAY_HTML,         'utf8');
 
 // --- Split encounter-data into two parts at the SPLIT marker ---
@@ -287,6 +311,9 @@ html = inlineRegion(html, JS_BEGIN_ACHIEVUI3,  JS_END_ACHIEVUI3,  jsAchievUI3,  
 html = inlineRegion(html, JS_BEGIN_RUNTRUPDATE, JS_END_RUNTRUPDATE, jsRunTrUpdate.replace(/\s+$/, ''), 'run-tracking-update');
 html = inlineRegion(html, JS_BEGIN_PROFUI1, JS_END_PROFUI1, jsProfUI1, 'profile-ui [1/2]');
 html = inlineRegion(html, JS_BEGIN_PROFUI2, JS_END_PROFUI2, jsProfUI2, 'profile-ui [2/2]');
+html = inlineRegion(html, JS_BEGIN_FJUI,     JS_END_FJUI,     jsFJUI.replace(/\s+$/, ''),     'field-journal-ui');
+html = inlineRegion(html, JS_BEGIN_FOSSSTATE, JS_END_FOSSSTATE, jsFossState.replace(/\s+$/, ''), 'fossil-record-state');
+html = inlineRegion(html, JS_BEGIN_FOSSUI,   JS_END_FOSSUI,   jsFossUI.replace(/\s+$/, ''),   'fossil-record-ui');
 
 if (html === original) {
   console.log('build_play_html: no change — game/play.html already matches all source files.');

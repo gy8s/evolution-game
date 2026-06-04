@@ -12,7 +12,7 @@ Evolution Game is a browser-based single-player survival simulation. The player 
 
 The game runs from a single HTML file (`game/play.html`, ~18,400 lines). There is no bundler and no server. Open the file in a browser and it works.
 
-Fifteen source extractions are complete. The playable file `game/play.html` still contains all content inline (between marker comments) so it works with no build step or runtime dependency.
+Eighteen source extractions are complete. The playable file `game/play.html` still contains all content inline (between marker comments) so it works with no build step or runtime dependency.
 
 | Source file | What it contains | In play.html |
 |-------------|-----------------|--------------|
@@ -31,8 +31,11 @@ Fifteen source extractions are complete. The playable file `game/play.html` stil
 | `src/ui/achievement-ui.js` | Achievement UI/support (`getProfileAchievements`, `_toastQueue`, `_toastActive`, `clearToastQueue`, `showAchievementToast`, `_processToastQueue`, `renderAchievements`) | Three inline JS regions (~line 4896, ~line 4919, ~line 4968) |
 | `src/state/run-tracking-update.js` | Run-tracking update function (`updateRunTracking`) | One inline JS region (~line 4999) |
 | `src/ui/profile-ui.js` | Profile/win-modal UI helpers (`showWinModal`, `hideWinModal`, `onWinAchieved`, `profileUpdatePanelUI`) | Two inline JS regions (~line 5222, ~line 5246) |
+| `src/ui/field-journal-ui.js` | Field Journal UI helpers (`showEncounterJournalEntry`, `showFieldJournal`) | One inline JS region (~line 12946) |
+| `src/state/fossil-record-state.js` | Fossil Record persistence (`saveFossilRecord`) | One inline JS region (~line 14311) |
+| `src/ui/fossil-record-ui.js` | Fossil Record display helpers (`renderFossilRecord`, `renderRunRecap`) | One inline JS region (~line 14330) |
 
-`scripts/build_play_html.mjs` inlines all source files back into `game/play.html`. Only configuration-like declarations and simple factory/helper functions are extracted — `profileCaptureWorldArrays`, `profileCaptureState`, `profileRestoreState`, `profileUpdateStats`, `profileOnRunEnd`, fossil record logic, active-run logic, save/load logic, and all other game code remain inside `game/play.html`. All JavaScript engine code and HTML structure also remain inside `game/play.html` for now.
+`scripts/build_play_html.mjs` inlines all source files back into `game/play.html`. Only configuration-like declarations and simple factory/helper functions are extracted — `profileCaptureWorldArrays`, `profileCaptureState`, `profileRestoreState`, `profileUpdateStats`, `profileOnRunEnd`, active-run logic, save/load logic, and all other game code remain inside `game/play.html`. All JavaScript engine code and HTML structure also remain inside `game/play.html` for now.
 
 ---
 
@@ -302,7 +305,10 @@ flowchart TD
 | 5160–5210 | Profile run lifecycle [3/3] (profileStartNewRun, profileResumeActiveRun) — generated, source is `src/state/profile-run-lifecycle.js` |
 | 5222–5242 | Profile UI [1/2] (showWinModal, hideWinModal, onWinAchieved) — generated, source is `src/ui/profile-ui.js` |
 | 5246–5278 | Profile UI [2/2] (profileUpdatePanelUI) — generated, source is `src/ui/profile-ui.js` |
-| 5279–5855 | Profile delete, profileShowStartupModal, initGame, profiles, save/load, Field Journal render, Fossil Record |
+| 5279–5855 | Profile delete, profileShowStartupModal, initGame, profiles, save/load |
+| 12946–13068 | Field Journal UI — generated, source is `src/ui/field-journal-ui.js`: showEncounterJournalEntry, showFieldJournal |
+| 14311–14325 | Fossil Record state — generated, source is `src/state/fossil-record-state.js`: saveFossilRecord |
+| 14330–14381 | Fossil Record UI — generated, source is `src/ui/fossil-record-ui.js`: renderFossilRecord, renderRunRecap |
 | 5853–5942 | Core utilities — generated, source is `src/utils/core-utils.js`: pure helpers (clamp, roll, choice, clonePlain, escapeHtml, etc.) |
 | 5943–6068 | Remaining utilities: logging, debug helpers, narration setters |
 | 6069–6147 | hiddenSubtypePools — generated, source is `src/data/encounter-data.js` [2/2] |
@@ -371,7 +377,10 @@ The rebuild plan (see `docs/project-plan.md`) targets extraction in this rough o
 | `src/state/run-tracking-update.js` | `// BEGIN/END GENERATED JS: src/state/run-tracking-update.js` |
 | `src/ui/profile-ui.js` [1/2] | `// BEGIN/END GENERATED JS: src/ui/profile-ui.js [1/2]` |
 | `src/ui/profile-ui.js` [2/2] | `// BEGIN/END GENERATED JS: src/ui/profile-ui.js [2/2]` |
+| `src/ui/field-journal-ui.js` | `// BEGIN/END GENERATED JS: src/ui/field-journal-ui.js` |
+| `src/state/fossil-record-state.js` | `// BEGIN/END GENERATED JS: src/state/fossil-record-state.js` |
+| `src/ui/fossil-record-ui.js` | `// BEGIN/END GENERATED JS: src/ui/fossil-record-ui.js` |
 
-The source file `src/data/encounter-data.js` contains a `// << SPLIT: hiddenSubtypePools >>` line dividing part 1 from part 2. `src/state/profile-run-lifecycle.js` contains two split lines (`// << SPLIT: profileOnRunEnd >>` and `// << SPLIT: profileStartNewRun >>`) dividing it into three parts. `src/state/achievement-persistence.js` contains two split lines (`// << SPLIT: awardAchievement >>` and `// << SPLIT: checkAchievements >>`) dividing it into three parts. `src/ui/achievement-ui.js` contains two split lines (`// << SPLIT: toastHelpers >>` and `// << SPLIT: renderAchievements >>`) dividing it into three parts, because the achievement-persistence [2/3] and [3/3] generated regions sit between the target groups in `play.html`. `src/ui/profile-ui.js` contains one split line (`// << SPLIT: profileUpdatePanelUI >>`) dividing it into two parts, because the `// ===== PROFILE PANEL UI =====` banner comment sits between the two groups in `play.html`. All other source files have no split marker — each maps to one contiguous region.
+The source file `src/data/encounter-data.js` contains a `// << SPLIT: hiddenSubtypePools >>` line dividing part 1 from part 2. `src/state/profile-run-lifecycle.js` contains two split lines (`// << SPLIT: profileOnRunEnd >>` and `// << SPLIT: profileStartNewRun >>`) dividing it into three parts. `src/state/achievement-persistence.js` contains two split lines (`// << SPLIT: awardAchievement >>` and `// << SPLIT: checkAchievements >>`) dividing it into three parts. `src/ui/achievement-ui.js` contains two split lines (`// << SPLIT: toastHelpers >>` and `// << SPLIT: renderAchievements >>`) dividing it into three parts, because the achievement-persistence [2/3] and [3/3] generated regions sit between the target groups in `play.html`. `src/ui/profile-ui.js` contains one split line (`// << SPLIT: profileUpdatePanelUI >>`) dividing it into two parts, because the `// ===== PROFILE PANEL UI =====` banner comment sits between the two groups in `play.html`. All other source files — including `src/ui/field-journal-ui.js`, `src/state/fossil-record-state.js`, and `src/ui/fossil-record-ui.js` — have no split marker and each maps to one contiguous region.
 
 Run `node scripts/build_play_html.mjs` after editing any source file. Do not hand-edit generated regions in `game/play.html`. This document will be updated as each further extraction completes.
