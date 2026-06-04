@@ -1,3 +1,29 @@
+[2026-06-04 extract-achievement-ui-run-tracking-update | Claude]
+Thirteenth and fourteenth controlled extractions — achievement UI/support and run-tracking update function extracted and build script extended.
+
+- Created src/ui/achievement-ui.js: seven achievement UI/support items extracted from game/play.html, byte-identical to the originals.
+  - getProfileAchievements(): returns the achievement map for the current profile.
+  - _toastQueue (let): queued toast notification objects.
+  - _toastActive (let): flag indicating whether a toast animation is in progress.
+  - clearToastQueue(): clears the queue and removes all active toast DOM elements.
+  - showAchievementToast(icon, name): enqueues a toast notification and starts the queue if idle.
+  - _processToastQueue(): dequeues and displays the next toast with a 2800ms dismiss timer.
+  - renderAchievements(): builds and returns the achievement panel HTML string.
+  - No function names changed. No variable names changed. No toast timing changed. No toast DOM behaviour changed. No achievement rendering output changed.
+- Created src/state/run-tracking-update.js: one function extracted from game/play.html, byte-identical to the original.
+  - updateRunTracking(): updates run-tracking stats per turn (fitness, poison, phase, tiles explored).
+  - No run-tracking field names changed. No run-tracking behaviour changed.
+- Edited game/play.html: the achievement UI items are NOT contiguous — the achievement-persistence [2/3] and [3/3] generated regions sit between them. Wrapped into THREE generated regions using [1/3], [2/3], [3/3] markers. updateRunTracking wrapped into a single separate generated region. No code moved. No call sites changed. game/play.html remains the directly playable artifact.
+  - achievement-ui [1/3]: getProfileAchievements — between achievement-persistence [1/3] and [2/3].
+  - achievement-ui [2/3]: toast queue + helpers — between achievement-persistence [2/3] and [3/3].
+  - achievement-ui [3/3]: renderAchievements — between achievement-persistence [3/3] and run-tracking-update.
+  - run-tracking-update: updateRunTracking — between achievement-ui [3/3] and profile-run-lifecycle [2/3].
+- Extended scripts/build_play_html.mjs: now inlines all existing source files plus achievement UI/support (three regions with two split markers) and run-tracking update (one region). Fails clearly if either new source file, its region markers, or its split markers are missing or out of order. Idempotent.
+- game/evolution_game_v66_57.html NOT changed: historical archive, not kept byte-synced between releases.
+- Docs: README.md (repo layout tree + build scaffold table), docs/current-game-structure.md (line-range table, build scaffold table, marker table, split-marker note), docs/architecture-notes.md (generated region entries, line-range table, split-marker note, edit guidance, achievement-persistence region note updated), docs/release-checklist.md (build step checks for achievement-ui and run-tracking-update).
+- Verification: node scripts/build_play_html.mjs (idempotent — no change) and node scripts/check_html_js_syntax.mjs both pass. All inline regions confirmed byte-identical to their source file parts.
+- Source/build structure change only. No gameplay logic, function bodies, call sites, toast behaviour, achievement rendering output, run-tracking fields, run-tracking behaviour, achievement persistence, or any other code changed.
+
 [2026-06-04 extract-field-journal-state | Claude]
 Twelfth controlled extraction — Field Journal state/persistence helpers extracted and build script extended.
 
