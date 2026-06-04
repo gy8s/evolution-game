@@ -4874,6 +4874,7 @@ const ACHIEVEMENT_DEFS = [
 ];
 // END GENERATED JS: src/data/achievement-data.js
 
+// BEGIN GENERATED JS: src/state/achievement-persistence.js [1/3]
 function loadAchievements(profileId) {
   try {
     const raw = localStorage.getItem(ACHIEVEMENTS_STORE_KEY);
@@ -4890,12 +4891,14 @@ function saveAchievements(profileId, achObj) {
     localStorage.setItem(ACHIEVEMENTS_STORE_KEY, JSON.stringify(all));
   } catch (_) {}
 }
+// END GENERATED JS: src/state/achievement-persistence.js [1/3]
 
 function getProfileAchievements() {
   if (!currentProfileId) return {};
   return loadAchievements(currentProfileId);
 }
 
+// BEGIN GENERATED JS: src/state/achievement-persistence.js [2/3]
 function awardAchievement(key, name) {
   if (!currentProfileId) return false;
   const ach = loadAchievements(currentProfileId);
@@ -4909,6 +4912,7 @@ function awardAchievement(key, name) {
   showAchievementToast(icon, name);
   return true;
 }
+// END GENERATED JS: src/state/achievement-persistence.js [2/3]
 
 let _toastQueue = [];
 let _toastActive = false;
@@ -4939,6 +4943,7 @@ function _processToastQueue() {
   setTimeout(dismiss, 2800);
 }
 
+// BEGIN GENERATED JS: src/state/achievement-persistence.js [3/3]
 function checkAchievements() {
   if (!currentProfileId) return;
   const rt = player.runTracking || {};
@@ -4954,6 +4959,7 @@ function checkAchievements() {
     } catch (_) {}
   }
 }
+// END GENERATED JS: src/state/achievement-persistence.js [3/3]
 
 function renderAchievements() {
   const ach = getProfileAchievements();

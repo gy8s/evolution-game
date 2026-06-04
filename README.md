@@ -103,7 +103,8 @@ evolution-game/
 │       ├── profile-factories.js      Profile factory/helper functions source (inlined into play.html by the build script)
 │       ├── profile-store-core.js     Profile store core helpers source (inlined into play.html by the build script)
 │       ├── profile-state-snapshot.js Profile state capture/restore helpers source (inlined into play.html by the build script)
-│       └── profile-run-lifecycle.js  Profile run summary/lifecycle helpers source (inlined into play.html by the build script)
+│       ├── profile-run-lifecycle.js  Profile run summary/lifecycle helpers source (inlined into play.html by the build script)
+│       └── achievement-persistence.js Achievement persistence helpers source (inlined into play.html by the build script)
 ├── docs/
 │   ├── current-game-structure.md     How the game works now: systems, flows, line ranges
 │   ├── documentation-map.md          What each doc covers and when to update it
@@ -144,7 +145,7 @@ The rebuild is not a rewrite, not a framework migration, and not a gameplay rede
 
 ### Build scaffold
 
-Ten source extractions are complete:
+Eleven source extractions are complete:
 
 | Source file | What it contains | Destination in play.html |
 |-------------|-----------------|--------------------------|
@@ -158,6 +159,7 @@ Ten source extractions are complete:
 | `src/state/profile-store-core.js` | Profile store core helpers (`profileLoadStore`, `profileSaveStore`, `profileCreateNew`, `profileGetActive`, `profileCheckBuildCompatibility`; all other profile logic stays in play.html) | One JS region (~line 4514) |
 | `src/state/profile-state-snapshot.js` | Profile active-run capture/restore helpers (`profileCaptureWorldArrays`, `profileCaptureState`, `profileRestoreState`; all other profile logic stays in play.html) | One JS region (~line 4579) |
 | `src/state/profile-run-lifecycle.js` | Profile run summary/lifecycle helpers (`profileKnowledgeCount`, `profileBuildRunSummary`, `profileRunIsGodMode`, `profileUpdateStats`, `profileOnRunEnd`, `profileSaveActiveRun`, `profileStartNewRun`, `profileResumeActiveRun`; all other profile logic stays in play.html) | Three JS regions (~line 4720, ~line 5013, ~line 5152) |
+| `src/state/achievement-persistence.js` | Achievement persistence helpers (`loadAchievements`, `saveAchievements`, `awardAchievement`, `checkAchievements`; `getProfileAchievements`, toast system, `renderAchievements`, `updateRunTracking` stay in play.html) | Three JS regions (~line 4877, ~line 4901, ~line 4946) |
 
 `game/play.html` keeps all content **inline** so it stays directly playable with no build step or runtime dependency. To regenerate `game/play.html` after editing any source file:
 

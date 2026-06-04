@@ -1,3 +1,23 @@
+[2026-06-04 extract-achievement-persistence | Claude]
+Eleventh controlled extraction — achievement persistence helpers extracted and build script extended.
+
+- Created src/state/achievement-persistence.js: four achievement persistence functions moved mechanically from game/play.html, byte-identical to the originals.
+  - loadAchievements(profileId): reads the per-profile achievement map from localStorage.
+  - saveAchievements(profileId, achObj): writes the per-profile achievement map to localStorage.
+  - awardAchievement(key, name): marks a single achievement as earned, logs it, and queues the toast notification.
+  - checkAchievements(): iterates ACHIEVEMENT_DEFS and calls awardAchievement for any newly-met criteria.
+  - No function names changed. No function bodies changed. No localStorage keys changed. No achievement schema changed. No toast behaviour changed.
+- Edited game/play.html: the four functions are NOT contiguous (getProfileAchievements and the toast system — clearToastQueue, showAchievementToast, _processToastQueue — sit between awardAchievement and checkAchievements and are NOT extracted). Rather than move any non-approved code, the source was inlined into THREE generated regions using [1/3], [2/3], [3/3] markers, leaving every function exactly where it already lived.
+  - [1/3] loadAchievements, saveAchievements — immediately after the achievement-data generated region.
+  - [2/3] awardAchievement — between getProfileAchievements (not extracted) and the toast helpers.
+  - [3/3] checkAchievements — between the toast helpers and renderAchievements (not extracted).
+  - No code was moved. No call sites changed. game/play.html remains the directly playable artifact.
+- Extended scripts/build_play_html.mjs: now inlines CSS, encounter data, core utils, achievement definitions, run-tracking state factory, profile/storage constants, profile factory helpers, profile store core helpers, profile state snapshot helpers, profile run lifecycle helpers, and achievement persistence helpers. The new source uses two split markers (// << SPLIT: awardAchievement >> and // << SPLIT: checkAchievements >>) to divide its three parts; the build script splits on them and inlines each part. Fails clearly if src/state/achievement-persistence.js, its region markers, or its split markers are missing, or if split markers are out of order. Idempotent.
+- game/evolution_game_v66_57.html NOT changed: historical archive, not kept byte-synced between releases.
+- Docs: README.md (repo layout tree + build scaffold table), docs/current-game-structure.md (line-range table, build scaffold table, marker table, split-marker note), docs/architecture-notes.md (generated regions + markers, line-range table, split-marker note), docs/release-checklist.md (build step check for achievement-persistence).
+- Verification: node scripts/build_play_html.mjs (idempotent — no change) and node scripts/check_html_js_syntax.mjs both pass. The three inline regions verified to match the source file byte-for-byte (excluding trailing-whitespace handling); each of the four functions confirmed present exactly once.
+- Source/build structure change only. No gameplay logic, function bodies, call sites, localStorage keys, achievement schema, toast behaviour, getProfileAchievements, renderAchievements, updateRunTracking, or any other code changed.
+
 [2026-06-04 extract-profile-run-lifecycle | Claude]
 Tenth controlled extraction — profile run summary/lifecycle helpers extracted and build script extended.
 
