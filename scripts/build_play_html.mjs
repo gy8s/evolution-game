@@ -16,6 +16,10 @@
 //   7. src/state/profile-factories.js → one JS region (~line 4500)
 //   8. src/state/profile-store-core.js → one JS region (~line 4514)
 //   9. src/state/profile-state-snapshot.js → one JS region (~line 4579)
+//  10. src/state/profile-run-lifecycle.js → three JS regions:
+//        [1/3] knowledge/summary/stats helpers (~line 4720)
+//        [2/3] run-end + active-run save       (~line 5013)
+//        [3/3] start-new + resume helpers      (~line 5152)
 //
 // Why inline (not external files): game/play.html must open straight from
 // disk — or via the GitHub Pages link — with no build step and no runtime
@@ -42,6 +46,7 @@ const PROFCONST_SOURCE   = resolve(repoRoot, 'src/state/profile-storage-constant
 const PROFFACT_SOURCE    = resolve(repoRoot, 'src/state/profile-factories.js');
 const PROFCORE_SOURCE    = resolve(repoRoot, 'src/state/profile-store-core.js');
 const PROFSNAP_SOURCE    = resolve(repoRoot, 'src/state/profile-state-snapshot.js');
+const PROFLIFE_SOURCE    = resolve(repoRoot, 'src/state/profile-run-lifecycle.js');
 const PLAY_HTML          = resolve(repoRoot, 'game/play.html');
 
 // CSS markers (CSS comment style, inside <style>)
@@ -82,9 +87,22 @@ const JS_END_PROFCORE   = '// END GENERATED JS: src/state/profile-store-core.js'
 const JS_BEGIN_PROFSNAP = '// BEGIN GENERATED JS: src/state/profile-state-snapshot.js';
 const JS_END_PROFSNAP   = '// END GENERATED JS: src/state/profile-state-snapshot.js';
 
+// Profile-run-lifecycle markers (JS comment style, inside <script>) — three parts
+const JS_BEGIN_PROFLIFE1 = '// BEGIN GENERATED JS: src/state/profile-run-lifecycle.js [1/3]';
+const JS_END_PROFLIFE1   = '// END GENERATED JS: src/state/profile-run-lifecycle.js [1/3]';
+const JS_BEGIN_PROFLIFE2 = '// BEGIN GENERATED JS: src/state/profile-run-lifecycle.js [2/3]';
+const JS_END_PROFLIFE2   = '// END GENERATED JS: src/state/profile-run-lifecycle.js [2/3]';
+const JS_BEGIN_PROFLIFE3 = '// BEGIN GENERATED JS: src/state/profile-run-lifecycle.js [3/3]';
+const JS_END_PROFLIFE3   = '// END GENERATED JS: src/state/profile-run-lifecycle.js [3/3]';
+
 // The split comment that divides the source file into part1 and part2.
 // It is NOT inlined into game/play.html.
 const JS_SPLIT  = '// << SPLIT: hiddenSubtypePools >>';
+
+// The two split comments that divide profile-run-lifecycle.js into three parts.
+// They are NOT inlined into game/play.html.
+const JS_SPLIT_PROFLIFE_A = '// << SPLIT: profileOnRunEnd >>';
+const JS_SPLIT_PROFLIFE_B = '// << SPLIT: profileStartNewRun >>';
 
 function fail(msg) {
   console.error(`build_play_html: ERROR: ${msg}`);
@@ -115,6 +133,7 @@ if (!existsSync(PROFCONST_SOURCE)) fail('cannot find src/state/profile-storage-c
 if (!existsSync(PROFFACT_SOURCE))  fail('cannot find src/state/profile-factories.js');
 if (!existsSync(PROFCORE_SOURCE))  fail('cannot find src/state/profile-store-core.js');
 if (!existsSync(PROFSNAP_SOURCE))  fail('cannot find src/state/profile-state-snapshot.js');
+if (!existsSync(PROFLIFE_SOURCE))  fail('cannot find src/state/profile-run-lifecycle.js');
 if (!existsSync(PLAY_HTML))        fail('cannot find game/play.html');
 
 const css          = readFileSync(CSS_SOURCE,       'utf8');
@@ -126,6 +145,7 @@ const jsProfConst  = readFileSync(PROFCONST_SOURCE, 'utf8');
 const jsProfFact   = readFileSync(PROFFACT_SOURCE,  'utf8');
 const jsProfCore   = readFileSync(PROFCORE_SOURCE,  'utf8');
 const jsProfSnap   = readFileSync(PROFSNAP_SOURCE,  'utf8');
+const jsProfLife   = readFileSync(PROFLIFE_SOURCE,  'utf8');
 let   html         = readFileSync(PLAY_HTML,        'utf8');
 
 // --- Split encounter-data into two parts at the SPLIT marker ---
@@ -133,6 +153,16 @@ const splitIdx = jsData.indexOf(JS_SPLIT);
 if (splitIdx === -1) fail(`missing split marker in src/data/encounter-data.js: ${JS_SPLIT}`);
 const jsPart1 = jsData.slice(0, splitIdx).replace(/\s+$/, '');
 const jsPart2 = jsData.slice(splitIdx + JS_SPLIT.length).replace(/^\n/, '').replace(/\s+$/, '');
+
+// --- Split profile-run-lifecycle into three parts at its two SPLIT markers ---
+const lifeSplitA = jsProfLife.indexOf(JS_SPLIT_PROFLIFE_A);
+if (lifeSplitA === -1) fail(`missing split marker in src/state/profile-run-lifecycle.js: ${JS_SPLIT_PROFLIFE_A}`);
+const lifeSplitB = jsProfLife.indexOf(JS_SPLIT_PROFLIFE_B);
+if (lifeSplitB === -1) fail(`missing split marker in src/state/profile-run-lifecycle.js: ${JS_SPLIT_PROFLIFE_B}`);
+if (lifeSplitB < lifeSplitA) fail('profile-run-lifecycle split markers are out of order');
+const jsLife1 = jsProfLife.slice(0, lifeSplitA).replace(/\s+$/, '');
+const jsLife2 = jsProfLife.slice(lifeSplitA + JS_SPLIT_PROFLIFE_A.length, lifeSplitB).replace(/^\n/, '').replace(/\s+$/, '');
+const jsLife3 = jsProfLife.slice(lifeSplitB + JS_SPLIT_PROFLIFE_B.length).replace(/^\n/, '').replace(/\s+$/, '');
 
 // --- Apply all regions ---
 const original = html;
@@ -146,6 +176,9 @@ html = inlineRegion(html, JS_BEGIN_PROFCONST, JS_END_PROFCONST, jsProfConst.repl
 html = inlineRegion(html, JS_BEGIN_PROFFACT,  JS_END_PROFFACT,  jsProfFact.replace(/\s+$/, ''),  'profile-factories');
 html = inlineRegion(html, JS_BEGIN_PROFCORE,  JS_END_PROFCORE,  jsProfCore.replace(/\s+$/, ''),  'profile-store-core');
 html = inlineRegion(html, JS_BEGIN_PROFSNAP,  JS_END_PROFSNAP,  jsProfSnap.replace(/\s+$/, ''),  'profile-state-snapshot');
+html = inlineRegion(html, JS_BEGIN_PROFLIFE1, JS_END_PROFLIFE1, jsLife1, 'profile-run-lifecycle [1/3]');
+html = inlineRegion(html, JS_BEGIN_PROFLIFE2, JS_END_PROFLIFE2, jsLife2, 'profile-run-lifecycle [2/3]');
+html = inlineRegion(html, JS_BEGIN_PROFLIFE3, JS_END_PROFLIFE3, jsLife3, 'profile-run-lifecycle [3/3]');
 
 if (html === original) {
   console.log('build_play_html: no change — game/play.html already matches all source files.');

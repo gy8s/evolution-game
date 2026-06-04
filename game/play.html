@@ -4717,6 +4717,7 @@ function profileRestoreState(state) {
 }
 // END GENERATED JS: src/state/profile-state-snapshot.js
 
+// BEGIN GENERATED JS: src/state/profile-run-lifecycle.js [1/3]
 function profileKnowledgeCount() {
   return Object.keys(player.knowledgeByEncounterKey || {}).length;
 }
@@ -4767,6 +4768,7 @@ function profileUpdateStats(profile, summary) {
   s.totalTurns = (s.totalTurns || 0) + (summary.turnsSurvived || 0);
   s.totalMatings = (s.totalMatings || 0) + (summary.matingCount || 0);
 }
+// END GENERATED JS: src/state/profile-run-lifecycle.js [1/3]
 
 // BEGIN GENERATED JS: src/state/run-tracking.js
 function freshRunTracking() {
@@ -5008,6 +5010,7 @@ function updateRunTracking() {
   rt.tilesExplored = newTiles;
 }
 
+// BEGIN GENERATED JS: src/state/profile-run-lifecycle.js [2/3]
 function profileOnRunEnd(outcome) {
   if (!currentProfileId) return;
   const store = profileLoadStore();
@@ -5093,6 +5096,7 @@ function profileSaveActiveRun() {
   }
   profileUpdatePanelUI();
 }
+// END GENERATED JS: src/state/profile-run-lifecycle.js [2/3]
 
 function profileLoadFieldJournal() {
   if (!currentProfileId) return {};
@@ -5145,6 +5149,7 @@ function journalMarkFirstSeen(e) {
   profileWriteJournalEntry(typeKey, entry);
 }
 
+// BEGIN GENERATED JS: src/state/profile-run-lifecycle.js [3/3]
 function profileStartNewRun() {
   currentRunId = profileGenerateId("run");
   runStartedAt = new Date().toISOString();
@@ -5194,6 +5199,7 @@ function profileResumeActiveRun(profile) {
   profileUpdatePanelUI();
   return true;
 }
+// END GENERATED JS: src/state/profile-run-lifecycle.js [3/3]
 
 // ===== WIN MODAL =====
 
