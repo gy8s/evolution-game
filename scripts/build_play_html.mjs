@@ -42,6 +42,10 @@
 //  22. src/state/game-state-globals.js → two JS regions:
 //        [1/2] knowledge constants + socialGroup + playerSpeciesProfile (~line 5472)
 //        [2/2] environment + timeState + layerNarration                 (~line 5741)
+//  23. src/qa/debug-helpers.js → one JS region (~line 5514)
+//        addDebugTrace, debugRoll, importantStateSnapshot, diffSnapshots,
+//        takeQABackSnapshot, restoreQABackSnapshot, addTurnDeltaTrace,
+//        addDebugFlag, scanForSuspiciousState
 //
 // Why inline (not external files): game/play.html must open straight from
 // disk — or via the GitHub Pages link — with no build step and no runtime
@@ -81,7 +85,8 @@ const PROFDELETE_SOURCE  = resolve(repoRoot, 'src/state/profile-delete.js');
 const PROFSM_SOURCE      = resolve(repoRoot, 'src/ui/profile-startup-modal.js');
 const GAMEINIT_SOURCE    = resolve(repoRoot, 'src/bootstrap/game-init.js');
 const GAMESTATEGLOBALS_SOURCE = resolve(repoRoot, 'src/state/game-state-globals.js');
-const PLAY_HTML          = resolve(repoRoot, 'game/play.html');
+const DEBUGHELPERS_SOURCE     = resolve(repoRoot, 'src/qa/debug-helpers.js');
+const PLAY_HTML               = resolve(repoRoot, 'game/play.html');
 
 // CSS markers (CSS comment style, inside <style>)
 const CSS_BEGIN = '/* BEGIN GENERATED CSS: src/styles/game.css */';
@@ -216,6 +221,10 @@ const JS_END_GAMESTATEGLOBALS2   = '// END GENERATED JS: src/state/game-state-gl
 // It is NOT inlined into game/play.html.
 const JS_SPLIT_GAMESTATEGLOBALS = '// << SPLIT: environmentState >>';
 
+// Debug-helpers markers (JS comment style, inside <script>)
+const JS_BEGIN_DEBUGHELPERS = '// BEGIN GENERATED JS: src/qa/debug-helpers.js';
+const JS_END_DEBUGHELPERS   = '// END GENERATED JS: src/qa/debug-helpers.js';
+
 function fail(msg) {
   console.error(`build_play_html: ERROR: ${msg}`);
   process.exit(1);
@@ -258,6 +267,7 @@ if (!existsSync(PROFDELETE_SOURCE))  fail('cannot find src/state/profile-delete.
 if (!existsSync(PROFSM_SOURCE))      fail('cannot find src/ui/profile-startup-modal.js');
 if (!existsSync(GAMEINIT_SOURCE))         fail('cannot find src/bootstrap/game-init.js');
 if (!existsSync(GAMESTATEGLOBALS_SOURCE)) fail('cannot find src/state/game-state-globals.js');
+if (!existsSync(DEBUGHELPERS_SOURCE))     fail('cannot find src/qa/debug-helpers.js');
 if (!existsSync(PLAY_HTML))               fail('cannot find game/play.html');
 
 const css          = readFileSync(CSS_SOURCE,       'utf8');
@@ -282,6 +292,7 @@ const jsProfDelete = readFileSync(PROFDELETE_SOURCE,  'utf8');
 const jsProfSM     = readFileSync(PROFSM_SOURCE,      'utf8');
 const jsGameInit         = readFileSync(GAMEINIT_SOURCE,         'utf8');
 const jsGameStateGlobals = readFileSync(GAMESTATEGLOBALS_SOURCE, 'utf8');
+const jsDebugHelpers     = readFileSync(DEBUGHELPERS_SOURCE,     'utf8');
 let   html               = readFileSync(PLAY_HTML,               'utf8');
 
 // --- Split encounter-data into two parts at the SPLIT marker ---
@@ -364,6 +375,7 @@ html = inlineRegion(html, JS_BEGIN_PROFDELETE, JS_END_PROFDELETE, jsProfDelete.r
 html = inlineRegion(html, JS_BEGIN_PROFSM,   JS_END_PROFSM,   jsProfSM.replace(/\s+$/, ''),   'profile-startup-modal');
 html = inlineRegion(html, JS_BEGIN_GAMEINIT, JS_END_GAMEINIT, jsGameInit.replace(/\s+$/, ''), 'game-init');
 html = inlineRegion(html, JS_BEGIN_GAMESTATEGLOBALS1, JS_END_GAMESTATEGLOBALS1, jsGameStateGlobals1, 'game-state-globals [1/2]');
+html = inlineRegion(html, JS_BEGIN_DEBUGHELPERS,      JS_END_DEBUGHELPERS,      jsDebugHelpers.replace(/\s+$/, ''), 'debug-helpers');
 html = inlineRegion(html, JS_BEGIN_GAMESTATEGLOBALS2, JS_END_GAMESTATEGLOBALS2, jsGameStateGlobals2, 'game-state-globals [2/2]');
 
 if (html === original) {

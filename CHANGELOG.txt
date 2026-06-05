@@ -1,3 +1,16 @@
+[2026-06-05 extract-debug-helpers | Claude]
+Twenty-third controlled extraction — debug/QA helper functions extracted and build script extended.
+
+- Created src/qa/debug-helpers.js: nine debug/QA helper functions extracted from game/play.html, byte-identical to the originals.
+  - addDebugTrace, debugRoll, importantStateSnapshot, diffSnapshots, takeQABackSnapshot, restoreQABackSnapshot, addTurnDeltaTrace, addDebugFlag, scanForSuspiciousState.
+  - No function names changed. No function order changed. No function bodies changed. No debug trace schema changed. No QA Back behaviour changed.
+- Edited game/play.html: generated region placed exactly between game-state-globals [1/2] and game-state-globals [2/2]. No code moved. No call sites changed.
+  - debug-helpers: one region (~line 5514) wrapping all nine functions.
+- Extended scripts/build_play_html.mjs: DEBUGHELPERS_SOURCE constant; marker pair; existence check; read; inlineRegion call (between the two game-state-globals inlines). Now handles 23 source files.
+- Docs: README.md (repo layout tree + build scaffold table), docs/current-game-structure.md (line-range table, build scaffold table, marker table), docs/architecture-notes.md (new region entry, edit guidance, line-range table), docs/release-checklist.md (build step check for new source file).
+- Verification: node scripts/build_play_html.mjs (idempotent — no change) and node scripts/check_html_js_syntax.mjs both pass.
+- Source/build structure change only. No gameplay logic, function bodies, call sites, debug trace schema, QA Back behaviour, or any other code changed.
+
 [2026-06-05 extract-game-state-globals | Claude]
 Twenty-second controlled extraction — game state globals extracted into two generated regions and build script extended.
 
