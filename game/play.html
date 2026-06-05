@@ -5469,6 +5469,7 @@ function initGame(resumeChoice) {
 }
 // END GENERATED JS: src/bootstrap/game-init.js
 
+// BEGIN GENERATED JS: src/state/game-state-globals.js [1/2]
 const KNOWLEDGE_MAX = 30;
 const KNOWLEDGE_PER_ENTITY_CAP = 2;
 const KNOWLEDGE_INFO_UNLOCK = 10;
@@ -5508,6 +5509,7 @@ const playerSpeciesProfile = {
   groupSizeCap: 6,       // T. belgica: encountered groups draw up to this ceiling
   baseSocialChance: 6
 };
+// END GENERATED JS: src/state/game-state-globals.js [1/2]
 
 /**
  * Adds a structured developer-only diagnostic event.
@@ -5736,6 +5738,8 @@ function scanForSuspiciousState(context = "") {
   if (!layerAllowedAt(player.x, player.y, player.z)) addDebugFlag("Current layer not allowed by habitat", {context, habitat: habitatAt(player.x, player.y), z: player.z});
 }
 
+// BEGIN GENERATED JS: src/state/game-state-globals.js [2/2]
+
 const environment = {
   wind: "still",
   weather: "humid",
@@ -5781,6 +5785,7 @@ const layerNarration = {
     "The high branches offer escape, but little room for mistakes."
   ]
 };
+// END GENERATED JS: src/state/game-state-globals.js [2/2]
 
 // ---------------------------------------------------------------------------
 // [DATA-ENCOUNTERS] moved to data-encounters.js

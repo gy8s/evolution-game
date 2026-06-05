@@ -1,3 +1,19 @@
+[2026-06-05 extract-game-state-globals | Claude]
+Twenty-second controlled extraction — game state globals extracted into two generated regions and build script extended.
+
+- Created src/state/game-state-globals.js: two pure declaration clusters extracted from game/play.html, byte-identical to the originals. Split by // << SPLIT: environmentState >>.
+  - Cluster 1 (~line 5472): KNOWLEDGE_MAX, KNOWLEDGE_PER_ENTITY_CAP, KNOWLEDGE_INFO_UNLOCK, KNOWLEDGE_NH_THRESHOLDS, KNOWLEDGE_TIERS, socialGroup, noiseLevel, lastCravingCueTurn, lastRiskMemoryCueTurn, SOCIAL_ENGINE_MAX_GROUP, playerSpeciesProfile.
+  - Cluster 2 (~line 5741): environment, timeState, timePhaseDurations, windOptions, weatherOptions, layerNarration.
+  - No functions extracted. Debug/QA functions (addDebugTrace, debugRoll, importantStateSnapshot, diffSnapshots, takeQABackSnapshot, restoreQABackSnapshot, addTurnDeltaTrace, addDebugFlag, scanForSuspiciousState) stay in game/play.html. Encounter helpers (getEncounterTemplate, validateEncounterData, normaliseEncounter) stay in game/play.html.
+  - No declaration names changed. No const/let types changed. No initial values changed. No object/array contents changed.
+- Edited game/play.html: two generated regions added. Functions between and after the clusters stay exactly where they are. No code moved. No call sites changed.
+  - game-state-globals [1/2]: one region (~line 5472) wrapping cluster 1.
+  - game-state-globals [2/2]: one region (~line 5741) wrapping cluster 2.
+- Extended scripts/build_play_html.mjs: GAMESTATEGLOBALS_SOURCE constant; split marker JS_SPLIT_GAMESTATEGLOBALS; two marker pairs; existence check; read; split logic; two inlineRegion calls. Now handles 22 source files.
+- Docs: README.md (repo layout tree + build scaffold table), docs/current-game-structure.md (line-range table, build scaffold table, marker table), docs/architecture-notes.md (new region entry, split-marker note, edit guidance, line-range table), docs/release-checklist.md (build step check for new source file).
+- Verification: node scripts/build_play_html.mjs (idempotent — no change on second run) and node scripts/check_html_js_syntax.mjs both pass.
+- Source/build structure change only. No gameplay logic, declaration names, initial values, call sites, startup order, save/profile behaviour, or any other code changed.
+
 [2026-06-04 extract-game-init | Claude]
 Twenty-first controlled extraction — initGame extracted and build script extended.
 
