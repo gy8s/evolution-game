@@ -39,6 +39,9 @@
 //  19. src/state/profile-delete.js → one JS region (~line 5280)
 //  20. src/ui/profile-startup-modal.js → one JS region (~line 5311)
 //  21. src/bootstrap/game-init.js → one JS region (~line 5441)
+//  22. src/state/game-state-globals.js → two JS regions:
+//        [1/2] knowledge constants + socialGroup + playerSpeciesProfile (~line 5472)
+//        [2/2] environment + timeState + layerNarration                 (~line 5741)
 //
 // Why inline (not external files): game/play.html must open straight from
 // disk — or via the GitHub Pages link — with no build step and no runtime
@@ -77,6 +80,7 @@ const FOSSUI_SOURCE      = resolve(repoRoot, 'src/ui/fossil-record-ui.js');
 const PROFDELETE_SOURCE  = resolve(repoRoot, 'src/state/profile-delete.js');
 const PROFSM_SOURCE      = resolve(repoRoot, 'src/ui/profile-startup-modal.js');
 const GAMEINIT_SOURCE    = resolve(repoRoot, 'src/bootstrap/game-init.js');
+const GAMESTATEGLOBALS_SOURCE = resolve(repoRoot, 'src/state/game-state-globals.js');
 const PLAY_HTML          = resolve(repoRoot, 'game/play.html');
 
 // CSS markers (CSS comment style, inside <style>)
@@ -202,6 +206,16 @@ const JS_END_PROFSM   = '// END GENERATED JS: src/ui/profile-startup-modal.js';
 const JS_BEGIN_GAMEINIT = '// BEGIN GENERATED JS: src/bootstrap/game-init.js';
 const JS_END_GAMEINIT   = '// END GENERATED JS: src/bootstrap/game-init.js';
 
+// Game-state-globals markers (JS comment style, inside <script>) — two parts
+const JS_BEGIN_GAMESTATEGLOBALS1 = '// BEGIN GENERATED JS: src/state/game-state-globals.js [1/2]';
+const JS_END_GAMESTATEGLOBALS1   = '// END GENERATED JS: src/state/game-state-globals.js [1/2]';
+const JS_BEGIN_GAMESTATEGLOBALS2 = '// BEGIN GENERATED JS: src/state/game-state-globals.js [2/2]';
+const JS_END_GAMESTATEGLOBALS2   = '// END GENERATED JS: src/state/game-state-globals.js [2/2]';
+
+// The split comment that divides game-state-globals.js into two parts.
+// It is NOT inlined into game/play.html.
+const JS_SPLIT_GAMESTATEGLOBALS = '// << SPLIT: environmentState >>';
+
 function fail(msg) {
   console.error(`build_play_html: ERROR: ${msg}`);
   process.exit(1);
@@ -242,8 +256,9 @@ if (!existsSync(FOSSSTATE_SOURCE))   fail('cannot find src/state/fossil-record-s
 if (!existsSync(FOSSUI_SOURCE))      fail('cannot find src/ui/fossil-record-ui.js');
 if (!existsSync(PROFDELETE_SOURCE))  fail('cannot find src/state/profile-delete.js');
 if (!existsSync(PROFSM_SOURCE))      fail('cannot find src/ui/profile-startup-modal.js');
-if (!existsSync(GAMEINIT_SOURCE))    fail('cannot find src/bootstrap/game-init.js');
-if (!existsSync(PLAY_HTML))          fail('cannot find game/play.html');
+if (!existsSync(GAMEINIT_SOURCE))         fail('cannot find src/bootstrap/game-init.js');
+if (!existsSync(GAMESTATEGLOBALS_SOURCE)) fail('cannot find src/state/game-state-globals.js');
+if (!existsSync(PLAY_HTML))               fail('cannot find game/play.html');
 
 const css          = readFileSync(CSS_SOURCE,       'utf8');
 const jsData       = readFileSync(DATA_SOURCE,      'utf8');
@@ -265,8 +280,9 @@ const jsFossState  = readFileSync(FOSSSTATE_SOURCE,   'utf8');
 const jsFossUI     = readFileSync(FOSSUI_SOURCE,      'utf8');
 const jsProfDelete = readFileSync(PROFDELETE_SOURCE,  'utf8');
 const jsProfSM     = readFileSync(PROFSM_SOURCE,      'utf8');
-const jsGameInit   = readFileSync(GAMEINIT_SOURCE,    'utf8');
-let   html         = readFileSync(PLAY_HTML,         'utf8');
+const jsGameInit         = readFileSync(GAMEINIT_SOURCE,         'utf8');
+const jsGameStateGlobals = readFileSync(GAMESTATEGLOBALS_SOURCE, 'utf8');
+let   html               = readFileSync(PLAY_HTML,               'utf8');
 
 // --- Split encounter-data into two parts at the SPLIT marker ---
 const splitIdx = jsData.indexOf(JS_SPLIT);
@@ -310,6 +326,12 @@ const jsAchPers1 = jsAchPers.slice(0, achPersSplitA).replace(/\s+$/, '');
 const jsAchPers2 = jsAchPers.slice(achPersSplitA + JS_SPLIT_ACHPERS_A.length, achPersSplitB).replace(/^\n/, '').replace(/\s+$/, '');
 const jsAchPers3 = jsAchPers.slice(achPersSplitB + JS_SPLIT_ACHPERS_B.length).replace(/^\n/, '').replace(/\s+$/, '');
 
+// --- Split game-state-globals into two parts at its SPLIT marker ---
+const gameStateGlobalsSplit = jsGameStateGlobals.indexOf(JS_SPLIT_GAMESTATEGLOBALS);
+if (gameStateGlobalsSplit === -1) fail(`missing split marker in src/state/game-state-globals.js: ${JS_SPLIT_GAMESTATEGLOBALS}`);
+const jsGameStateGlobals1 = jsGameStateGlobals.slice(0, gameStateGlobalsSplit).replace(/\s+$/, '');
+const jsGameStateGlobals2 = jsGameStateGlobals.slice(gameStateGlobalsSplit + JS_SPLIT_GAMESTATEGLOBALS.length).replace(/^\n/, '').replace(/\s+$/, '');
+
 // --- Apply all regions ---
 const original = html;
 html = inlineRegion(html, CSS_BEGIN,        CSS_END,        css.replace(/\s+$/, ''), 'CSS');
@@ -341,6 +363,8 @@ html = inlineRegion(html, JS_BEGIN_FOSSUI,   JS_END_FOSSUI,   jsFossUI.replace(/
 html = inlineRegion(html, JS_BEGIN_PROFDELETE, JS_END_PROFDELETE, jsProfDelete.replace(/\s+$/, ''), 'profile-delete');
 html = inlineRegion(html, JS_BEGIN_PROFSM,   JS_END_PROFSM,   jsProfSM.replace(/\s+$/, ''),   'profile-startup-modal');
 html = inlineRegion(html, JS_BEGIN_GAMEINIT, JS_END_GAMEINIT, jsGameInit.replace(/\s+$/, ''), 'game-init');
+html = inlineRegion(html, JS_BEGIN_GAMESTATEGLOBALS1, JS_END_GAMESTATEGLOBALS1, jsGameStateGlobals1, 'game-state-globals [1/2]');
+html = inlineRegion(html, JS_BEGIN_GAMESTATEGLOBALS2, JS_END_GAMESTATEGLOBALS2, jsGameStateGlobals2, 'game-state-globals [2/2]');
 
 if (html === original) {
   console.log('build_play_html: no change — game/play.html already matches all source files.');

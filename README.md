@@ -106,6 +106,7 @@ evolution-game/
 │   │   ├── profile-startup-modal.js  Profile selection/startup modal source (inlined into play.html by the build script)
 │   │   └── profile-ui.js             Profile/win-modal UI helpers source (inlined into play.html by the build script)
 │   └── state/
+│       ├── game-state-globals.js     Global constant/state declarations source (inlined into play.html by the build script)
 │       ├── run-tracking.js           Run-tracking state factory source (inlined into play.html by the build script)
 │       ├── profile-storage-constants.js  Profile/storage constant declarations (inlined into play.html by the build script)
 │       ├── profile-factories.js      Profile factory/helper functions source (inlined into play.html by the build script)
@@ -157,7 +158,7 @@ The rebuild is not a rewrite, not a framework migration, and not a gameplay rede
 
 ### Build scaffold
 
-Twenty-one source extractions are complete:
+Twenty-two source extractions are complete:
 
 | Source file | What it contains | Destination in play.html |
 |-------------|-----------------|--------------------------|
@@ -182,6 +183,7 @@ Twenty-one source extractions are complete:
 | `src/state/profile-delete.js` | Profile deletion helper (`deleteProfile`) | One JS region (~line 5280) |
 | `src/ui/profile-startup-modal.js` | Profile selection/startup modal (`profileShowStartupModal`) | One JS region (~line 5311) |
 | `src/bootstrap/game-init.js` | Game bootstrap (`initGame`) | One JS region (~line 5441) |
+| `src/state/game-state-globals.js` | Global constants and state declarations (`KNOWLEDGE_*`, `KNOWLEDGE_TIERS`, `socialGroup`, `playerSpeciesProfile`, `environment`, `timeState`, `layerNarration`, etc.) | Two JS regions (~line 5472 and ~line 5741) |
 
 `game/play.html` keeps all content **inline** so it stays directly playable with no build step or runtime dependency. To regenerate `game/play.html` after editing any source file:
 
