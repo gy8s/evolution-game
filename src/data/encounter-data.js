@@ -635,7 +635,7 @@ const encounters = {
     kind: "forage", name: "canopy fruit", icon: "🍏", className: "food",
     canInvestigate: true, portions: 2, energy: 20,
     poison: null,
-    seen: "Small fruits hang in the canopy, bright against the wet leaves.",
+    seen: "Small fruits hang overhead, bright against the wet leaves.",
     investigated: "The fruit smells sweet and several have been opened by birds or other climbers.",
     naturalHistory: {
       title: "Canopy fruit",
@@ -962,7 +962,8 @@ const encounters = {
     dangerProfile: "predator", temperament: "hunter", pursuitType: "air", canInvestigate: true,
     fitness: 95, size: 28, speed: 85, agility: 70, aggression: 75, food: 80,
     poison: null,
-    seen: "High above the canopy, a broad-winged raptor turns on warm air, searching for the smallest mistake below.",
+    seen: "A broad-winged raptor turns on warm air, searching for the smallest mistake below.",
+    investigated: "An aerial hunter using height and sun position. Dense overhead cover is your only defence. Open canopy gaps are targeting windows — cross them fast or avoid them.",
     naturalHistory: {
       title: "Large eagle",
       fieldNote: "A large aerial raptor operating above the canopy sees the forest surface as a mosaic of movement \u2014 any gap in cover is a targeting window.",
@@ -979,6 +980,7 @@ const encounters = {
     fitness: 80, size: 18, speed: 65, agility: 80, aggression: 65, food: 55,
     poison: null,
     seen: "Pressed against the trunk, an owl holds perfectly still. Only the eyes move, measuring the gaps between leaves.",
+    investigated: "A nocturnal ambush hunter holding a daytime roost. It will not pursue far in daylight. At dusk and in darkness, it reads canopy gaps with precision you cannot match.",
     naturalHistory: {
       title: "Forest owl",
       fieldNote: "An owl's facial disc functions as a parabolic sound reflector, channelling sound to asymmetrically positioned ears and enabling three-dimensional sound localisation precise enough to strike in complete darkness.",
@@ -1182,6 +1184,7 @@ const encounters = {
     fitness: 100, size: 60, speed: 45, agility: 25, aggression: 85, food: 180,
     poison: null,
     seen: "Only eyes and ridged back break the waterline. The bank itself feels dangerous.",
+    investigated: "Everything dangerous about it is within a body-length of the bank. The strike begins before you can react. Distance from the water is the only reliable defence — drink quickly, from cover, and leave.",
     naturalHistory: {
       title: "Crocodile",
       fieldNote: "Eocene crocodilians are already highly derived ambush predators, and the water's edge is their domain \u2014 an invisible kill zone extending several body lengths from the bank.",
@@ -1215,6 +1218,7 @@ const encounters = {
     fitness: 80, size: 20, speed: 30, agility: 25, aggression: 30, food: 65,
     poison: null,
     seen: "A strange long-snouted climber tears at rotting wood, searching for insects.",
+    investigated: "Occupied with its own work. The foreclaws are defensive, not aggressive — it will only commit if cornered. Give it space and move on.",
     naturalHistory: {
       title: "Eurotamandua-like anteater",
       fieldNote: "Eurotamandua is the unexpected anteater of the European Eocene \u2014 a fully specialised myrmecophage whose presence raises unresolved biogeographic questions about continental connections and dispersal.",
@@ -1246,7 +1250,8 @@ const encounters = {
     dangerProfile: "predator", temperament: "hunter", pursuitType: "climber", canInvestigate: true,
     fitness: 90, size: 22, speed: 55, agility: 55, aggression: 65, food: 70,
     poison: null,
-    seen: "A monitor lizard works through the undergrowth with slow confidence, its tongue testing the damp air ahead of it.",
+    seen: "A monitor lizard moves with slow confidence, its tongue testing the damp air ahead of it.",
+    investigated: "An active forager that follows scent and pursues. It can climb. Elevation reduces but does not remove the threat — reach the upper canopy before it commits to a pursuit.",
     naturalHistory: {
       title: "Monitor lizard",
       fieldNote: "Monitor lizards are the most cognitively complex lizards \u2014 demonstrated to count, solve multi-step problems, and coordinate group behaviours \u2014 and their large size makes them dangerous generalist predators.",
@@ -1280,6 +1285,7 @@ const encounters = {
     fitness: 45, size: 4, speed: 60, agility: 75, aggression: 5, food: 18,
     poison: null,
     seen: "A fruit bat shifts under a branch, wings wrapping and unwrapping around its body.",
+    investigated: "Roosts in daytime, feeds on fruit at night. Follow its activity at dusk to locate productive fruiting trees. Too fast and fragile to be worth pursuing.",
     naturalHistory: {
       title: "Fruit bat",
       fieldNote: "Fruit bats are keystone dispersers \u2014 they move seeds across distances no terrestrial animal matches, and their night-time foraging reveals which fruiting trees are currently productive.",
@@ -1296,6 +1302,7 @@ const encounters = {
     fitness: 85, size: 14, speed: 75, agility: 80, aggression: 70, food: 45,
     poison: null,
     seen: "A small raptor threads between trees, fast enough to make open branches feel unsafe.",
+    investigated: "A canopy pursuit hunter working the same vertical space you occupy. It closes gaps by threading through foliage, not stooping from height. Dense cover disrupts its angle — move into the thickest available screen.",
     naturalHistory: {
       title: "Masillaraptor-like raptor",
       fieldNote: "A raptor of the closed canopy hunts very differently from an open-sky eagle \u2014 short wings, long tail, and fast horizontal acceleration through branches rather than power-dive from height.",
@@ -1329,6 +1336,7 @@ const encounters = {
     fitness: 55, size: 6, speed: 55, agility: 60, aggression: 10, food: 22,
     poison: null,
     seen: "A large-billed fruit bird hops between branches, bright beak cutting through the green.",
+    investigated: "A frugivore that marks productive canopy fruit trees by its presence and calls. Not easy to catch, but a reliable signal to follow.",
     naturalHistory: {
       title: "Large toucan-like bird",
       fieldNote: "The toucan's large beak is structurally a thermoregulation device as much as a feeding tool \u2014 a network of blood vessels in the beak surface allows rapid heat exchange, cooling the bird in tropical forest heat.",
@@ -1606,6 +1614,7 @@ const encounters = {
     canInvestigate: true, fitness: 100, size: 40, speed: 55, agility: 35, aggression: 85, food: 120,
     poison: null,
     seen: "A terrestrial crocodile-like predator moves between roots, high-legged and purposeful.",
+    investigated: "High-legged and fast across the ground. Unlike a water crocodilian, it is not tied to the bank — it pursues. It can follow into low branches. Reach the mid-storey before it closes.",
     naturalHistory: {
       title: "Bergisuchus-like sebecid",
       fieldNote: "Unlike the water-margin ambush strategy of modern crocodilians, sebecid relatives like Bergisuchus were fully terrestrial hunters \u2014 fast-moving, long-legged, and capable of sustained pursuit.",
@@ -1622,6 +1631,7 @@ const encounters = {
     fitness: 45, size: 4, speed: 55, agility: 50, aggression: 5, food: 18,
     poison: null,
     seen: "A small ground bird picks through the litter, then freezes at the sound of movement.",
+    investigated: "A ground forager that prefers to walk away through cover rather than flush. Catchable in confined spaces. Its disturbing of litter sometimes exposes invertebrates.",
     naturalHistory: {
       title: "Messelornis-like bird",
       fieldNote: "Messelornis represents the gruiform radiation of the Eocene \u2014 rail-like ground birds that diversified into multiple ecological roles before being largely replaced by modern gruiform and galliform birds.",
@@ -1638,6 +1648,7 @@ const encounters = {
     canInvestigate: true, fitness: 80, size: 18, speed: 65, agility: 45, aggression: 70, food: 55,
     poison: null,
     seen: "A long-legged predatory bird darts between trunks, head low and eyes sharp.",
+    investigated: "Fast across the ground in committed short bursts. Does not follow into the canopy. Elevation ends the threat.",
     naturalHistory: {
       title: "Small cariamiform hunter",
       fieldNote: "Cariamiform birds were the dominant small cursorial predators of the Eocene, occupying the ecological role that mongooses, genets, and small cats would later claim.",
@@ -1654,6 +1665,7 @@ const encounters = {
     fitness: 55, size: 4, speed: 45, agility: 85, aggression: 5, food: 20,
     poison: null,
     seen: "A small gliding mammal clings to bark, membrane folded along its side.",
+    investigated: "An arboreal bark specialist. Not aggressive. Its inter-tree gliding reveals navigable distances between branches.",
     naturalHistory: {
       title: "Heterohyus-like glider",
       fieldNote: "Heterohyus belongs to the apatemyids \u2014 an extinct order of small mammals convergent with gliders and bark specialists, using elongated fingers to extract insects from crevices.",
@@ -1670,6 +1682,7 @@ const encounters = {
     fitness: 65, size: 8, speed: 40, agility: 60, aggression: 20, food: 32,
     poison: null,
     seen: "A shaggy arboreal mammal moves along a branch, larger than most small prey.",
+    investigated: "A large arboreal frugivore that will defend a food patch. Territorial rather than predatory. Avoid feeding simultaneously at the same resource.",
     naturalHistory: {
       title: "Kopidodon-like arboreal mammal",
       fieldNote: "Kopidodon belongs to the cimolestans \u2014 a broad group of early mammals that occupied diverse niches before placental orders fully diversified, including a fully committed arboreal frugivore niche.",
@@ -1686,6 +1699,7 @@ const encounters = {
     fitness: 45, size: 3, speed: 45, agility: 55, aggression: 5, food: 16,
     poison: null,
     seen: "A small opossum-like mammal noses through wet vegetation.",
+    investigated: "A small generalist opportunist. Slow enough to catch in confined spaces, but it will bite when cornered. Modest food value.",
     naturalHistory: {
       title: "Amphiperatherium-like marsupial",
       fieldNote: "One of the last European marsupials, Amphiperatherium persists into the Eocene as a small, nocturnal opportunist occupying niches that placental mammals have not yet fully claimed.",
@@ -1761,6 +1775,7 @@ const encounters = {
     fitness: 75, size: 9, speed: 45, agility: 70, aggression: 30, food: 36,
     poison: null,
     seen: "A larger primate relative grips the branch, weighing threat against retreat.",
+    investigated: "Bigger than it looks and aware of you. Social animals — there may be more nearby. Competition for fruit patches is real.",
     naturalHistory: {
       title: "Europolemur-like primate",
       fieldNote: "Europolemur represents the Eocene adaptive radiation of primates across Europe \u2014 a social, fruit-eating arboreal mammal occupying the same niche you do and defending it actively.",
@@ -2168,7 +2183,7 @@ const encounters = {
     dangerProfile: "bite", temperament: "ambush", canInvestigate: true,
     fitness: 52, size: 3, speed: 34, agility: 48, aggression: 34, food: 16,
     poison: null,
-    seen: "A small but thick-bodied snake lies looped along the branch. It does not hurry away.",
+    seen: "A small but thick-bodied snake lies still against the wood. It does not hurry away.",
     investigationDetails: [
       "It is not the huge constrictor that could overpower you outright, but the body is still all muscle.",
       "The thicker coils matter. This is prey only if you control the head and avoid the body wrapping around you.",
@@ -2253,6 +2268,7 @@ const encounters = {
     dangerProfile: "bite", temperament: "skittish", canInvestigate: true,
     fitness: 60, size: 3, speed: 55, agility: 50, aggression: 10, food: 22,
     seen: "A small mammal darts between leaves. Its body is small, but its teeth are not harmless.",
+    investigated: "Quick and capable of a painful bite, but poor value in a fight. Worth pursuing only when other food is scarce.",
     naturalHistory: {
       title: "Small multituberculate",
       fieldNote: "Multituberculates are the longest-lived mammal order in the fossil record \u2014 over 120 million years from Late Jurassic to Oligocene \u2014 a success story built on specialised dentition for seed and nut processing.",
@@ -2267,6 +2283,7 @@ const encounters = {
     dangerProfile: "minor", temperament: "skittish", canInvestigate: true,
     fitness: 50, size: 2, speed: 70, agility: 80, aggression: 5, food: 18,
     seen: "A small bird shifts on a branch, alert to every movement.",
+    investigated: "Too fast to catch by direct approach. Wait near a known feeding perch and intercept rather than pursue.",
     naturalHistory: {
       title: "Small bird",
       fieldNote: "Small passerine-grade birds represent the success of the neornithine radiation \u2014 small, fast, metabolically intense, and able to exploit food resources in milliseconds of decision time.",
@@ -2281,6 +2298,7 @@ const encounters = {
     dangerProfile: "fight", temperament: "territorial", canInvestigate: true,
     fitness: 85, size: 5, speed: 45, agility: 70, aggression: 45, food: 30,
     seen: "Another small tree-climber freezes among the branches. For a moment, both of you judge the distance.",
+    investigated: "Another tree-climber: competitive, aware, and capable of real injury in a fight. This is a territorial dispute, not a predation encounter. Signal clearly before it escalates.",
     naturalHistory: {
       title: "Rival tree-climber",
       fieldNote: "A conspecific or closely related competitor understands your resources, your movement patterns, and your vulnerabilities better than any other predator \u2014 primate rivalry is cognitively sophisticated.",
@@ -2294,7 +2312,7 @@ const encounters = {
     kind: "animal", name: "large constrictor", icon: "🐍", className: "threat",
     dangerProfile: "grapple", temperament: "ambush", canInvestigate: true,
     fitness: 80, size: 11, speed: 35, agility: 50, aggression: 65, food: 35,
-    seen: "A heavy-bodied constrictor lies looped across the branch, so still it could be mistaken for vine.",
+    seen: "A heavy-bodied constrictor lies across the wood, so still it could be mistaken for vine.",
     investigationDetails: [
       "The branch-shape has muscle under it. The stillness is hunting, not rest.",
       "Its head is already angled towards you. If you close badly, it can seize and coil before you can pull free.",
@@ -2322,6 +2340,7 @@ const encounters = {
     dangerProfile: "fatal", temperament: "hunter", canInvestigate: true,
     pursuitType: "ground", fitness: 100, size: 55, speed: 82, agility: 35, aggression: 94, food: 150,
     seen: "A long-jawed ground predator moves between the trees below. On the ground, and even in low scrub, you are not built to survive it.",
+    investigated: "Built for ground speed. The mid-storey limits its reach, but do not test the transition. Climb and do not come down while it is present.",
     knowledgeTierText: [
       "You observe the mesonychid-like predator from a safe distance.",
       "You note its stride — long, covering ground faster than its bulk suggests.",
@@ -2343,6 +2362,7 @@ const encounters = {
     dangerProfile: "predator", temperament: "hunter", canInvestigate: true,
     pursuitType: "climber", fitness: 95, size: 24, speed: 72, agility: 86, aggression: 86, food: 95,
     seen: "A miacid-like hunter moves with sudden precision. Low branches will not save you, and even canopy routes only buy distance.",
+    investigated: "A canopy predator that hunts by angle and patience. It cannot be outrun once it commits. Your window is before it reads the gap.",
     investigationDetails: [
       "You study the way it distributes weight before committing to a branch. There is no wasted movement.",
       "You notice a pause before it repositions — a brief recalculation, not hesitation. It is reading the gaps in the canopy.",

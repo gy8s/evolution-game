@@ -152,6 +152,36 @@ Do not describe a PR as complete, safe, or ready to merge unless the documentati
 
 ---
 
+## BG-005 — isInvertebrateEncounter regex gap causes wrong sex assignment for invertebrate encounters
+
+**Status:** Active guardrail
+
+**Observed failure:**
+`isInvertebrateEncounter()` in `game/play.html` uses a hardcoded regex against the encounter key and name. New invertebrate encounter entries (`antSwarm`, `titanomyrma`, `titanomyrmaSwarm`, `treeCrab`, `freshwaterCrayfish`) were added to `src/data/encounter-data.js` without extending the regex, causing them to fall through to the sex-determination path that assigns male/female pronouns. Invertebrates should return no sex.
+
+**Player/tester symptom:**
+Ant and crab/crayfish encounters received male or female sex descriptors in flavour text and pronoun resolution paths — grammatically and ecologically wrong.
+
+**Root cause:**
+The classification function is maintained manually as a regex literal. Every new invertebrate encounter key must be added to the regex at `isInvertebrateEncounter()`. There is no automated check or shared list.
+
+**Known affected area:**
+- `game/play.html` — `isInvertebrateEncounter()` function
+- Any new entry in `src/data/encounter-data.js` that is an invertebrate but does not contain the existing regex terms in its key or name
+
+**Future guardrail:**
+When adding any new encounter entry to `src/data/encounter-data.js`, explicitly check whether it is an invertebrate. If so, verify that its key or name matches at least one term in the `isInvertebrateEncounter` regex. If not, add the term before opening the PR.
+
+**Required PR check:**
+- Search `isInvertebrateEncounter` in `game/play.html`.
+- Confirm every invertebrate encounter key or name contains a term in the regex.
+- If a new invertebrate was added, confirm the regex was extended to cover it.
+
+**Reviewer instruction:**
+If a PR adds any new invertebrate encounter entry, explicitly check `isInvertebrateEncounter` coverage. Block merge if the regex was not updated.
+
+---
+
 ## Entry template for future bugs
 
 ```md
