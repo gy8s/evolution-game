@@ -1,3 +1,22 @@
+[2026-06-05 flavour-text-fixes | Claude]
+Flavour text audit fixes — seen/investigated text corrected across 20+ encounter entries; isInvertebrateEncounter regex extended.
+
+- src/data/encounter-data.js: 4 seen text fixes (layer-neutral rewrites for eagle, monitorLizard, constrictor, smallConstrictor; canopyFruit already fixed).
+  - eagle: removed layer-specific "High above the canopy," prefix.
+  - monitorLizard: removed undergrowth reference (spawns Canopy/Mid-storey, not Ground).
+  - constrictor: removed "looped across the branch" (spawns on Ground).
+  - smallConstrictor: removed "looped along the branch" (spawns on Ground).
+- src/data/encounter-data.js: 20 investigated fields added to entries that had seen but no investigated text.
+  - eagle, owl, crocodile, eurotamandua, monitorLizard, fruitBat, masillaraptor, ramphastos,
+    bergisuchus, messelornis, cariamiform, heterohyus, kopidodon, amphiperatherium, europolemur,
+    smallMammal, smallBird, rivalPrimate, groundCarnivore, climbingHunter.
+  - Each text is tone-consistent: tactical/observational, no anachronistic framing.
+- game/play.html: isInvertebrateEncounter regex extended to include ant|crab|crayfish.
+  - antSwarm, titanomyrma, titanomyrmaSwarm, treeCrab, freshwaterCrayfish were incorrectly
+    assigned male/female sex at runtime; this fix corrects the sex-determination path for all five.
+- Verification: node scripts/build_play_html.mjs and node scripts/check_html_js_syntax.mjs both pass.
+- No gameplay logic, stat values, spawn tables, function bodies, or call sites changed.
+
 [2026-06-05 extract-encounter-helpers | Claude]
 Twenty-fourth controlled extraction — encounter helper functions extracted and build script extended.
 
