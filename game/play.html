@@ -8329,7 +8329,7 @@ function randomFalseClue() {
     {
       sense: "smell",
       text: `A musky mammalian smell seems to come from the ${dir}, but it may be old scent held in wet bark.`,
-      narration: `The smell of mammal hangs in the air. It may be predator, prey, or memory.`
+      narration: `The smell of mammal is in the air. Something alive has been through here recently.`
     },
     {
       sense: "hear",
@@ -10763,7 +10763,6 @@ function layerPerilCheck(actionText) {
         ? "The forest floor feels busy with hidden movement. It is not a place to linger without a reason."
         : "The high branches expose you against gaps in the canopy. Height helps, but it advertises movement.";
       addLog(text, "threat");
-      setNarration(text);
     }
     return false;
   }
@@ -12678,8 +12677,14 @@ function hiddenSubtypeSuspicionText(e, level) {
     return {log: "uncertain food; more evidence needed", narration: "You can read some signs, but not enough to trust them.", className: "minor"};
   }
   if (level < 4) {
-    if (rank >= 4) return {log: "strong warning signs, exact identity uncertain", narration: "The signs are bad: bold warning cues, little fear, and no hurry to escape.", className: "threat"};
-    if (rank >= 2) return {log: "probable chemical/toxin risk", narration: "Slow, exposed prey is often defended. This one deserves care.", className: "poison"};
+    if (rank >= 4) {
+      if (e.kind !== "animal") return {log: "strong toxin warning, exact identity uncertain", narration: "Strong warning signs on a food source — this may be deadly. Do not eat until you are certain.", className: "threat"};
+      return {log: "strong warning signs, exact identity uncertain", narration: "The signs are bad: bold warning cues, little fear, and no hurry to escape.", className: "threat"};
+    }
+    if (rank >= 2) {
+      if (e.kind !== "animal") return {log: "probable chemical/toxin risk", narration: "Something here carries a chemical risk. The signs are real but the severity is uncertain.", className: "poison"};
+      return {log: "probable chemical/toxin risk", narration: "Slow, exposed prey is often defended. This one deserves care.", className: "poison"};
+    }
     if (rank >= 1) return {log: "possible mild toxin or bad taste", narration: "There are warning hints, but they are weak. Treat it as uncertain, not safe.", className: "poison"};
     return {log: "probably edible, but not certain", narration: "It looks promising, but certainty only comes with experience and risk.", className: "food"};
   }
@@ -17595,6 +17600,8 @@ function renderSenses() {
     seeText.innerHTML = formatCueText("water surrounds you; there is no forest structure to climb here.");
     hearText.innerHTML = formatCueText("water breaks against your body and hides other movement.");
     smellTextEl.innerHTML = formatCueText("wet mineral scent and riverbank rot press close.");
+  } else if (activePursuit && activePursuit.name) {
+    seeText.innerHTML = formatCueText(`${activePursuit.name} is still close.`);
   } else {
     seeText.innerHTML = formatCueText("no animal or food source clearly visible." + nearbyWaterText() + staticScarcityCueAt());
   }
