@@ -12,7 +12,7 @@ Evolution Game is a browser-based single-player survival simulation. The player 
 
 The game runs from a single HTML file (`game/play.html`, ~18,400 lines). There is no bundler and no server. Open the file in a browser and it works.
 
-Twenty-three source extractions are complete. The playable file `game/play.html` still contains all content inline (between marker comments) so it works with no build step or runtime dependency.
+Twenty-four source extractions are complete. The playable file `game/play.html` still contains all content inline (between marker comments) so it works with no build step or runtime dependency.
 
 | Source file | What it contains | In play.html |
 |-------------|-----------------|--------------|
@@ -39,6 +39,7 @@ Twenty-three source extractions are complete. The playable file `game/play.html`
 | `src/bootstrap/game-init.js` | Game bootstrap (`initGame`) | One inline JS region (~line 5441) |
 | `src/state/game-state-globals.js` | Global constants and state declarations (`KNOWLEDGE_*`, `KNOWLEDGE_TIERS`, `socialGroup`, `noiseLevel`, `playerSpeciesProfile`, `environment`, `timeState`, `timePhaseDurations`, `windOptions`, `weatherOptions`, `layerNarration`) | Two inline JS regions (~line 5472 and ~line 5741) |
 | `src/qa/debug-helpers.js` | Debug/QA helper functions (`addDebugTrace`, `debugRoll`, `importantStateSnapshot`, `diffSnapshots`, `takeQABackSnapshot`, `restoreQABackSnapshot`, `addTurnDeltaTrace`, `addDebugFlag`, `scanForSuspiciousState`) | One inline JS region (~line 5514) |
+| `src/engine/encounter-helpers.js` | Encounter helper functions (`getEncounterTemplate`, `validateEncounterData`, `normaliseEncounter`) | One inline JS region (~line 5792) |
 
 `scripts/build_play_html.mjs` inlines all source files back into `game/play.html`. Only configuration-like declarations and simple factory/helper functions are extracted — `profileCaptureWorldArrays`, `profileCaptureState`, `profileRestoreState`, `profileUpdateStats`, `profileOnRunEnd`, active-run logic, save/load logic, and all other game code remain inside `game/play.html`. All JavaScript engine code and HTML structure also remain inside `game/play.html` for now.
 
@@ -316,7 +317,7 @@ flowchart TD
 | 5472–5512 | Game state globals [1/2] (knowledge constants, socialGroup, playerSpeciesProfile) — generated, source is `src/state/game-state-globals.js` |
 | 5514–5741 | Debug/QA helper functions — generated, source is `src/qa/debug-helpers.js` |
 | 5741–5787 | Game state globals [2/2] (environment, timeState, layerNarration, etc.) — generated, source is `src/state/game-state-globals.js` |
-| 5789–5879 | Encounter helper functions (getEncounterTemplate, validateEncounterData, normaliseEncounter) |
+| 5792–5881 | Encounter helper functions — generated, source is `src/engine/encounter-helpers.js`: getEncounterTemplate, validateEncounterData, normaliseEncounter |
 | 12946–13068 | Field Journal UI — generated, source is `src/ui/field-journal-ui.js`: showEncounterJournalEntry, showFieldJournal |
 | 14311–14325 | Fossil Record state — generated, source is `src/state/fossil-record-state.js`: saveFossilRecord |
 | 14330–14381 | Fossil Record UI — generated, source is `src/ui/fossil-record-ui.js`: renderFossilRecord, renderRunRecap |
@@ -397,7 +398,8 @@ The rebuild plan (see `docs/project-plan.md`) targets extraction in this rough o
 | `src/state/game-state-globals.js` [1/2] | `// BEGIN/END GENERATED JS: src/state/game-state-globals.js [1/2]` |
 | `src/qa/debug-helpers.js` | `// BEGIN/END GENERATED JS: src/qa/debug-helpers.js` |
 | `src/state/game-state-globals.js` [2/2] | `// BEGIN/END GENERATED JS: src/state/game-state-globals.js [2/2]` |
+| `src/engine/encounter-helpers.js` | `// BEGIN/END GENERATED JS: src/engine/encounter-helpers.js` |
 
-The source file `src/data/encounter-data.js` contains a `// << SPLIT: hiddenSubtypePools >>` line dividing part 1 from part 2. `src/state/profile-run-lifecycle.js` contains two split lines (`// << SPLIT: profileOnRunEnd >>` and `// << SPLIT: profileStartNewRun >>`) dividing it into three parts. `src/state/achievement-persistence.js` contains two split lines (`// << SPLIT: awardAchievement >>` and `// << SPLIT: checkAchievements >>`) dividing it into three parts. `src/ui/achievement-ui.js` contains two split lines (`// << SPLIT: toastHelpers >>` and `// << SPLIT: renderAchievements >>`) dividing it into three parts, because the achievement-persistence [2/3] and [3/3] generated regions sit between the target groups in `play.html`. `src/ui/profile-ui.js` contains one split line (`// << SPLIT: profileUpdatePanelUI >>`) dividing it into two parts, because the `// ===== PROFILE PANEL UI =====` banner comment sits between the two groups in `play.html`. `src/state/game-state-globals.js` contains one split line (`// << SPLIT: environmentState >>`) dividing it into two parts, because debug/QA function declarations sit between the two declaration clusters in `play.html`. All other source files — including `src/ui/field-journal-ui.js`, `src/state/fossil-record-state.js`, `src/ui/fossil-record-ui.js`, `src/state/profile-delete.js`, `src/ui/profile-startup-modal.js`, `src/bootstrap/game-init.js`, and `src/qa/debug-helpers.js` — have no split marker and each maps to one contiguous region.
+The source file `src/data/encounter-data.js` contains a `// << SPLIT: hiddenSubtypePools >>` line dividing part 1 from part 2. `src/state/profile-run-lifecycle.js` contains two split lines (`// << SPLIT: profileOnRunEnd >>` and `// << SPLIT: profileStartNewRun >>`) dividing it into three parts. `src/state/achievement-persistence.js` contains two split lines (`// << SPLIT: awardAchievement >>` and `// << SPLIT: checkAchievements >>`) dividing it into three parts. `src/ui/achievement-ui.js` contains two split lines (`// << SPLIT: toastHelpers >>` and `// << SPLIT: renderAchievements >>`) dividing it into three parts, because the achievement-persistence [2/3] and [3/3] generated regions sit between the target groups in `play.html`. `src/ui/profile-ui.js` contains one split line (`// << SPLIT: profileUpdatePanelUI >>`) dividing it into two parts, because the `// ===== PROFILE PANEL UI =====` banner comment sits between the two groups in `play.html`. `src/state/game-state-globals.js` contains one split line (`// << SPLIT: environmentState >>`) dividing it into two parts, because debug/QA function declarations sit between the two declaration clusters in `play.html`. All other source files — including `src/ui/field-journal-ui.js`, `src/state/fossil-record-state.js`, `src/ui/fossil-record-ui.js`, `src/state/profile-delete.js`, `src/ui/profile-startup-modal.js`, `src/bootstrap/game-init.js`, `src/qa/debug-helpers.js`, and `src/engine/encounter-helpers.js` — have no split marker and each maps to one contiguous region.
 
 Run `node scripts/build_play_html.mjs` after editing any source file. Do not hand-edit generated regions in `game/play.html`. This document will be updated as each further extraction completes.

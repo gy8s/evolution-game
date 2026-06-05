@@ -1,3 +1,16 @@
+[2026-06-05 extract-encounter-helpers | Claude]
+Twenty-fourth controlled extraction — encounter helper functions extracted and build script extended.
+
+- Created src/engine/encounter-helpers.js: three encounter helper functions extracted from game/play.html, byte-identical to the originals.
+  - getEncounterTemplate, validateEncounterData, normaliseEncounter.
+  - No function names changed. No function order changed. No function bodies changed. No encounter lookup, validation, or normalisation behaviour changed.
+- Edited game/play.html: generated region placed immediately after game-state-globals [2/2] and before core-utils. No code moved. No call sites changed.
+  - encounter-helpers: one region (~line 5792) wrapping all three functions.
+- Extended scripts/build_play_html.mjs: ENCOUNTERHELPERS_SOURCE constant; marker pair; existence check; read; inlineRegion call (after game-state-globals [2/2] inline). Now handles 24 source files.
+- Docs: README.md (repo layout tree + build scaffold table), docs/current-game-structure.md (line-range table, build scaffold table, marker table), docs/architecture-notes.md (new region entry, edit guidance, line-range table), docs/release-checklist.md (build step check for new source file).
+- Verification: node scripts/build_play_html.mjs (idempotent — no change) and node scripts/check_html_js_syntax.mjs both pass.
+- Source/build structure change only. No gameplay logic, function bodies, call sites, encounter lookup, validation, normalisation behaviour, or any other code changed.
+
 [2026-06-05 extract-debug-helpers | Claude]
 Twenty-third controlled extraction — debug/QA helper functions extracted and build script extended.
 
