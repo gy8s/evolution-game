@@ -24,28 +24,59 @@ This is not a promise to build everything. It is a shared memory and prioritisat
 
 ## Current broad phase
 
-**Phase:** Controlled rebuild — Phase 1 (documentation repair and enforcement).
+**Phase:** Controlled rebuild — Phase 1 complete; Phase 2 pending George's approval.
 
 The game has grown beyond what is safe to maintain as a single large HTML file. Rather than a rewrite, the plan is a structured, evidence-first rebuild that keeps the playable game stable throughout.
 
 ### Rebuild phases
 
-**Phase 1 — Documentation repair and enforcement** *(current)*  
-Repair all existing documentation to accurately describe the current game. Create `docs/current-game-structure.md` and `docs/documentation-map.md`. Make documentation checks mandatory in every PR via the PR template.
+**Phase 1 — Documentation repair and source/build scaffold** *(complete)*  
+Repaired all existing documentation. Created `docs/current-game-structure.md` and `docs/documentation-map.md`. Made documentation checks mandatory in every PR. Extracted 24 pure-helper and data source files into `src/` with a build scaffold that inlines them back into `game/play.html`. Build verification (`scripts/build_play_html.mjs`) and syntax check (`scripts/check_html_js_syntax.mjs`) both pass. Phase 1 is closed subject to George's browser smoke test.
 
-**Phase 2 — Architecture plan** *(next)*  
-After documentation is in order, produce and agree a proposed modular structure. Likely shape:
-- `src/data/` — encounters, spawn tables, natural-history text
-- `src/state/` — player state, world state, profiles, save schema
-- `src/engine/` — turn logic, encounters, poison, ecology, group systems
-- `src/ui/` — rendering, map, player panel, modals, Field Journal
-- `src/qa/` — bot runner, invariant checks, report generation
-- `scripts/` — build and check tools
+**Phase 2 — Deeper extraction** *(requires George's explicit approval before starting)*  
+Agree which remaining systems to extract and in what order. No Phase 2 extraction begins without explicit approval. Phase 2 candidates are listed below.
 
 **Phase 3 — Safe extraction** *(after Phase 2 is approved)*  
-Extract code in small PRs with a single purpose each. Probable order: CSS/templates → static data → pure helpers → state/save schema → turn engine → rendering → bot/QA tools.
+Extract remaining systems in small PRs with a single purpose each. Each extraction PR must: have one purpose, avoid gameplay changes, update docs, update CHANGELOG, pass syntax/smoke checks, and keep the playable build working.
 
-Each extraction PR must: have one purpose, avoid gameplay changes, update docs, update CHANGELOG, pass syntax/smoke checks, and keep the playable build working.
+### Phase 1 stop point
+
+Phase 1 is now complete after the `close-phase1-restructure` PR, subject to George's browser smoke test.
+
+**Phase 1 completed:**
+- Source/build scaffold (24 source files extracted; `scripts/build_play_html.mjs` inlines them into `game/play.html`)
+- Data separation: encounter data, achievement data
+- State/profile separation: profiles, run-tracking, field journal, fossil record, global state declarations, achievement persistence
+- UI panel/modal separation: profile UI, achievement UI, field journal UI, fossil record UI, profile startup modal, profile delete
+- Bootstrap separation: `initGame`
+- Helper separation: utility helpers, debug/QA helpers, encounter helpers
+- Architecture flowchart and runtime flowchart (see README.md)
+- Build verification and syntax check both pass at every PR
+
+**Phase 1 did not attempt:**
+- World generation extraction
+- Look / Investigate extraction
+- Encounter resolution or spawning extraction
+- Predator / pursuit logic extraction
+- Turn engine extraction
+- Rendering, map, or input handler extraction
+- Bot runner extraction
+
+Those are Phase 2 candidates and must not be started unless George explicitly approves Phase 2.
+
+### Phase 2 candidates
+
+These are listed for planning only. None should be started without George's explicit `>>> ENTER EXECUTION MODE` for Phase 2.
+
+| System | Why it may help | Why it is riskier |
+|--------|----------------|-------------------|
+| World generation | Extracted, it would be testable in isolation and easier to modify without touching action or rendering code | Reads and writes many shared state variables; needs careful boundary mapping before extraction |
+| Look / Investigate | Well-scoped helper candidates that could live in `src/engine/`; would help future perception/awareness work | Call several rendering and journal functions not yet extracted; interleaving must be resolved first |
+| Encounter spawning / resolution | Core to gameplay correctness; extracted, bugs would be easier to isolate | Deep coupling to ecology state, weather, world registry, and normalisation path |
+| Predator / pursuit logic | Good isolation candidate once encounter resolution is extracted | Tightly interleaved with action handlers and social systems; extraction order matters |
+| Turn engine (`startTurn`, `endTurn`, metabolism) | Would make the game loop explicit and easy to trace | Many side effects and shared state writes; safest to extract after state globals are fully separated |
+| Rendering / map / input | Extracted, it would decouple display from logic | Large and complex; tight coupling to full game state; highest risk of regression |
+| Bot runner | Relatively self-contained; extraction would isolate QA concerns | Relies on the full game API surface; any API change would break the bot |
 
 ### What the rebuild is not
 
