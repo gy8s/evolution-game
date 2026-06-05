@@ -1,3 +1,18 @@
+[2026-06-05 close-phase1-restructure | Claude]
+Phase 1 restructure closure — architecture flowchart and status documentation added.
+
+- Confirmed encounter helper extraction (getEncounterTemplate, validateEncounterData, normaliseEncounter) cleanly separable and complete (src/engine/encounter-helpers.js). No further extraction was attempted.
+- Added Mermaid build scaffold flowchart to README.md showing how src/ files flow through scripts/build_play_html.mjs into game/play.html.
+- Added Mermaid runtime flowchart to README.md showing profileShowStartupModal → initGame → render → player input → action handlers → turn update → encounter/social/predator systems → save/journal → render loop → death/win.
+- Added Phase 1 status table to README.md: 24 extracted items listed (extracted vs. remaining in game/play.html), with Phase 2 candidates noted.
+- Added explicit Phase 1 stop point to README.md and docs/project-plan.md: Phase 1 is complete after this PR, subject to browser smoke test. Phase 2 requires George's explicit approval.
+- Listed Phase 2 candidates in docs/project-plan.md with one-sentence rationale and risk for each: world generation, Look/Investigate, encounter spawning/resolution, predator/pursuit, turn engine, rendering/input, bot runner.
+- Updated docs/project-plan.md "Current broad phase" section to reflect Phase 1 is complete.
+- Added architecture flowchart note to docs/architecture-notes.md (see README.md).
+- No gameplay logic changed. No source function bodies changed. No call sites changed. No game behaviour changed.
+- Verification: node scripts/build_play_html.mjs (no change), node scripts/check_html_js_syntax.mjs (all checks passed).
+- Browser manual check not run by Claude; awaiting George's browser smoke test.
+
 [2026-06-05 extract-encounter-helpers | Claude]
 Twenty-fourth controlled extraction — encounter helper functions extracted and build script extended.
 

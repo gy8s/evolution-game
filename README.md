@@ -149,14 +149,14 @@ evolution-game/
 
 The game has grown to ~18,400 lines in a single HTML file. It still works, but the structure is now too fragile to maintain safely. The plan is to restructure it in three phases while keeping the playable build stable throughout.
 
-**Phase 1 — Documentation repair and enforcement** *(current)*  
-Repair all documentation to accurately describe the current game. Create `docs/current-game-structure.md` and `docs/documentation-map.md`. Make documentation checks mandatory in every PR.
+**Phase 1 — Documentation repair and source/build scaffold** *(complete)*  
+Repair all documentation. Create `docs/current-game-structure.md` and `docs/documentation-map.md`. Extract pure helpers and data into `src/` files with a build scaffold that inlines them back into `game/play.html`. Make documentation checks mandatory in every PR. **Phase 1 is now complete** — see Phase 1 status table below.
 
-**Phase 2 — Architecture plan** *(next)*  
-Agree a proposed modular structure before any code is moved. No extraction begins until George approves the plan.
+**Phase 2 — Deeper extraction and architecture plan** *(requires George's explicit approval before starting)*  
+Agree a proposed modular structure before any further code is moved. Phase 2 candidates are listed in `docs/project-plan.md`. No Phase 2 extraction begins until George approves.
 
 **Phase 3 — Safe extraction** *(after Phase 2 is approved)*  
-Extract code in small PRs in a defined order, keeping the playable build working at every step.
+Extract remaining systems in small PRs in a defined order, keeping the playable build working at every step.
 
 The rebuild is not a rewrite, not a framework migration, and not a gameplay redesign. See `docs/project-plan.md` for full detail.
 
@@ -198,6 +198,96 @@ node scripts/build_play_html.mjs
 ```
 
 The script replaces only the marked generated regions; it never touches code outside those regions. **Edit source in `src/`; do not hand-edit the generated regions in `game/play.html`.**
+
+### Build scaffold flowchart
+
+```mermaid
+flowchart TD
+    subgraph SRC ["src/ — edit source files here"]
+        CSS["src/styles/game.css"]
+        DATA["src/data/*\nencounter-data · achievement-data"]
+        UTILS["src/utils/core-utils.js"]
+        ENGINE["src/engine/encounter-helpers.js"]
+        BOOT["src/bootstrap/game-init.js"]
+        QA["src/qa/debug-helpers.js"]
+        STATE["src/state/*\nprofiles · run-tracking · field-journal\nfossil-record · globals · achievements"]
+        UI["src/ui/*\nprofile-ui · achievement-ui\nfield-journal-ui · fossil-record-ui\nprofile-startup-modal"]
+    end
+    CSS --> BUILD
+    DATA --> BUILD
+    UTILS --> BUILD
+    ENGINE --> BUILD
+    BOOT --> BUILD
+    QA --> BUILD
+    STATE --> BUILD
+    UI --> BUILD
+    BUILD["scripts/build_play_html.mjs\ninlines source into generated regions"]
+    BUILD --> HTML
+    HTML["game/play.html\ndirectly playable — no runtime dependencies\nopen in browser with no build step"]
+    HTML --> BROWSER["Browser / playtest"]
+```
+
+This is an **inline build scaffold**, not a module system. `game/play.html` is the playable artifact at every step. Generated regions inside `game/play.html` should not be hand-edited; edit the corresponding `src/` file and run the build script.
+
+### Runtime flowchart
+
+```mermaid
+flowchart TD
+    LOAD["Page load\ngame/play.html"] --> MODAL
+    MODAL["profileShowStartupModal\nchoose or create profile"] --> INIT
+    INIT["initGame\nconfigure run-tracking\ngenerate terrain and habitats"] --> RENDER
+    RENDER["render\nmap · player panel · log"] --> INPUT
+    INPUT["Player input\naction button or keyboard"] --> ACTION
+    ACTION["Action handler\nmove · eat · drink · climb · wait\ngroom · look · investigate · etc."] --> TURN
+    TURN["Turn update\nmetabolism · ecology tick\ntime advance · weather"] --> ENC
+    ENC["Encounter and perception systems\nLook · Investigate · spawning\nnormaliseEncounter · resolution"] --> SOCIAL
+    SOCIAL["Social and group systems\ngrooming · same-species · calls\ngroup management"] --> PRED
+    PRED["Threat and predator logic\npursuit · escalation · flee/fight"] --> SAVE
+    SAVE["Field Journal · achievements\nprofile save · run-tracking update"] --> RENDER
+    RENDER --> DEATH{Death or win?}
+    DEATH -->|No| INPUT
+    DEATH -->|Yes| HISTORY["Run history saved\nnext run or profile screen"]
+```
+
+All systems shown run inside `game/play.html`. Extracted source files (`src/`) contribute helpers and data inlined at build time; none run independently.
+
+### Phase 1 status
+
+Phase 1 is complete. The table below shows what was extracted and what remains in `game/play.html`.
+
+| Category | Status | Location |
+|----------|--------|----------|
+| CSS | Extracted | `src/styles/game.css` |
+| Encounter data | Extracted | `src/data/encounter-data.js` |
+| Achievement data | Extracted | `src/data/achievement-data.js` |
+| Utility helpers | Extracted | `src/utils/core-utils.js` |
+| Game bootstrap (`initGame`) | Extracted | `src/bootstrap/game-init.js` |
+| Encounter helpers | Extracted | `src/engine/encounter-helpers.js` |
+| Global state declarations | Extracted | `src/state/game-state-globals.js` |
+| Run-tracking factory | Extracted | `src/state/run-tracking.js` |
+| Profile/save (constants, factories, core, snapshot, lifecycle) | Extracted | `src/state/profile-*.js` |
+| Achievement persistence | Extracted | `src/state/achievement-persistence.js` |
+| Run-tracking update | Extracted | `src/state/run-tracking-update.js` |
+| Field Journal state | Extracted | `src/state/field-journal-state.js` |
+| Fossil Record state | Extracted | `src/state/fossil-record-state.js` |
+| Profile delete | Extracted | `src/state/profile-delete.js` |
+| Debug/QA helpers | Extracted | `src/qa/debug-helpers.js` |
+| Achievement UI | Extracted | `src/ui/achievement-ui.js` |
+| Profile UI / win modal | Extracted | `src/ui/profile-ui.js` |
+| Field Journal UI | Extracted | `src/ui/field-journal-ui.js` |
+| Fossil Record UI | Extracted | `src/ui/fossil-record-ui.js` |
+| Profile startup modal | Extracted | `src/ui/profile-startup-modal.js` |
+| World generation | Remaining | `game/play.html` — Phase 2 candidate |
+| Turn engine | Remaining | `game/play.html` — Phase 2 candidate |
+| Look / Investigate | Remaining | `game/play.html` — Phase 2 candidate |
+| Encounter spawning / resolution | Remaining | `game/play.html` — Phase 2 candidate |
+| Social / group systems | Remaining | `game/play.html` — Phase 2 candidate |
+| Predator / pursuit logic | Remaining | `game/play.html` — Phase 2 candidate |
+| Action handlers | Remaining | `game/play.html` — Phase 2 candidate |
+| Rendering / map / input | Remaining | `game/play.html` — Phase 2 candidate |
+| Bot runner | Remaining | `game/play.html` — Phase 2 candidate |
+
+**Phase 2 requires George's explicit approval before any further extraction begins.** Phase 2 candidates and rationale are in `docs/project-plan.md`.
 
 ---
 

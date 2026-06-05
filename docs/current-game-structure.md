@@ -2,7 +2,7 @@
 
 This document describes what the game is, how it works, and what lives where in the codebase. It is the primary reference for understanding the current build before any architectural changes are made.
 
-Last updated: 2026-06-03 (Phase 1 documentation repair).
+Last updated: 2026-06-05 (Phase 1 complete — 24 source extractions done; build scaffold and architecture flowcharts added to README.md; Phase 2 candidates listed in docs/project-plan.md).
 
 ---
 

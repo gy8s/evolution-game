@@ -8,6 +8,8 @@ This document is a map of how the game HTML file is organised. Read this before 
 
 The entire game lives in one large HTML file (`game/play.html`, ~18,400 lines). There is no build step, no bundler, and no separate JavaScript files. Everything — CSS, HTML structure, and all JavaScript — is in one file.
 
+Phase 1 of the controlled rebuild is complete. A build scaffold flowchart and runtime flowchart showing the current structure are in `README.md` under "Build scaffold flowchart" and "Runtime flowchart". Phase 2 candidates are in `docs/project-plan.md`. No further extraction should begin without George's explicit approval.
+
 Twenty-four source files have been extracted and are inlined back into `game/play.html` by `scripts/build_play_html.mjs`. The playable file still ships all content inline, so it works with no build step at runtime. The build script replaces only the regions between these marker comments:
 
 **CSS** (inside the `<style>` block) — source `src/styles/game.css`:
