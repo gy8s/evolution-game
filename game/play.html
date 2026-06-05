@@ -5511,6 +5511,7 @@ const playerSpeciesProfile = {
 };
 // END GENERATED JS: src/state/game-state-globals.js [1/2]
 
+// BEGIN GENERATED JS: src/qa/debug-helpers.js
 /**
  * Adds a structured developer-only diagnostic event.
  *
@@ -5737,6 +5738,7 @@ function scanForSuspiciousState(context = "") {
   if (isWaterTile(player.x, player.y) && player.z !== 0) addDebugFlag("Water tile with non-ground layer", {context, x: player.x, y: player.y, z: player.z});
   if (!layerAllowedAt(player.x, player.y, player.z)) addDebugFlag("Current layer not allowed by habitat", {context, habitat: habitatAt(player.x, player.y), z: player.z});
 }
+// END GENERATED JS: src/qa/debug-helpers.js
 
 // BEGIN GENERATED JS: src/state/game-state-globals.js [2/2]
 
