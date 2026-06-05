@@ -92,6 +92,8 @@ evolution-game/
 ├── src/
 │   ├── bootstrap/
 │   │   └── game-init.js              Game bootstrap source (inlined into play.html by the build script)
+│   ├── engine/
+│   │   └── encounter-helpers.js      Encounter helper functions source (inlined into play.html by the build script)
 │   ├── qa/
 │   │   └── debug-helpers.js          Debug/QA helper functions source (inlined into play.html by the build script)
 │   ├── styles/
@@ -160,7 +162,7 @@ The rebuild is not a rewrite, not a framework migration, and not a gameplay rede
 
 ### Build scaffold
 
-Twenty-three source extractions are complete:
+Twenty-four source extractions are complete:
 
 | Source file | What it contains | Destination in play.html |
 |-------------|-----------------|--------------------------|
@@ -187,6 +189,7 @@ Twenty-three source extractions are complete:
 | `src/bootstrap/game-init.js` | Game bootstrap (`initGame`) | One JS region (~line 5441) |
 | `src/state/game-state-globals.js` | Global constants and state declarations (`KNOWLEDGE_*`, `KNOWLEDGE_TIERS`, `socialGroup`, `playerSpeciesProfile`, `environment`, `timeState`, `layerNarration`, etc.) | Two JS regions (~line 5472 and ~line 5741) |
 | `src/qa/debug-helpers.js` | Debug/QA helper functions (`addDebugTrace`, `debugRoll`, `importantStateSnapshot`, `diffSnapshots`, `takeQABackSnapshot`, `restoreQABackSnapshot`, `addTurnDeltaTrace`, `addDebugFlag`, `scanForSuspiciousState`) | One JS region (~line 5514) |
+| `src/engine/encounter-helpers.js` | Encounter helper functions (`getEncounterTemplate`, `validateEncounterData`, `normaliseEncounter`) | One JS region (~line 5792) |
 
 `game/play.html` keeps all content **inline** so it stays directly playable with no build step or runtime dependency. To regenerate `game/play.html` after editing any source file:
 
