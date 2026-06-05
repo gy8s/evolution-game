@@ -182,6 +182,60 @@ If a PR adds any new invertebrate encounter entry, explicitly check `isInvertebr
 
 ---
 
+## BG-006 — addLog + setNarration dual-call causes event text to appear twice in the scene panel
+
+**Status:** Active guardrail
+
+**Observed failure:**
+A no-encounter danger-layer warning was passed to both `addLog()` (which writes to the event alert box) and `setNarration()` (which writes to the scene description body). The same sentence appeared in both places in the same render cycle.
+
+**Player/tester symptom:**
+Identical text shown in the brown alert box at the top of the scene panel AND in the plain scene description text immediately below it.
+
+**Root cause:**
+`setNarration()` sets `lastNarration`, which the scene body renderer reads directly. Any code path that calls both `addLog(text)` and `setNarration(text)` with the same string will duplicate the text in the UI. Only one of the two should be used for any given string. Event notifications belong in `addLog`; scene-state descriptions belong in `setNarration`.
+
+**Known affected area:**
+- `game/play.html` — any code path calling `addLog` and `setNarration` with the same string
+
+**Future guardrail:**
+When writing code that produces a player-facing string, decide whether it is an event (use `addLog`) or a scene state (use `setNarration`). Do not call both with the same text.
+
+**Required PR check:**
+- Search for `setNarration` calls adjacent to `addLog` calls and verify they are not using the same string.
+
+**Reviewer instruction:**
+If a PR adds a code path that calls both `addLog(text)` and `setNarration(text)` with the same content, flag it before merge.
+
+---
+
+## BG-007 — hiddenSubtypeSuspicionText uses animal-predation language for forage/plant hidden subtypes
+
+**Status:** Active guardrail
+
+**Observed failure:**
+`hiddenSubtypeSuspicionText()` returns investigation narration that references "prey", "defended", and "bold warning cues, little fear, no hurry to escape" — all of which are animal-predation framing. When a poisonous forage item (e.g., brown mushrooms) spawned as a hidden-subtype variant, investigation showed "Slow, exposed prey is often defended. This one deserves care." for a fungus.
+
+**Player/tester symptom:**
+Investigation text for a mushroom read as if the player were investigating a defensive animal.
+
+**Root cause:**
+`hiddenSubtypeSuspicionText()` had no `kind` check. The rank >= 4 and rank >= 2 branches generated text written for animals regardless of the encounter's kind.
+
+**Known affected area:**
+- `game/play.html` — `hiddenSubtypeSuspicionText()` function
+
+**Future guardrail:**
+When writing investigation or suspicion text in `hiddenSubtypeSuspicionText()`, add a `kind !== "animal"` guard for any branch whose language is specific to animals (predator posture, prey behaviour, escape response, etc.).
+
+**Required PR check:**
+- If modifying `hiddenSubtypeSuspicionText()`, verify that all return branches are checked: does the narration text make sense for both an animal and a forage/plant/nest/remedy item?
+
+**Reviewer instruction:**
+If investigation text contains "prey", "defended", "flee", "posture", or similar animal-behaviour language in a branch that can fire for forage items, flag it before merge.
+
+---
+
 ## Entry template for future bugs
 
 ```md

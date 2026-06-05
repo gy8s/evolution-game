@@ -1,3 +1,23 @@
+[2026-06-05 scene-text-bugs | Claude]
+Four scene/investigation text bugs fixed in game/play.html.
+
+- Issue A — Scene text duplication: dangerous-layer "no encounter" warning was passed to both
+  addLog() and setNarration(), causing the same sentence to appear in the event alert box AND
+  in the scene description body. Removed the setNarration() call; addLog() alone is correct here.
+- Issue B — YOU SEE contradicts active pursuit: renderSenses() fell through to "no animal or food
+  source clearly visible" even when activePursuit was active. Added an activePursuit branch before
+  the fallback so YOU SEE reads "[predator name] is still close." during a chase.
+- Issue C — Mammal-smell narration overlap: the scene body and the YOU SMELL line were both
+  interpreting the same mammal-scent signal, and the narration used the phrase "or memory" which
+  reads as nonsensical. Narration now reads "Something alive has been through here recently."
+  which is distinct from the YOU SMELL directional text.
+- Issue D — hiddenSubtypeSuspicionText() used animal-prey language for forage hidden subtypes:
+  rank >= 4 ("bold warning cues, little fear, no hurry to escape") and rank >= 2 ("Slow, exposed
+  prey is often defended") both used predation framing that makes no sense for mushrooms or plant
+  items. Added kind !== "animal" branches for both ranks with forage-appropriate language.
+- Verification: node scripts/check_html_js_syntax.mjs — all checks passed.
+- No gameplay logic, stat values, spawn tables, or encounter data changed.
+
 [2026-06-05 flavour-text-fixes | Claude]
 Flavour text audit fixes — seen/investigated text corrected across 20+ encounter entries; isInvertebrateEncounter regex extended.
 
