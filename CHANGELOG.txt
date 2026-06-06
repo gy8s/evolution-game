@@ -1,3 +1,20 @@
+[2026-06-06 creatures-encounters-modularity-code | Claude]
+Creature modularity implemented: layers+subtypes embedded in encounter definitions; encounterTables generated from data; hiddenSubtypePools removed.
+
+- src/data/encounter-data.js: layers field added to all 125 creature definitions. Triggered-only creatures (antTrail, antNest, predatorLeftovers, freshwaterMussels, freshwaterCrayfish, clayDeposit, termiteSwarm, rivalPrimate) get layers: {}. All others carry a per-layer spawn probability dict, with duplicate encounterTable entries summed (smallMammal Undergrowth 0.07, godinotia Mid-storey 0.052 and Canopy 0.054, woodpeckerBird Mid-storey 0.040 and Canopy 0.052, hummingbird Mid-storey 0.036 and Canopy 0.049).
+- src/data/encounter-data.js: subtypes field added to 13 creatures that previously had hiddenSubtypePools entries (largeInsect, redBerries, purpleBerries, fallenFruit, paleMushroom, brownMushroom, caterpillar, millipede, slug, butterfly, moth, hollyBerries, aroidShoots).
+- src/data/encounter-data.js: const encounterTables block removed. const hiddenSubtypePools block removed. The // << SPLIT: hiddenSubtypePools >> marker is retained (build script requires it); [2/2] region is now empty.
+- src/engine/encounter-table-builder.js: created. Defines buildEncounterTables() which iterates encounters, reads enc.layers, and builds { layerName: [[key, chance], ...] } — same shape as the old static encounterTables.
+- src/engine/encounter-helpers.js: validateEncounterData() strengthened to validate per-creature layers fields (layer name validity, chance range 0–1) in addition to generated table entries.
+- game/play.html: new generated region added for src/engine/encounter-table-builder.js (between encounter-helpers and core-utils); const encounterTables = buildEncounterTables(); call added immediately after the region.
+- game/play.html: applyHiddenSubtype() updated to read from e.subtypes (was hiddenSubtypePools[e.key]).
+- game/play.html: [2/2] region for encounter-data.js is now empty (hiddenSubtypePools removed from source).
+- scripts/build_play_html.mjs: ENCOUNTERTABLEBUILDER_SOURCE constant, markers, existence check, read, and inlineRegion call added. Now handles 25 source files.
+- docs/current-game-structure.md: source table updated; line ranges table updated; creature schema reference section updated to reflect implementation.
+- docs/architecture-notes.md: encounter-data [1/2] and [2/2] descriptions updated; encounter-table-builder section added; Planned section updated to Implemented; Known fragile areas updated; line ranges table updated.
+- Verification: node scripts/build_play_html.mjs (idempotent — no change) and node scripts/check_html_js_syntax.mjs both pass.
+- No gameplay logic, stat values, function bodies other than applyHiddenSubtype and validateEncounterData, or call sites changed.
+
 [2026-06-06 creatures-encounters-modularity-schema-docs | Claude]
 Creature schema CSV documentation added; layers+subtypes modularity approach documented.
 

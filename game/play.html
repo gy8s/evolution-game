@@ -1055,7 +1055,14 @@ const encounters = {
       ecology: "A decomposer, wood-borer, or seed-feeder depending on species. Beetles cycle nutrients through dead wood faster than almost any other organism.",
       gameplayInsight: "Edible but the hard carapace reduces processing efficiency \u2014 worth collecting when protein is scarce but not a priority over softer prey.",
       scienceNote: "Coleoptera appear in the Permian and achieve enormous diversity by the Eocene. Messel fossils preserve beetle elytra in extraordinary colour-preserving detail, revealing metallic structural colouration in many species \u2014 an ancient optical phenomenon."
-    }
+    },
+    layers: { "Ground": 0.045, "Undergrowth": 0.055, "Mid-storey": 0.045, "Canopy": 0.04 },
+    subtypes: [
+      {"label":"edible hard-shelled beetle","weight":45,"poison":null,"energy":10},
+      {"label":"bitter chemical beetle","weight":25,"poison":{"severity":"mild","rank":1,"toxinType":"irritant","lethal":false,"turns":3,"damage":2,"warning":"Bitter chemical defence"},"energy":8},
+      {"label":"biting ground beetle","weight":20,"poison":null,"energy":9,"aggression":35,"dangerProfile":"bite"},
+      {"label":"toxic beetle mimic","weight":10,"poison":{"severity":"moderate","rank":2,"toxinType":"irritant","lethal":false,"turns":4,"damage":4,"warning":"Caustic beetle chemicals"},"energy":8}
+    ]
   },
   antTrail: {
     kind: "forage", name: "ant trail", icon: "🐜", className: "food",
@@ -1070,7 +1077,8 @@ const encounters = {
       ecology: "A nutrient transport system linking the colony to food resources and cycling organic material through the forest floor. Trail activity shifts as resources deplete and new ones are discovered.",
       gameplayInsight: "Edible directly from the column \u2014 lick them off bark or scoop them rapidly. Following the trail in the food direction leads to either a food source or the colony itself.",
       scienceNote: "Pheromone trail communication is established across all major ant subfamilies represented in the Eocene. Baltic amber preserves ants in column formation, suggesting trail-following behaviour was already colony-wide in Eocene formicine species."
-    }
+    },
+    layers: {},
   },
 
   antNest: {
@@ -1087,7 +1095,8 @@ const encounters = {
       ecology: "A nutrient concentration point and soil aerator. Ant colonies represent enormous accumulated biomass and their trails connect the nest to food resources across a significant territorial radius.",
       gameplayInsight: "Ant larvae and pupae are the highest caloric yield items in the nest. Target the brood chambers, which are the deeper galleries, and exit before soldier numbers build to overwhelming levels.",
       scienceNote: "Formicine and myrmicine ants with complex brood-care behaviours are known from Eocene Baltic amber in extraordinary detail \u2014 preserved queens, workers, soldiers, and brood in the same inclusions. Superorganism-level collective behaviour is inferred from the caste diversity preserved."
-    }
+    },
+    layers: {},
   },
 
   antSwarm: {
@@ -1104,7 +1113,8 @@ const encounters = {
       ecology: "Ants are ecosystem engineers, aerating soil, dispersing seeds, and controlling invertebrate populations. A defensive swarm is a temporary state of an otherwise structured colony.",
       gameplayInsight: "Moving through or over a disturbed swarm applies cumulative damage \u2014 leave the area immediately rather than waiting for the response to subside.",
       scienceNote: "Formicine and myrmicine ants were well-established by the Eocene. Amber deposits from Baltic and Fushun sites preserve diverse ant faunas, including workers, queens, and males, confirming complex eusocial organisation."
-    }
+    },
+    layers: { "Ground": 0.006 },
   },
 
   predatorLeftovers: {
@@ -1120,7 +1130,8 @@ const encounters = {
       ecology: "Partial kills in the food web transfer energy from the primary predator's surplus to scavengers that cannot make kills of their own. This secondary transfer is ecologically significant in predator-rich environments.",
       gameplayInsight: "Feed fast and disengage \u2014 the predator that made this kill is unlikely to be far. Any returning sound or movement should trigger immediate retreat.",
       scienceNote: "Kleptoparasitism \u2014 stealing food from the animal that caught it \u2014 is documented across a wide range of Eocene carnivore groups. Dental trace analysis on Eocene mammal bones shows multiple species feeding on the same carcass in overlapping sequences."
-    }
+    },
+    layers: {},
   },
 
   wasp: {
@@ -1137,7 +1148,8 @@ const encounters = {
       ecology: "Both predator and scavenger \u2014 wasps hunt caterpillars and soft-bodied arthropods to provision larvae, and also consume fruit, nectar, and carrion. Their ecological role spans multiple trophic levels.",
       gameplayInsight: "Retreat from patrol response immediately \u2014 continued proximity escalates to sting. A single sting is manageable but repeated contact is compounding.",
       scienceNote: "Vespidae (social wasps) appear in the Cretaceous. Eocene social wasp nests and workers are known from Baltic amber. Wasp venom chemistry is among the most complex of any insect, with over 20 distinct peptide and enzyme compounds identified in some species."
-    }
+    },
+    layers: { "Ground": 0.02, "Undergrowth": 0.028, "Mid-storey": 0.032, "Canopy": 0.032 },
   },
   scorpion: {
     kind: "animal", name: "small scorpion", icon: "🦂", className: "threat",
@@ -1153,7 +1165,8 @@ const encounters = {
       ecology: "A predator of invertebrates in bark and litter microhabitats. Its sting suppresses nocturnal invertebrate movement through fear-based avoidance rather than direct predation pressure alone.",
       gameplayInsight: "Nocturnal and concentrated under bark and rocks. Move these materials carefully at night \u2014 the sting causes localised damage and temporary effect.",
       scienceNote: "Scorpiones are known from the Silurian and show remarkable morphological conservation. Eocene scorpions from Baltic amber are indistinguishable from modern species. The UV fluorescence is caused by beta-carboline compounds in the cuticle \u2014 its biological function remains debated."
-    }
+    },
+    layers: { "Ground": 0.022 },
   },
   tarantula: {
     kind: "animal", name: "large spider", icon: "🕷️", className: "threat",
@@ -1169,7 +1182,8 @@ const encounters = {
       ecology: "An apex invertebrate predator in bark and ground microhabitats. Its silk-lined burrow is a permanent feature of its territory, and the surrounding area shows reduced small invertebrate density.",
       gameplayInsight: "Venom causes painful but non-fatal effects \u2014 disengage immediately. Urticating hairs (in new world species) cause additional irritation if contact is prolonged.",
       scienceNote: "Theraphosidae (tarantulas) appear in the fossil record from the Eocene. Eocene theraphosid specimens from French amber preserve the body plan and cheliceral structure of modern species. Their longevity and slow growth rates are adaptations to unpredictable prey environments."
-    }
+    },
+    layers: { "Undergrowth": 0.02, "Mid-storey": 0.018 },
   },
   caterpillar: {
     kind: "forage", name: "hairy caterpillar", icon: "🐛", className: "food",
@@ -1184,7 +1198,14 @@ const encounters = {
       ecology: "A major consumer of leaf material, channelling plant biomass into caterpillar body mass that becomes available to predators, parasitoids, and eventually decomposers.",
       gameplayInsight: "Handle from beneath or at the smooth anterior end \u2014 avoid contact with the hair surface. The protein return is high and worth the minor processing difficulty.",
       scienceNote: "Lepidopteran larvae with urticating setae appear across multiple families. Eocene compression fossils and amber specimens preserve larval morphology in detail sufficient to identify hairy forms. The mechanical irritant function requires no biological activation \u2014 purely physical."
-    }
+    },
+    layers: { "Undergrowth": 0.04, "Mid-storey": 0.04, "Canopy": 0.038 },
+    subtypes: [
+      {"label":"irritating hairy caterpillar","weight":50,"poison":{"severity":"mild","rank":1,"toxinType":"irritant","lethal":false,"turns":3,"damage":2,"warning":"Irritating hairs / possible toxin"}},
+      {"label":"edible hairy caterpillar","weight":20,"poison":null},
+      {"label":"toxic hairy caterpillar","weight":25,"poison":{"severity":"moderate","rank":2,"toxinType":"irritant","lethal":false,"turns":4,"damage":4,"warning":"Toxic hairs"}},
+      {"label":"dangerous hairy caterpillar","weight":5,"poison":{"severity":"severe","rank":4,"toxinType":"irritant","lethal":true,"criticalTimer":7,"turns":7,"damage":7,"warning":"Severe caterpillar toxin"}}
+    ]
   },
   snail: {
     kind: "forage", name: "forest snail", icon: "🐌", className: "food",
@@ -1199,7 +1220,8 @@ const encounters = {
       ecology: "A decomposer and herbivore with a shell that concentrates calcium in the forest floor ecosystem. Snail shells are dietary calcium sources for birds and small mammals in calcium-limited forest environments.",
       gameplayInsight: "The shell requires processing \u2014 crush or use a hard surface to crack before consuming the body tissue inside. Predictably located on bark and wet surfaces after rain.",
       scienceNote: "Land snails (Pulmonata) are known from Carboniferous deposits. Eocene land snails are abundant and diverse in European fossil sites including Messel. Snail shell oxygen isotope analysis from Eocene specimens has provided high-resolution climate records of Eocene humidity and temperature cycles."
-    }
+    },
+    layers: { "Ground": 0.032, "Undergrowth": 0.035 },
   },
   centipede: {
     kind: "animal", name: "large centipede", icon: "🪱", className: "threat",
@@ -1215,7 +1237,8 @@ const encounters = {
       ecology: "A generalist invertebrate predator of the forest floor and bark microhabitat. Its venom immobilises prey rapidly, allowing it to hunt animals larger than itself.",
       gameplayInsight: "Venom causes sustained damage \u2014 disengage immediately rather than fighting through the bite effect.",
       scienceNote: "Scolopendromorph centipedes have changed little since the Carboniferous. Eocene examples are known from amber and compression fossils. Modern giant species like Scolopendra gigantea regularly prey on bats and small rodents."
-    }
+    },
+    layers: { "Ground": 0.028, "Undergrowth": 0.032 },
   },
   millipede: {
     kind: "forage", name: "millipede", icon: "🪱", className: "food",
@@ -1232,7 +1255,14 @@ const encounters = {
       ecology: "A primary shredder of leaf litter, processing dead plant material into smaller fragments for fungal and bacterial decomposition. Millipedes are keystone nutrient cyclers in the forest floor ecosystem.",
       gameplayInsight: "Edible after removing the dorsal secretion glands or roasting \u2014 but requires processing. Raw consumption causes mucosal irritation. Not worth the effort unless alternatives are exhausted.",
       scienceNote: "Diplopoda (millipedes) appear in the Silurian as some of the earliest terrestrial animals. Eocene millipedes from Baltic amber preserve fine morphological detail including ozopore positions. Some Eocene millipede species exceeded 30 cm \u2014 larger than most modern forms."
-    }
+    },
+    layers: { "Ground": 0.032, "Undergrowth": 0.038 },
+    subtypes: [
+      {"label":"chemically defended millipede","weight":45,"poison":{"severity":"moderate","rank":2,"toxinType":"irritant","lethal":false,"turns":4,"damage":3,"warning":"Chemical defence"},"energy":6},
+      {"label":"harmless millipede mimic","weight":25,"poison":null,"energy":6},
+      {"label":"mildly irritating millipede","weight":20,"poison":{"severity":"mild","rank":1,"toxinType":"irritant","lethal":false,"turns":3,"damage":2,"warning":"Bitter defensive fluid"},"energy":6},
+      {"label":"dangerously toxic millipede","weight":10,"poison":{"severity":"severe","rank":4,"toxinType":"irritant","lethal":true,"criticalTimer":7,"turns":6,"damage":7,"warning":"Strong chemical toxin"},"energy":6}
+    ]
   },
 
   // plants/fungi
@@ -1254,7 +1284,14 @@ const encounters = {
       ecology: "A bird-dispersed fruit type in most cases, targeting robin and thrush-like frugivores. Mammal exploitation of red fruits is secondary and often less efficient due to visual spectrum differences.",
       gameplayInsight: "Requires individual species assessment \u2014 red colouration alone is not a safety indicator. Test with a small sample and wait before committing to full consumption.",
       scienceNote: "Red fruit colours in multiple plant families evolved convergently targeting similar disperser guilds. Eocene bird diversity included frugivores with full colour vision capable of red-fruit targeting. Some red berries in Eocene flora (Ericaceae relatives) are known from fossil seeds."
-    }
+    },
+    layers: { "Ground": 0.03, "Undergrowth": 0.04, "Mid-storey": 0.026 },
+    subtypes: [
+      {"label":"mildly poisonous red berries","weight":55,"poison":{"severity":"mild","rank":1,"toxinType":"plant","lethal":false,"turns":4,"damage":2,"warning":"Mildly poisonous berries"},"energy":14},
+      {"label":"edible red berries","weight":25,"poison":null,"energy":14},
+      {"label":"inedible red berries","weight":15,"poison":{"severity":"mild","rank":1,"toxinType":"plant","lethal":false,"turns":2,"damage":1,"warning":"Stomach upset"},"energy":8},
+      {"label":"dangerous red berries","weight":5,"poison":{"severity":"moderate","rank":2,"toxinType":"plant","lethal":false,"turns":5,"damage":4,"warning":"Strongly poisonous berries"},"energy":14}
+    ]
   },
   purpleBerries: {
     kind: "forage", name: "purple berries", icon: "🫐", className: "food",
@@ -1274,7 +1311,14 @@ const encounters = {
       ecology: "A bird-dispersed fruit type in many forest systems. The anthocyanin pigment is reflective in ultraviolet light \u2014 a signal channel that birds detect but most mammals do not.",
       gameplayInsight: "High in sugars and generally edible across most shrub berry species. Competition from frugivorous birds is high \u2014 exploit clusters before they are stripped.",
       scienceNote: "Purple-fruited shrubs appear across multiple families in Eocene fossil floras. Anthocyanin biochemistry is ancient within angiosperms. Bird colour vision sensitivity to UV-reflective anthocyanin fruits is considered a coevolved disperser targeting mechanism established well before the Eocene."
-    }
+    },
+    layers: { "Ground": 0.028, "Undergrowth": 0.03, "Mid-storey": 0.032, "Canopy": 0.032 },
+    subtypes: [
+      {"label":"edible purple berries","weight":65,"poison":null,"energy":16},
+      {"label":"mildly poisonous purple berries","weight":20,"poison":{"severity":"mild","rank":1,"toxinType":"plant","lethal":false,"turns":4,"damage":2,"warning":"Mildly poisonous berries"},"energy":16},
+      {"label":"inedible purple berries","weight":10,"poison":{"severity":"mild","rank":1,"toxinType":"plant","lethal":false,"turns":2,"damage":1,"warning":"Stomach upset"},"energy":8},
+      {"label":"dangerous purple berries","weight":5,"poison":{"severity":"moderate","rank":2,"toxinType":"plant","lethal":false,"turns":5,"damage":4,"warning":"Strongly poisonous berries"},"energy":16}
+    ]
   },
 
   bitterLeaves: {
@@ -1295,7 +1339,8 @@ const encounters = {
       ecology: "Heavy secondary compound investment in leaves reduces herbivory but has an energetic cost to the plant. High-alkaloid plants often show reduced herbivore damage and are shade-tolerant species with long leaf lifespans.",
       gameplayInsight: "Bitterness is the signal \u2014 do not override it. Small samples to test are reasonable; full consumption of intensely bitter material is not.",
       scienceNote: "Alkaloid diversity in Eocene plants was already high, driven by millions of years of plant-herbivore coevolution. London Clay and Messel plant assemblages include families (Menispermaceae, Ranunculaceae) known for high alkaloid investment in leaf tissue."
-    }
+    },
+    layers: { "Ground": 0.03, "Undergrowth": 0.04 },
   },
 
   fallenFruit: {
@@ -1317,7 +1362,13 @@ const encounters = {
       ecology: "A nutrient subsidy from canopy to ground, feeding ground-level frugivores, invertebrates, and even attracting larger mammals. Fallen fruit determines where ground animals concentrate their activity.",
       gameplayInsight: "Ground-level access means ground predator exposure. Assess the surroundings, feed quickly, and return to height \u2014 the nutritional return often justifies brief ground exposure.",
       scienceNote: "Fruit fermentation and the associated attraction of frugivores is documented across primate and bat ecology studies. Eocene mammals show dental evidence of fruit-dominated diets in several lineages, and the behaviour of exploiting fallen fruit is inferred from isotope studies of fossil tooth enamel."
-    }
+    },
+    layers: { "Ground": 0.03, "Undergrowth": 0.026 },
+    subtypes: [
+      {"label":"fresh fallen fruit","weight":70,"poison":null,"energy":18,"alcohol":null},
+      {"label":"slightly fermented fallen fruit","weight":22,"poison":null,"energy":20,"alcohol":{"rank":1,"turns":4,"label":"mild intoxication"}},
+      {"label":"strongly fermented fallen fruit","weight":8,"poison":null,"energy":22,"alcohol":{"rank":2,"turns":5,"label":"strong intoxication"}}
+    ]
   },
 
   laurelDrupe: {
@@ -1338,7 +1389,8 @@ const encounters = {
       ecology: "A fat-rich seed dispersal mechanism targeting birds with wide gapes. Lauraceae seed dispersal by birds is one of the most studied plant-disperser relationships in tropical ecology.",
       gameplayInsight: "High fat content per unit \u2014 prioritise when available. Competition from frugivorous birds is intense; exploit during low avian activity periods at dawn and dusk.",
       scienceNote: "Lauraceae are one of the dominant families in Eocene fossil floras globally, particularly in the London Clay and Messel. Fossil lauraceous fruits and leaves show remarkable morphological similarity to modern species in the family, which includes avocado, cinnamon, and camphor."
-    }
+    },
+    layers: { "Ground": 0.018, "Undergrowth": 0.02, "Mid-storey": 0.024, "Canopy": 0.026 },
   },
 
   palmFruit: {
@@ -1359,7 +1411,8 @@ const encounters = {
       ecology: "A high-energy seed dispersal mechanism targeting large frugivores. Palm fruit density and synchrony structures the seasonal movements of frugivore communities across wide areas.",
       gameplayInsight: "High fat and carbohydrate content. Abundant and spatially predictable. Ground accumulation below the trunk is accessible without climbing, but exposes you to ground-level predator risk.",
       scienceNote: "Oil palm relatives (Elaeis-like palms) have an Eocene fossil record in Africa. London Clay flora includes palm fruits of multiple genera. The fat-rich mesocarp of palms evolved as a megafauna dispersal reward \u2014 some of the original dispersers are now extinct."
-    }
+    },
+    layers: { "Ground": 0.016, "Mid-storey": 0.022, "Canopy": 0.026 },
   },
 
   nypaFruit: {
@@ -1380,7 +1433,8 @@ const encounters = {
       ecology: "A dominant species of tidal mangrove and coastal swamp habitats, forming mono-dominant stands that stabilise sediment and provide refuge for estuarine fauna.",
       gameplayInsight: "Edible seed endosperm in the fruit segments. Coastal or swamp access required \u2014 factor in the high predator density of water margin habitats when approaching.",
       scienceNote: "Nypa pollen is one of the most abundant Eocene palynomorphs globally. During the Eocene Climatic Optimum, Nypa palms grew as far north as southern England and Germany. The genus is now restricted to Indo-Pacific mangroves \u2014 a dramatic range contraction tracking global cooling."
-    }
+    },
+    layers: { "Ground": 0.01 },
   },
 
   vitisBerries: {
@@ -1401,7 +1455,8 @@ const encounters = {
       ecology: "A bird and mammal dispersed fruit type whose vine habit allows it to climb using existing tree structure rather than investing in trunk wood \u2014 a rapid height-gaining strategy at canopy gaps.",
       gameplayInsight: "High sugar content at full ripeness \u2014 prioritise deep-coloured, soft clusters over green or firm ones. Forest edge and gap locations where vines climb are the primary search areas.",
       scienceNote: "Vitaceae (grape family) are known from Eocene fossil pollen and leaves in Europe and North America. Fossil Vitis seeds from the Eocene show morphology consistent with modern wild grape species. The family's climbing vine habit appears to have been established by the mid-Eocene."
-    }
+    },
+    layers: { "Ground": 0.014, "Undergrowth": 0.018, "Mid-storey": 0.022, "Canopy": 0.024 },
   },
 
   menispermBerry: {
@@ -1422,7 +1477,8 @@ const encounters = {
       ecology: "A chemically defended fruiting plant that reduces seed predation through toxicity. Some specialised frugivores with detoxification capacity exploit these berries specifically.",
       gameplayInsight: "Treat dark berries on twining understorey vines with caution. Visible animal avoidance of a berry cluster is a reliable warning signal worth respecting.",
       scienceNote: "Menispermaceae have an extensive Eocene fossil record, particularly from the London Clay flora where multiple genera are identified from seeds. The family's alkaloid diversity was already high by the Eocene, based on phylogenetic inference from the fossil record."
-    }
+    },
+    layers: { "Ground": 0.01, "Undergrowth": 0.012 },
   },
 
   arilFruit: {
@@ -1443,7 +1499,8 @@ const encounters = {
       ecology: "A seed dispersal mechanism linking the parent plant to mobile animal vectors. Aril fruiting is often synchronised to peak disperser activity periods.",
       gameplayInsight: "High sugar and fat content in a visible, reliably located package. Consume the aril \u2014 avoid the seed itself, which may contain secondary compounds.",
       scienceNote: "Arillate seeds are known from Eocene fossil deposits including specimens from the London Clay flora. Several Eocene plant families including Sapindaceae and Celastraceae produced arillate seeds adapted to bird and mammal dispersal during this period."
-    }
+    },
+    layers: { "Mid-storey": 0.014, "Canopy": 0.016 },
   },
 
   custardAppleFruit: {
@@ -1464,7 +1521,8 @@ const encounters = {
       ecology: "A high-sugar fruit adapted to large-bodied frugivores capable of processing the seeds. In the Eocene, appropriate megafaunal dispersers are present, making the mutualism intact.",
       gameplayInsight: "Rich caloric source when ripe. The strong aroma at full ripeness also attracts competing frugivores \u2014 expect competition from other animals at ripe fruit falls.",
       scienceNote: "Annonaceae pollen and leaf fossils are known from Eocene deposits globally. The family is considered one of the most primitive flowering plant lineages. Some living Annonaceae species show morphological stasis compared to Eocene specimens \u2014 a rare example of evolutionary conservatism over 50 million years."
-    }
+    },
+    layers: { "Mid-storey": 0.014, "Canopy": 0.018 },
   },
 
   resinousFruit: {
@@ -1485,7 +1543,8 @@ const encounters = {
       ecology: "A specialist dispersal mechanism attracting animals with terpenoid tolerance \u2014 certain bird species, some primates, and bats. Most invertebrates avoid the resin surface.",
       gameplayInsight: "The sticky resin can complicate hand and fur grooming \u2014 consume efficiently rather than handling repeatedly. The aromatic scent marks your location to animals with chemical senses.",
       scienceNote: "Resinous fruits appear in Eocene flora across multiple tropical families. Burseraceae (frankincense and myrrh relatives) produce resinous fruits known from Eocene fossil deposits. The terpenoid compounds in resin are biosynthetically related to those used in plant-herbivore defence."
-    }
+    },
+    layers: { "Ground": 0.01, "Undergrowth": 0.012, "Mid-storey": 0.012, "Canopy": 0.012 },
   },
 
   soapberryFruit: {
@@ -1506,7 +1565,8 @@ const encounters = {
       ecology: "A dispersal mechanism targeting medium-sized frugivores capable of saponin tolerance. The chemical deterrence discourages seed predators (who consume the seed) while allowing seed dispersers (who swallow and excrete).",
       gameplayInsight: "Edible in moderate amounts \u2014 the saponin concentration in ripe fruit flesh is generally below threshold for vertebrate toxicity. Avoid consuming in bulk or eating the seeds.",
       scienceNote: "Sapindaceae are among the dominant families in Eocene fossil floras, particularly in the London Clay. The family includes lychee, longan, and maple. Saponin-containing Sapindaceae fruits from Eocene deposits are identified from seed morphology in multiple collections."
-    }
+    },
+    layers: { "Undergrowth": 0.01, "Mid-storey": 0.01, "Canopy": 0.01 },
   },
 
   podFruit: {
@@ -1527,7 +1587,8 @@ const encounters = {
       ecology: "Leguminosae (Fabaceae) were already among the dominant families in Eocene forests and are key nitrogen-fixers through root nodule bacteria \u2014 a contribution to soil fertility with ecosystem-wide effects.",
       gameplayInsight: "Seeds inside mature pods are often edible and calorie-dense. Listen for pod-splitting sounds on warm afternoons to locate fresh seed falls.",
       scienceNote: "Fabaceae are among the most species-rich families in Eocene fossil floras globally. London Clay and Messel preserve legume leaves, pods, and seeds. Nitrogen-fixing root nodules in legumes are inferred to have Eocene or earlier origins based on molecular clock estimates."
-    }
+    },
+    layers: { "Ground": 0.01, "Undergrowth": 0.01 },
   },
 
   pandanusFruit: {
@@ -1548,7 +1609,8 @@ const encounters = {
       ecology: "A major food resource in coastal and swamp environments, adapted to water dispersal as a primary vector. Its dense structure and sequential key ripening extends the fruiting resource window.",
       gameplayInsight: "Processing requires time \u2014 separate individual keys and target the base tissue rather than the fibrous exterior. High starch return once accessed.",
       scienceNote: "Pandanaceae are known from Eocene fossil pollen and leaf records across the Indo-Pacific. Pandanus-type leaf structure is recognisable in Eocene deposits from coastal paleo-environments. The genus has changed little morphologically since the Eocene."
-    }
+    },
+    layers: { "Undergrowth": 0.01, "Canopy": 0.012 },
   },
 
   magnoliaFlowers: {
@@ -1569,7 +1631,8 @@ const encounters = {
       ecology: "A generalist pollinator resource that evolved before bees and relies on beetles and flies as primary pollinators. Its ancient pollination syndrome is maintained by a different visitor community than most modern flowers.",
       gameplayInsight: "Nectar is present at the flower base. The strong scent makes these trees detectable from significant distance \u2014 use it as a navigation landmark.",
       scienceNote: "Magnoliaceae have one of the best Eocene fossil records of any flowering plant family. Fossil magnolia leaves, pollen, and flowers are known from Eocene deposits in North America, Europe, and Asia, with some specimens nearly indistinguishable from living species."
-    }
+    },
+    layers: { "Ground": 0.018, "Undergrowth": 0.02, "Mid-storey": 0.024, "Canopy": 0.026 },
   },
   hibiscusFlowers: {
     kind: "forage", name: "hibiscus-type flowers", icon: "🌺", className: "food",
@@ -1589,7 +1652,8 @@ const encounters = {
       ecology: "A generalist pollinator resource supporting diverse bee, butterfly, and nectar-feeding bird communities. Large petal surface area also provides basking platforms for thermoregulating insects.",
       gameplayInsight: "Daily flower cycle means fresh nectar is reliably present at dawn before insect activity depletes it. Return to known plants in early morning for best yield.",
       scienceNote: "Malvaceae pollen and leaf fossils are known from Eocene deposits globally, including the London Clay flora. The family had diversified widely by the mid-Eocene and includes ancestors of cotton, cacao, and durian \u2014 all with distinct flower architecture strategies."
-    }
+    },
+    layers: { "Ground": 0.016, "Undergrowth": 0.02, "Mid-storey": 0.024, "Canopy": 0.026 },
   },
   roseFamilyBlossoms: {
     kind: "forage", name: "rose-family blossoms", icon: "🌸", className: "food",
@@ -1609,7 +1673,8 @@ const encounters = {
       ecology: "A generalist pollinator resource for bees, flies, beetles, and small nectar-feeding birds. The standardised flower form allows pollinators to transfer between rose-family species without learning new search images.",
       gameplayInsight: "Reliable nectar source across the Eocene. Dense flower clusters mean significant nectar yield per visit. Bloom timing follows temperature cues \u2014 seek out after warm, settled weather.",
       scienceNote: "Rosaceae appear in the Eocene fossil record with leaves and pollen from European and North American sites. The family has diversified extensively since the Eocene to include apple, cherry, strawberry, and rose \u2014 all retaining the ancestral five-petalled flower architecture."
-    }
+    },
+    layers: { "Ground": 0.024, "Undergrowth": 0.03, "Mid-storey": 0.026, "Canopy": 0.02 },
   },
   citrusBlossoms: {
     kind: "forage", name: "citrus-type blossoms", icon: "🌼", className: "food",
@@ -1629,7 +1694,8 @@ const encounters = {
       ecology: "A pollinator resource attracting bees, butterflies, and nectar-feeding birds. The strong scent signal concentrates pollinators in one location, increasing cross-pollination efficiency.",
       gameplayInsight: "High-concentration nectar accessible from the flower base. Detectable by scent at distance \u2014 follow aromatic signals in warm morning hours when volatiles are most active.",
       scienceNote: "Rutaceae are known from Eocene fossil sites. Citrus-relative pollen is documented in Eocene deposits in Asia and southern Europe. The family had already diversified widely by the mid-Eocene, with multiple genera producing aromatic flower structures."
-    }
+    },
+    layers: { "Ground": 0.012, "Undergrowth": 0.016, "Mid-storey": 0.02, "Canopy": 0.022 },
   },
   bananaTypeFlowers: {
     kind: "forage", name: "banana-type flowers", icon: "🌷", className: "food",
@@ -1649,7 +1715,8 @@ const encounters = {
       ecology: "A pollinator-attracting structure that rewards birds, bats, and large insects differentially depending on flower depth. The sequential opening extends the nectar availability window across multiple days.",
       gameplayInsight: "Reliable nectar source in a fixed location. Check the flower base rather than the bract surface \u2014 nectar pools there in quantity.",
       scienceNote: "Musaceae and related Zingiberales families have an Eocene fossil record. Pollen and leaf fossils from Eocene deposits in Asia and Africa confirm the family was widespread and producing large inflorescences by this period."
-    }
+    },
+    layers: { "Ground": 0.01, "Undergrowth": 0.014, "Mid-storey": 0.018, "Canopy": 0.02 },
   },
   palmFlowers: {
     kind: "forage", name: "palm flowers", icon: "🌴", className: "food",
@@ -1669,7 +1736,8 @@ const encounters = {
       ecology: "A generalist pollinator resource supporting bees, beetles, flies, and vertebrate visitors simultaneously. Wind also plays a role in pollen transfer in many palm species.",
       gameplayInsight: "Accessible pollen and nectar in large quantities. The crown position requires climbing to the upper trunk \u2014 exposure to aerial predators is elevated at this height.",
       scienceNote: "Arecaceae (palms) are one of the most diverse plant families in Eocene fossil floras. Arecaceous pollen is abundant in Eocene pollen spectra globally. Multiple palm genera including Sabalites and Phoenicites are identified from Eocene leaf and pollen fossils."
-    }
+    },
+    layers: { "Ground": 0.014, "Undergrowth": 0.018, "Mid-storey": 0.022, "Canopy": 0.026 },
   },
   canopyFruit: {
     kind: "forage", name: "canopy fruit", icon: "🍏", className: "food",
@@ -1684,7 +1752,8 @@ const encounters = {
       ecology: "A seed dispersal mechanism adapted to large-bodied arboreal frugivores and birds. High position reduces ground-level competition and restricts dispersal to animals capable of reaching canopy height.",
       gameplayInsight: "Requires reaching high canopy positions \u2014 higher risk from aerial predators but significantly lower competition than ground-level fruit resources.",
       scienceNote: "Canopy fruit syndromes \u2014 size, colour, nutrient composition, and position adapted to specific dispersers \u2014 are well-documented across Eocene plant families. Upper canopy fruiting is associated with large-seeded plants requiring mobile animal dispersers in the Eocene fossil botanical record."
-    }
+    },
+    layers: { "Mid-storey": 0.032, "Canopy": 0.036 },
   },
   paleMushroom: {
     kind: "forage", name: "pale mushrooms", icon: "🍄", className: "food",
@@ -1699,7 +1768,14 @@ const encounters = {
       ecology: "Many pale mushrooms are mycorrhizal partners of forest trees \u2014 the visible fruiting body is the reproductive structure of an organism whose main mass supports tree root networks.",
       gameplayInsight: "Pale mushrooms on soil require maximum caution. When in doubt, do not consume \u2014 the cost of a missed opportunity is recoverable; the cost of misidentification is not.",
       scienceNote: "Amanita and related amatoxin-producing genera have a fossil record extending to the Eocene in Baltic amber. The amatoxin biosynthesis pathway is ancient within the genus. Amatoxins cause delayed onset liver failure specifically because they block RNA polymerase II \u2014 a mechanism that has no antidote."
-    }
+    },
+    layers: { "Ground": 0.028, "Undergrowth": 0.025 },
+    subtypes: [
+      {"label":"severely poisonous pale mushrooms","weight":55,"poison":{"severity":"severe","rank":4,"toxinType":"fungal","lethal":true,"criticalTimer":7,"turns":7,"damage":7,"warning":"Severely poisonous fungus"},"energy":8},
+      {"label":"inedible pale mushrooms","weight":25,"poison":{"severity":"moderate","rank":2,"toxinType":"fungal","lethal":false,"turns":4,"damage":3,"warning":"Sickening fungus"},"energy":6},
+      {"label":"edible pale mushrooms","weight":15,"poison":null,"energy":8},
+      {"label":"deadly pale mushrooms","weight":5,"poison":{"severity":"deadly","rank":5,"toxinType":"fungal","lethal":true,"criticalTimer":5,"turns":6,"damage":10,"warning":"Deadly fungus"},"energy":8}
+    ]
   },
   brownMushroom: {
     kind: "forage", name: "brown mushrooms", icon: "🍄", className: "food",
@@ -1714,7 +1790,14 @@ const encounters = {
       ecology: "A decomposer organism breaking down dead wood and leaf litter and making nutrients available to plants through mycorrhizal networks. Fungal fruiting is a nutrient cycling event.",
       gameplayInsight: "Brown-capped mushrooms on dead wood are often edible, but colour and substrate type alone do not guarantee safety. Consume a small amount and wait before relying on as a food source.",
       scienceNote: "Basidiomycete fungi are known from the Cretaceous. Eocene amber from Baltic deposits preserves mushroom fruiting bodies with cap and stipe morphology, confirming that above-ground sporocarp production in modern form was established by this period."
-    }
+    },
+    layers: { "Ground": 0.03, "Undergrowth": 0.035 },
+    subtypes: [
+      {"label":"edible brown mushrooms","weight":65,"poison":null,"energy":10},
+      {"label":"inedible brown mushrooms","weight":20,"poison":{"severity":"mild","rank":1,"toxinType":"fungal","lethal":false,"turns":3,"damage":2,"warning":"Sickening fungus"},"energy":7},
+      {"label":"poisonous brown mushrooms","weight":12,"poison":{"severity":"moderate","rank":2,"toxinType":"fungal","lethal":false,"turns":5,"damage":4,"warning":"Poisonous fungus"},"energy":8},
+      {"label":"deadly brown mushrooms","weight":3,"poison":{"severity":"deadly","rank":5,"toxinType":"fungal","lethal":true,"criticalTimer":5,"turns":6,"damage":10,"warning":"Deadly fungus"},"energy":8}
+    ]
   },
 
   cycadSeeds: {
@@ -1735,7 +1818,8 @@ const encounters = {
       ecology: "Cycads rely on large beetles and, in some lineages, vertebrates with cycasin tolerance for seed dispersal. Most frugivores are excluded — the toxin selectively filters which animals interact with the seeds.",
       gameplayInsight: "Do not eat. The vivid colour is a warning, not an invitation. No safe dose exists for raw cycad seed in a small primate body.",
       scienceNote: "Cycadaceae have one of the longest fossil records of any living plant family. Direct cycad ancestors are confirmed from the Triassic, with Eocene cycad pollen and megasporophylls recorded from North America, Europe, and Asia. The cycasin biosynthesis pathway is conserved across all extant cycad genera and is presumed ancient."
-    }
+    },
+    layers: { "Ground": 0.012 },
   },
 
   spurgeCapsules: {
@@ -1756,7 +1840,8 @@ const encounters = {
       ecology: "A dominant family in Eocene tropical forests, Euphorbiaceae fill roles from pioneer shrubs to canopy trees. The latex-based defence is a convergent strategy found across multiple unrelated plant families.",
       gameplayInsight: "Avoid handling broken stems — latex contact is an irritant before consumption is attempted. Seeds carry the sap coating after explosive dispersal.",
       scienceNote: "Euphorbiaceae are among the most frequently identified families in the London Clay flora. Seed and fruit morphology resembling Eocene Euphorbiaceae genera is recovered from multiple Eocene Lagerstätten. The diterpenoid ester pathway responsible for latex toxicity is conserved across the family and presumed ancient."
-    }
+    },
+    layers: { "Ground": 0.01, "Undergrowth": 0.012 },
   },
 
   hollyBerries: {
@@ -1777,7 +1862,13 @@ const encounters = {
       ecology: "A dispersal strategy targeting specific bird species and tolerant mammals. Toxicity level filters seed dispersers from seed predators — birds pass the seeds intact, most mammals cannot safely consume the flesh.",
       gameplayInsight: "Bright red and present when other food is absent, but the attractiveness is the trap. Follow bird foraging activity on this shrub only when nothing safer is available.",
       scienceNote: "Aquifoliaceae, including Ilex, are well-documented in Eocene fossil floras. Ilex pollen and leaf impressions from Eocene deposits in Europe and North America confirm the genus was widespread and diverse by this period. Theobromine — also found in cacao — is present in Ilex species and is toxic to most mammals at low doses."
-    }
+    },
+    layers: { "Undergrowth": 0.014, "Mid-storey": 0.01 },
+    subtypes: [
+      {"label":"edible holly-like berries","weight":20,"poison":null,"energy":8},
+      {"label":"mildly toxic holly-like berries","weight":55,"poison":{"severity":"mild","rank":1,"toxinType":"ilicin","lethal":false,"turns":3,"damage":2,"warning":"Mild ilicin — dry mouth and nausea."},"energy":8},
+      {"label":"toxic holly-like berries","weight":25,"poison":{"severity":"moderate","rank":2,"toxinType":"ilicin","lethal":false,"turns":4,"damage":3,"warning":"Ilicin and saponins — vomiting and cramping."},"energy":8}
+    ]
   },
 
   milkweedFruit: {
@@ -1798,7 +1889,8 @@ const encounters = {
       ecology: "The cardiac glycoside defence discourages vertebrate seed predation while allowing some insect tolerance. Certain insects sequester the glycosides for their own chemical defence — a relationship likely established well before the Eocene.",
       gameplayInsight: "Avoid. The seed fibres are not nutritious and the seed coat is toxic. The elongated pale-green pod shape becomes distinctive once recognised.",
       scienceNote: "Apocynaceae are confirmed in Eocene fossil floras at both Messel and London Clay sites. The family is currently one of the most species-rich in tropical forests — its Eocene diversity was likely comparable. Cardiac glycoside-producing lineages are among the most ancient within the family based on molecular phylogenetics."
-    }
+    },
+    layers: { "Mid-storey": 0.014, "Canopy": 0.01 },
   },
 
   aroidShoots: {
@@ -1819,7 +1911,13 @@ const encounters = {
       ecology: "Among the dominant understorey plants in Eocene tropical forests, Araceae occupy the deep-shade niche inaccessible to most fruiting angiosperms. Rhizomes store carbohydrate reserves and allow the plant to persist through seasonal variation.",
       gameplayInsight: "Small amounts cause mouth burning but are survivable. Deeper rhizomes below ground have lower oxalate concentrations and higher starch, but require excavation. Do not eat in bulk.",
       scienceNote: "Araceae have an extensive Eocene fossil record. Aroid pollen and leaf impressions are abundant in Eocene tropical and subtropical deposits globally. Calcium oxalate raphide production is found in virtually all genera and is ancient within the family."
-    }
+    },
+    layers: { "Ground": 0.018, "Undergrowth": 0.022 },
+    subtypes: [
+      {"label":"edible aroid shoots","weight":30,"poison":null,"energy":7},
+      {"label":"mildly irritant aroid shoots","weight":50,"poison":{"severity":"mild","rank":1,"toxinType":"oxalate","lethal":false,"turns":3,"damage":2,"warning":"Raphide crystals — burning in mouth and throat."},"energy":6},
+      {"label":"severely irritant aroid shoots","weight":20,"poison":{"severity":"moderate","rank":2,"toxinType":"oxalate","lethal":false,"turns":5,"damage":4,"warning":"Dense raphide load — severe mucosal inflammation."},"energy":5}
+    ]
   },
 
   gingerRhizomes: {
@@ -1840,7 +1938,8 @@ const encounters = {
       ecology: "A major component of Eocene tropical understorey vegetation, Zingiberaceae provide ground-level food resources accessible to small mammals through excavation. The rhizome's carbohydrate stores are reliable and independent of fruiting cycles.",
       gameplayInsight: "Accessible at the ground layer in shaded areas. Excavation requires time but the nutritional return is reliable. The spicy scent briefly masks your own odour while you feed.",
       scienceNote: "Zingiberaceae have an Eocene fossil record confirmed from pollen and rhizome remains in Asian and African deposits. Molecular clock estimates place the family's origin in the Cretaceous, with major diversification in the Eocene as tropical forests expanded. Gingerol-related phenolics are biosynthetically ancient within the order Zingiberales."
-    }
+    },
+    layers: { "Ground": 0.016 },
   },
 
   treeFernFiddleheads: {
@@ -1861,7 +1960,8 @@ const encounters = {
       ecology: "Tree ferns were a dominant feature of Eocene forest understorey and margins. As non-flowering plants, they represent a nutritional resource completely outside the angiosperm fruiting system — available even when fruit is absent.",
       gameplayInsight: "Available in a narrow window before full frond expansion. The crown position requires vertical access. Insects concentrated at the crown are a secondary food bonus when fiddleheads are present.",
       scienceNote: "Cyatheaceae are confirmed from Eocene fossil deposits across multiple continents. Tree fern trunks are found in Eocene coal and lignite deposits. The family was more globally widespread in the Eocene warm climate than today. Cyatheaceous spores are abundant in Eocene palynological assemblages."
-    }
+    },
+    layers: { "Ground": 0.014, "Undergrowth": 0.018 },
   },
 
   waterLilySeedPods: {
@@ -1882,7 +1982,8 @@ const encounters = {
       ecology: "Nymphaeaceae are among the most basal flowering plant lineages. In Eocene lake and slow-river environments, water lily beds were important structural features supporting invertebrates, fish, and amphibians.",
       gameplayInsight: "Accessible from the bank without full water entry. The hydration return is significant — a useful resource at the water margin. Collect in moderation; overconsumption is unpleasant rather than dangerous.",
       scienceNote: "Nymphaeaceae have among the richest Eocene fossil records of any aquatic plant family. Nymphaea-type pollen is abundant in Eocene lake sediments globally, and fossil Nymphaea leaves and seeds are known from Eocene deposits in Europe, North America, and Asia. The family's early divergence from other angiosperms is confirmed by molecular phylogenetics, placing the split in the Cretaceous."
-    }
+    },
+    layers: { "Ground": 0.008 },
   },
 
   // small water sources
@@ -1899,7 +2000,8 @@ const encounters = {
       ecology: "A temporary breeding habitat for mosquitoes and other standing-water invertebrates. Its chemical content reflects the surface materials it has drained from \u2014 variable and locally specific.",
       gameplayInsight: "Hydration value is real but contamination risk is non-trivial. Consume only when no clean water alternative exists, and in small amounts.",
       scienceNote: "Phytotelmata (small water bodies in plant structures) and ground puddles are important microhabitats in tropical forest ecology. Mosquito Eocene fossil records from Baltic amber confirm standing-water breeding behaviour was established in this period."
-    }
+    },
+    layers: { "Ground": 0.03, "Undergrowth": 0.026, "Mid-storey": 0.014 },
   },
 
   freshwaterMussels: {
@@ -1920,7 +2022,8 @@ const encounters = {
       ecology: "Filter feeders that clarify stream water and concentrate nutrients from the water column into accessible bivalve tissue. Their beds stabilise stream margins and provide complex habitat structure.",
       gameplayInsight: "Sessile and predictable \u2014 return to the same location across multiple visits. Require water margin access with associated predator exposure risk.",
       scienceNote: "Unionidae (freshwater mussels) have an extensive Eocene fossil record. Their larval glochidium stage \u2014 a specialised fish-parasitising juvenile \u2014 was already established by the Eocene, and fish-mussel host specificity is inferred from co-occurrence patterns in fossil assemblages."
-    }
+    },
+    layers: {},
   },
 
   freshwaterCrayfish: {
@@ -1942,7 +2045,8 @@ const encounters = {
       ecology: "An omnivore bridging aquatic and terrestrial food webs at stream margins. Its burrowing creates microhabitats used by other invertebrates and small vertebrates.",
       gameplayInsight: "Catchable in shallow water with speed. High protein return justifies brief water margin exposure \u2014 but always check for crocodilian stillness at the surface before approaching.",
       scienceNote: "Freshwater crayfish (Astacidea) have a Mesozoic fossil record and were widespread by the Eocene. Eocene specimens from multiple continents show the full modern body plan. Some fossil burrow structures attributed to crayfish are preserved in Eocene sediments."
-    }
+    },
+    layers: {},
   },
 
   // nests and carcasses
@@ -1960,7 +2064,8 @@ const encounters = {
       ecology: "A mineral resource hub attracting multiple species that share exposure to the same dietary toxins. Mineral lick sites become predictable congregation points, creating both social encounters and predation vulnerability.",
       gameplayInsight: "Consume after eating chemically defended or uncertain plant material. Clay adsorbs alkaloids in the gut before absorption. Fresh animal tracks indicate current safety and high mineral quality.",
       scienceNote: "Geophagy in primates is extensively documented and the detoxification function has been confirmed by measuring reduced bioavailability of plant alkaloids in the presence of clay minerals. Eocene primate geophagy is inferred from the presence of kaolin clay deposits co-located with primate fossil sites, though direct fossil evidence is limited."
-    }
+    },
+    layers: {},
   },
 
   mantis: {
@@ -1977,7 +2082,8 @@ const encounters = {
       ecology: "An ambush predator of arthropods and small vertebrates in the mid-canopy and shrub layer. It sits at the top of the invertebrate predator hierarchy within its microhabitat.",
       gameplayInsight: "Large mantids can strike at small vertebrates \u2014 at minimal size the player is within range. Treat it as a minor threat rather than a food opportunity.",
       scienceNote: "Mantodea appear in the Cretaceous. Eocene mantids are known from Baltic amber and Messel, preserving the full raptorial foreleg structure. The independent binocular vision system for depth-perception prey targeting was already present in Eocene specimens."
-    }
+    },
+    layers: { "Undergrowth": 0.032, "Mid-storey": 0.032, "Canopy": 0.028 },
   },
 
   dragonfly: {
@@ -1994,7 +2100,8 @@ const encounters = {
       ecology: "An apex predator of flying insects, controlling mosquito, midge, and small butterfly populations near water. Its presence indicates healthy aquatic insect emergence nearby.",
       gameplayInsight: "Harmless to the player. Its flight activity near water indicates insect abundance \u2014 and therefore insectivore predator activity \u2014 in the same area.",
       scienceNote: "Odonata are among the oldest winged insects, with a body plan largely unchanged since the Carboniferous. Eocene dragonflies from Messel and Green River deposits are fully modern in wing venation and compound eye structure."
-    }
+    },
+    layers: { "Mid-storey": 0.035, "Canopy": 0.038 },
   },
 
   eagle: {
@@ -2011,7 +2118,8 @@ const encounters = {
       ecology: "An apex predator of the upper canopy and forest edge, targeting medium-sized arboreal mammals and large birds. Its presence shapes movement behaviour across multiple prey species.",
       gameplayInsight: "Dense cover overhead is your primary defence. Open canopy gaps expose you to strike \u2014 cross them quickly or avoid them entirely.",
       scienceNote: "Large diurnal raptors (Accipitridae) were present in the Eocene, though eagle diversity and size increased through the Oligocene and Miocene. Eocene raptors from Messel include Messelastur and Tynskya, representing early accipitrid and pandionid relatives."
-    }
+    },
+    layers: { "Canopy": 0.004 },
   },
 
   owl: {
@@ -2028,7 +2136,8 @@ const encounters = {
       ecology: "A nocturnal apex predator of small mammals, arboreal rodents, and birds. Its activity suppresses nocturnal small mammal behaviour across the area it patrols.",
       gameplayInsight: "Night movement through open canopy is high-risk when owls are active. Sound-masking behaviour \u2014 moving with ambient noise like wind \u2014 reduces detection probability.",
       scienceNote: "Strigiformes (owls) appear in the Paleocene-Eocene boundary. Eocene owls including Palaeoglaux from the Messel show the asymmetric ear placement and wide facial disc of modern species, confirming acoustic hunting was already the owls' primary strategy."
-    }
+    },
+    layers: { "Mid-storey": 0.008, "Canopy": 0.008 },
   },
 
   pakicetus: {
@@ -2057,7 +2166,8 @@ const encounters = {
       ecology: "A semiaquatic ambush predator. Its ecological role is to control access to water sources, forcing terrestrial animals to approach carefully and briefly. Other predators may compete for its kills.",
       gameplayInsight: "The waterline is the danger zone. Drinking quickly, from a position of cover, with awareness of the bank is the only way to manage this threat. The further from the bank, the safer you are.",
       scienceNote: "Pakicetus was a terrestrial mammal of the early-to-middle Eocene, closely related to early cetacean ancestors. It was not yet aquatic but had features linking it to the whale lineage. Its discovery helped confirm that whales evolved from land-dwelling even-toed ungulates rather than from a separate lineage."
-    }
+    },
+    layers: { "Ground": 0.004 },
   },
 
   frog: {
@@ -2074,7 +2184,8 @@ const encounters = {
       ecology: "A predator of small invertebrates and prey item for snakes, birds, and small mammals. It bridges aquatic and terrestrial food webs as both predator and prey.",
       gameplayInsight: "Fast at close range but catchable with a direct lunge. Worth the effort near water sources where densities are higher.",
       scienceNote: "Modern frog families including Ranidae and Hylidae have Eocene representatives known from fossil sites in Europe and North America. Frog body plan has been essentially stable since the Triassic."
-    }
+    },
+    layers: { "Ground": 0.03, "Undergrowth": 0.035, "Mid-storey": 0.018 },
   },
 
   poisonDartFrog: {
@@ -2091,7 +2202,8 @@ const encounters = {
       ecology: "A predator of small invertebrates, particularly mites and small arthropods that contribute alkaloids to its skin chemistry. Removing poison frogs disrupts toxin cycling in the ecosystem.",
       gameplayInsight: "Do not eat. Skin contact during an attack may transfer toxins. The conspicuous colouration is the warning \u2014 treat it as one.",
       scienceNote: "Dendrobatidae (poison dart frogs) acquire their alkaloid toxins from dietary arthropods, not synthesis. The exact Eocene distribution of the family is uncertain, but aposematic colouration as a defensive strategy in amphibians is documented across deep time in multiple lineages."
-    }
+    },
+    layers: { "Undergrowth": 0.008, "Mid-storey": 0.006, "Canopy": 0.004 },
   },
 
   toad: {
@@ -2108,7 +2220,8 @@ const encounters = {
       ecology: "A predator of invertebrates and small prey items in terrestrial and semi-aquatic habitats. Its toxicity removes it from most predator diets, releasing it from the anti-predator behaviours that constrain other similarly-sized animals.",
       gameplayInsight: "Do not eat \u2014 even partial consumption transfers toxin. Recognise the slow, unhurried movement as a toxicity signal and avoid contact.",
       scienceNote: "Bufonidae (true toads) appear in the Eocene fossil record. Parotoid gland structure is preserved in some fossil specimens. Bufadienolide compounds are convergently produced by plants (squill) and toads \u2014 one of the most studied examples of convergent secondary metabolite evolution."
-    }
+    },
+    layers: { "Ground": 0.024, "Undergrowth": 0.03 },
   },
 
   leptictidium: {
@@ -2137,7 +2250,8 @@ const encounters = {
       ecology: "A ground-level insectivore and small animal predator. It lives in the same habitat zones as many of your other encounters but occupies a fast-moving niche that few predators can exploit efficiently.",
       gameplayInsight: "Difficult to catch even when healthy. Better to wait for it to return to a known feeding spot than to pursue it directly. Good food if you can manage the ambush.",
       scienceNote: "Leptictidium was an Eocene leptictidan found in the Messel fossil beds of Germany. It was genuinely bipedal, with long hind limbs and a long balancing tail. Its ecological role and diet remain partly debated — it may have been omnivorous, eating insects, lizards, and plant matter."
-    }
+    },
+    layers: { "Ground": 0.023, "Undergrowth": 0.022 },
   },
 
   gastornis: {
@@ -2167,7 +2281,8 @@ const encounters = {
       ecology: "A megafaunal bird of the Eocene forests, found across Europe and North America. It may have been primarily herbivorous, using its beak to crack hard seeds and nuts rather than to catch prey, though its size and presence alone made it dangerous.",
       gameplayInsight: "Stay off the ground when it is present. It cannot follow you into the branches. The danger window is crossing open ground or descending while it is nearby.",
       scienceNote: "Gastornis (formerly often called Diatryma) was a large flightless bird standing nearly two metres tall. Long thought to be a carnivore, recent isotope analysis suggests it was likely herbivorous, feeding on tough vegetation and seeds. It was one of the dominant large animals of the early Eocene before placental mammals expanded into its ecological role."
-    }
+    },
+    layers: { "Ground": 0.014, "Undergrowth": 0.01 },
   },
 
   nuts: {
@@ -2183,7 +2298,8 @@ const encounters = {
       ecology: "A calorie-dense seed type driving the evolution of specialised hard-food processing dentition in rodents, primates, and corvids. Nut crops structure the activity of the entire small mammal community.",
       gameplayInsight: "High caloric return but shell cracking requires appropriate substrate. Carry to a hard bark surface or rock and use impact rather than bite force to process.",
       scienceNote: "Hard-shelled nuts appear in Eocene fossil floras across multiple families including Juglandaceae (walnut relatives) and Fagaceae (oak relatives). London Clay flora preserves nuts of both families. The evolution of hardened shells is considered a co-evolutionary response to rodent and primate dental processing."
-    }
+    },
+    layers: { "Ground": 0.035, "Undergrowth": 0.03, "Mid-storey": 0.025, "Canopy": 0.02 },
   },
 
   waspNest: {
@@ -2199,7 +2315,8 @@ const encounters = {
       ecology: "A predator colony targeting caterpillars and soft-bodied arthropods to provision larvae. Wasp colonies are effective pest-control agents from the plant's perspective, removing folivores from a wide territorial radius.",
       gameplayInsight: "Larval chambers contain high-fat larvae before wax capping. Night approach reduces guard activity significantly \u2014 wasp temperature sensitivity means night raids face fewer defenders.",
       scienceNote: "Social wasp nest structure is preserved in Eocene amber inclusions. Paper nest material \u2014 wood-fibre-based \u2014 rarely fossilises, but wasp worker and soldier specimens from Baltic amber preserve the mandibular structure used for wood processing. Colony size estimates from worker-to-queen ratios in amber suggest Eocene colonies were similar in scale to modern temperate species."
-    }
+    },
+    layers: { "Undergrowth": 0.012, "Mid-storey": 0.014, "Canopy": 0.014 },
   },
 
   beehive: {
@@ -2215,7 +2332,8 @@ const encounters = {
       ecology: "A pollinator colony with a foraging radius of several kilometres, connecting flowering plants across a wide landscape through a single resource hub. Honey is consumed by bears, primates, and other large mammals willing to accept stings.",
       gameplayInsight: "Smoke disrupts alarm pheromone communication \u2014 fire-adjacent beehive access is viable if fire is available. Without disruption, rapid extraction and immediate retreat is the only viable strategy.",
       scienceNote: "Apis (honeybees) appear in the Eocene fossil record. Eocene bee specimens from Baltic amber include workers with pollen loads on their corbiculae \u2014 confirming foraging behaviour and hive provisioning was established. Honey storage as winter energy reserve is inferred from hive architecture preserved in trace fossils."
-    }
+    },
+    layers: { "Undergrowth": 0.01, "Mid-storey": 0.012, "Canopy": 0.012 },
   },
 
   crocodile: {
@@ -2232,7 +2350,8 @@ const encounters = {
       ecology: "An apex predator of freshwater margins, controlling the access point between forest and water. Carcasses it abandons feed scavengers across the food web.",
       gameplayInsight: "Never approach water margin at ground level without scanning for stillness at the surface. Speed is irrelevant once the ambush begins.",
       scienceNote: "Multiple crocodilian lineages coexisted in the Eocene, including dyrosaurids, tomistomines, and alligatoroids. Messel preserves Asiatosuchus and Diplocynodon, both fully modern in body plan. Eocene crocodilians occupied salt and freshwater environments."
-    }
+    },
+    layers: { "Ground": 0.005 },
   },
 
   turtle: {
@@ -2249,7 +2368,8 @@ const encounters = {
       ecology: "An omnivore of forest floor and water margin habitats. Shell-withdrawn turtles are effectively invulnerable to all predators except large crushing specialists.",
       gameplayInsight: "Catchable when moving \u2014 the shell withdrawal eliminates attack options. Carry and relocate if you cannot process it immediately.",
       scienceNote: "Testudines (turtles) appear in the Triassic. Messel preserves several turtle species including Allaeochelys, with soft tissue outlines preserved. Some Messel turtles show evidence of death during mating \u2014 a famously documented case of preservation coinciding with reproductive behaviour."
-    }
+    },
+    layers: { "Ground": 0.014 },
   },
 
   eurotamandua: {
@@ -2266,7 +2386,8 @@ const encounters = {
       ecology: "A specialist predator of ants and termites, consuming enormous numbers of individuals per feeding bout. Its excavation work exposes interior colony resources.",
       gameplayInsight: "Its feeding activity opens ant and termite resources \u2014 approach after it moves on to exploit the opened nests.",
       scienceNote: "Eurotamandua joresi is known from the Messel Pit and was long debated as a xenarthran (related to South American anteaters). Current consensus places it closer to pangolins or in an uncertain position \u2014 its precise phylogenetic placement remains contested."
-    }
+    },
+    layers: { "Undergrowth": 0.012, "Mid-storey": 0.012, "Canopy": 0.012 },
   },
 
   woodGrub: {
@@ -2282,7 +2403,8 @@ const encounters = {
       ecology: "A primary decomposer of dead wood, breaking cellulose and lignin with assistance from gut microbiota. Grub galleries initiate the decomposition sequence that eventually returns woody biomass to the soil.",
       gameplayInsight: "Located by tapping dead wood and listening for hollow resonance. High fat yield per grub makes excavation time worthwhile. Dead wood at advanced decay stages yields higher grub density.",
       scienceNote: "Wood-boring beetle larvae (Cerambycidae, Buprestidae, and others) are known from Eocene amber and compression fossils. Larval feeding galleries are preserved in Eocene fossil wood. The cellulose-digesting gut microbiome of wood-boring larvae is now studied for biofuel enzyme research."
-    }
+    },
+    layers: { "Ground": 0.035, "Undergrowth": 0.04, "Mid-storey": 0.022 },
   },
 
   monitorLizard: {
@@ -2299,7 +2421,8 @@ const encounters = {
       ecology: "A top predator of the forest floor and lower canopy, consuming eggs, carcasses, invertebrates, and vertebrates up to substantial size. Active pursuit rather than ambush makes it unpredictable.",
       gameplayInsight: "It can climb low branches \u2014 elevation alone is insufficient. Reach high canopy before it commits to a pursuit.",
       scienceNote: "Varanidae appear in the Cretaceous with a centre of origin in Asia. Eocene monitors are known from European fossil sites, including forms related to the giant Megalania lineage. Modern monitors retain a largely unchanged Eocene body plan."
-    }
+    },
+    layers: { "Undergrowth": 0.01, "Mid-storey": 0.012, "Canopy": 0.006 },
   },
 
   iguana: {
@@ -2316,7 +2439,8 @@ const encounters = {
       ecology: "A herbivore of the upper canopy and sun-exposed edges, consuming leaves, flowers, and fruit. Its size and defensive capability reduce predation pressure to large raptors and carnivorans.",
       gameplayInsight: "The tail-whip has real range \u2014 do not approach from the side without accounting for it. Approach from directly above or below.",
       scienceNote: "Iguanidae have a complex Eocene biogeographic history, with representatives on both sides of the Atlantic during the early Eocene when continental positions allowed dispersal. Fossil iguanids are known from European Eocene deposits, raising unresolved dispersal questions."
-    }
+    },
+    layers: { "Undergrowth": 0.012, "Mid-storey": 0.018, "Canopy": 0.02 },
   },
 
   fruitBat: {
@@ -2333,7 +2457,8 @@ const encounters = {
       ecology: "A nocturnal frugivore and pollinator linking isolated tree patches through seed dispersal. Its activity concentrates fallen fruit resources below roost trees at night.",
       gameplayInsight: "Follow active bat feeding noise to locate fruiting trees in low-light conditions \u2014 fallen fruit accumulates directly below roosting points.",
       scienceNote: "Chiroptera (bats) appear in the fossil record by the early Eocene, with Onychonycteris and Icaronycteris from the Green River Formation already showing fully developed wings. Fruit-eating bats (Pteropodidae) appear later, but Eocene bats were already ecologically diverse."
-    }
+    },
+    layers: { "Mid-storey": 0.018, "Canopy": 0.025 },
   },
 
   masillaraptor: {
@@ -2350,7 +2475,8 @@ const encounters = {
       ecology: "An apex predator of the mid-to-upper canopy targeting arboreal mammals and birds. Its presence restricts small arboreal mammal movement to denser cover.",
       gameplayInsight: "Dense foliage disrupts its hunting approach \u2014 move into the thickest available cover rather than attempting to outrun it in open canopy.",
       scienceNote: "Masillaraptor parvunguis is known from the Messel Pit and represents an early accipitrid or close relative. Its proportions suggest a woodland-adapted pursuit predator rather than an open-country soarer \u2014 convergent with modern goshawks."
-    }
+    },
+    layers: { "Mid-storey": 0.008, "Canopy": 0.01 },
   },
 
   eomanis: {
@@ -2367,7 +2493,8 @@ const encounters = {
       ecology: "A specialised insectivore controlling ant and termite colonies. Its digging opens mounds for secondary exploitation by other insectivores.",
       gameplayInsight: "Follow Eomanis to locate ant and termite nest resources \u2014 its excavation work makes interior protein accessible without triggering the full defensive response.",
       scienceNote: "Eomanis waldi is known from the Messel Pit, Germany \u2014 one of the earliest definitive pangolins. Its scales were preserved as a distinct pattern in the Messel oil shale, confirming the full pangolin body plan was established by the mid-Eocene."
-    }
+    },
+    layers: { "Ground": 0.012, "Undergrowth": 0.01, "Canopy": 0.006 },
   },
 
   ramphastos: {
@@ -2384,7 +2511,8 @@ const encounters = {
       ecology: "A frugivore and seed disperser of large-seeded fruits that few other birds can process. Its beak width allows consumption of fruits too large for other avian frugivores.",
       gameplayInsight: "Its conspicuous presence marks fruiting trees reliably \u2014 locate it by its calls and follow to the food source before it strips the available fruit.",
       scienceNote: "Ramphastidae are a neotropical family with uncertain Eocene representation outside the Americas. Large-billed frugivorous birds in Old World Eocene contexts are likely stem-group forms convergent in ecology. The thermoregulation function of the toucan beak was confirmed by infrared imaging in living specimens."
-    }
+    },
+    layers: { "Mid-storey": 0.02, "Canopy": 0.025 },
   },
 
   orbWeaver: {
@@ -2401,7 +2529,8 @@ const encounters = {
       ecology: "An aerial predator of flying insects, positioned at canopy openings where insect flight paths concentrate. Its web removal has immediate measurable effects on local insect populations.",
       gameplayInsight: "Web contact causes temporary entanglement \u2014 navigate around web structures rather than through them, especially in narrow branch corridors.",
       scienceNote: "Araneae (spiders) appear in the Carboniferous. Orb-weaving families including Araneidae are known from Eocene Baltic amber. Silk properties preserved in amber specimens confirm modern-grade silk chemistry was established by this period."
-    }
+    },
+    layers: { "Undergrowth": 0.025, "Mid-storey": 0.028, "Canopy": 0.03 },
   },
 
   shieldBug: {
@@ -2418,7 +2547,8 @@ const encounters = {
       ecology: "A sap and seed feeder that can cause significant damage to individual plants. Its chemical defence makes it largely predator-free at the invertebrate scale.",
       gameplayInsight: "Edible after drying \u2014 the secretion dissipates and the protein content is real. Not worth pursuing if other food is available, but viable in scarcity.",
       scienceNote: "Pentatomidae are known from Eocene deposits in amber and compression fossils. Their thoracic gland defence chemistry is complex and species-specific. Interestingly, some predators including certain birds learn to avoid the glands while consuming the body tissue."
-    }
+    },
+    layers: { "Ground": 0.025, "Undergrowth": 0.03, "Mid-storey": 0.025, "Canopy": 0.022 },
   },
 
   plantHopper: {
@@ -2435,7 +2565,8 @@ const encounters = {
       ecology: "A phloem sap-feeder weakening individual plants. In high densities, planthopper aggregations can cause visible plant stress and attract honeydew-seeking ants.",
       gameplayInsight: "Too small to be worth individual pursuit. Ignore unless no other food source is available \u2014 their jump trajectory makes catching them inefficient.",
       scienceNote: "Fulgoromorpha (planthoppers) are known from Triassic deposits. Eocene planthoppers from Baltic amber are extremely diverse, with many species preserving the full wing venation and hindleg gear mechanism in amber specimens."
-    }
+    },
+    layers: { "Ground": 0.025, "Undergrowth": 0.035, "Mid-storey": 0.035, "Canopy": 0.035 },
   },
 
   moth: {
@@ -2453,7 +2584,14 @@ const encounters = {
       ecology: "A nocturnal pollinator and herbivore whose caterpillar stage drives significant leaf consumption. Adults serve as a high-fat prey item for nocturnal insectivores and bats.",
       gameplayInsight: "Easily caught at rest during daylight. The high fat content makes moths a useful caloric supplement even when other protein is available.",
       scienceNote: "Lepidoptera (moths and butterflies) are known from the Jurassic. Eocene moths are abundant in Baltic amber, including members of Noctuidae and Tortricidae. The bat-scale acoustic absorber function has been confirmed in living species and is considered an evolved anti-predator response."
-    }
+    },
+    layers: { "Mid-storey": 0.03, "Canopy": 0.035 },
+    subtypes: [
+      {"label":"edible soft moth","weight":55,"poison":null,"energy":6},
+      {"label":"bitter moth","weight":20,"poison":{"severity":"mild","rank":1,"toxinType":"plant","lethal":false,"turns":3,"damage":2,"warning":"Bitter wing scales"},"energy":6},
+      {"label":"toxic moth","weight":15,"poison":{"severity":"moderate","rank":2,"toxinType":"plant","lethal":false,"turns":4,"damage":4,"warning":"Stored plant toxin"},"energy":6},
+      {"label":"plain-looking toxic moth","weight":10,"poison":{"severity":"moderate","rank":2,"toxinType":"plant","lethal":false,"turns":5,"damage":4,"warning":"Hidden plant toxin"},"energy":6}
+    ]
   },
 
   butterfly: {
@@ -2475,7 +2613,14 @@ const encounters = {
       ecology: "A pollinator in flower-rich canopy and edge habitats. Its presence indicates open sunlight and flowering resources nearby.",
       gameplayInsight: "Butterflies congregate near reliable nectar sources \u2014 their flight direction can guide you toward flowering food resources.",
       scienceNote: "Papilionoid butterflies are known from Eocene amber and compression fossils, including specimens from the Messel pit. By the mid-Eocene, the major butterfly families were already differentiated."
-    }
+    },
+    layers: { "Mid-storey": 0.028, "Canopy": 0.035 },
+    subtypes: [
+      {"label":"harmless bright butterfly","weight":30,"poison":null,"energy":5},
+      {"label":"mildly toxic butterfly","weight":35,"poison":{"severity":"mild","rank":1,"toxinType":"plant","lethal":false,"turns":3,"damage":2,"warning":"Toxic wing scales / stored plant toxin"},"energy":5},
+      {"label":"strongly toxic butterfly","weight":20,"poison":{"severity":"moderate","rank":2,"toxinType":"plant","lethal":false,"turns":5,"damage":4,"warning":"Stored plant toxin"},"energy":5},
+      {"label":"warning-colour mimic butterfly","weight":15,"poison":null,"energy":5}
+    ]
   },
 
   titanomyrma: {
@@ -2492,7 +2637,8 @@ const encounters = {
       ecology: "A predatory and scavenging ant species at the top of the invertebrate predator scale. Colony foraging parties can dominate food resources in their territory.",
       gameplayInsight: "A single giant ant can be evaded. The real threat is proximity to the colony \u2014 a single disturbed individual will recruit rapidly.",
       scienceNote: "Titanomyrma lubei is known from Eocene deposits of Wyoming, USA. Queens reached over 5 cm body length. Their presence in North America during a warm Eocene interval suggests they dispersed from Africa or Europe via high-latitude corridors during thermal maxima."
-    }
+    },
+    layers: { "Ground": 0.025, "Undergrowth": 0.022 },
   },
 
   titanomyrmaSwarm: {
@@ -2509,7 +2655,8 @@ const encounters = {
       ecology: "A dominance-scale predation event that clears invertebrates and drives off vertebrates across the entire territory. Swarm foraging resupplies the colony at a rate that shapes local prey populations.",
       gameplayInsight: "Vertical escape is your only effective response \u2014 leave the ground and reach height before recruitment completes. Pheromone trails can be avoided by bypassing marked paths entirely.",
       scienceNote: "Army ant-like swarm raiding behaviour is inferred in some Eocene giant ant species from colony size estimates and worker-to-soldier ratios in amber deposits. Modern army ant swarm behaviour is among the most studied examples of emergent collective behaviour in animal biology."
-    }
+    },
+    layers: { "Ground": 0.004, "Undergrowth": 0.006 },
   },
 
   katydid: {
@@ -2526,7 +2673,8 @@ const encounters = {
       ecology: "A herbivore and occasional predator of soft-bodied invertebrates. Its camouflage makes it effectively invisible to visual predators, concentrating predation pressure on its acoustic signal.",
       gameplayInsight: "Locate by night call, approach by sound in darkness \u2014 daylight detection requires close inspection of leaf surfaces rather than scanning by movement.",
       scienceNote: "Tettigoniidae (katydids) are known from Cretaceous deposits with leaf-mimicry wing venation. Eocene examples from Baltic amber preserve detailed wing patterning consistent with modern leaf-mimics, suggesting this extreme camouflage strategy is at least Eocene in age."
-    }
+    },
+    layers: { "Undergrowth": 0.03, "Mid-storey": 0.035, "Canopy": 0.035 },
   },
 
   grasshopper: {
@@ -2543,7 +2691,8 @@ const encounters = {
       ecology: "A herbivore consuming significant leaf and stem material. In high densities, grasshopper activity can visibly defoliate vegetation and concentrate predator activity.",
       gameplayInsight: "Jump direction is predictable \u2014 they launch away from the side of disturbance. Approach from two directions to limit escape angles.",
       scienceNote: "Acrididae (locusts and grasshoppers) are known from Eocene deposits in Europe and North America. Wing venation in compression fossils confirms modern body plan was established by this period."
-    }
+    },
+    layers: { "Ground": 0.025, "Undergrowth": 0.028 },
   },
 
   cricket: {
@@ -2560,7 +2709,8 @@ const encounters = {
       ecology: "An omnivorous detritivore and seed-eater in the forest floor layer. Crickets are a dietary staple for nocturnal insectivores, small reptiles, and ground-foraging birds.",
       gameplayInsight: "Abundant at night near rotting wood and leaf litter. A reliable, low-risk food source in poor foraging conditions.",
       scienceNote: "Gryllidae (true crickets) are known from Triassic deposits and persist largely unchanged. Eocene compression fossils from sites including the Messel preserve wing venation consistent with modern stridulating species."
-    }
+    },
+    layers: { "Ground": 0.024, "Undergrowth": 0.026 },
   },
 
   cicada: {
@@ -2577,7 +2727,8 @@ const encounters = {
       ecology: "Sap-feeders on living wood, weakening stressed trees over time. Their mass emergences concentrate protein for every aerial and arboreal predator in the vicinity.",
       gameplayInsight: "Edible and protein-rich when caught. The alarm click on disturbance can alert other animals \u2014 factor this into stealth decisions.",
       scienceNote: "Cicadidae are known from Eocene deposits including the Messel. Their nymphal stage \u2014 underground, feeding on root sap \u2014 was already established in this period, suggesting the synchronized adult emergence strategy has deep origins."
-    }
+    },
+    layers: { "Ground": 0.012, "Undergrowth": 0.016, "Mid-storey": 0.018, "Canopy": 0.02 },
   },
 
   leafInsect: {
@@ -2594,7 +2745,8 @@ const encounters = {
       ecology: "A herbivore of broadleaf canopy. Its camouflage effectively removes it from the visual predator prey pool, making acoustic and chemical cues the only detection methods.",
       gameplayInsight: "Detection requires searching leaf surfaces at close range rather than scanning for movement. Pick dense leaf clusters to find them, not open spaces.",
       scienceNote: "Phasmatodea (stick and leaf insects) are known from the Eocene. True leaf insects (Phylliidae) have a confirmed fossil record from Eocene deposits in Germany and France, with preserved wing patterning showing the leaf venation mimicry already fully developed."
-    }
+    },
+    layers: { "Undergrowth": 0.025, "Mid-storey": 0.035, "Canopy": 0.04 },
   },
 
   stickInsect: {
@@ -2611,7 +2763,8 @@ const encounters = {
       ecology: "A folivore consuming significant leaf material in the canopy. Its camouflage removes it almost entirely from visual predator detection, concentrating predation pressure on chemosensory hunters.",
       gameplayInsight: "Detection requires handling each branch section individually at close range. The caloric return relative to search time is low \u2014 prioritise this only in extreme scarcity.",
       scienceNote: "Phasmatodea (stick and leaf insects) are known from the Triassic. Eocene stick insects from Baltic amber and Messel compression fossils preserve the full body proportions of modern forms. Swaying behaviour as active camouflage enhancement is inferred from morphological comparison with modern species."
-    }
+    },
+    layers: { "Undergrowth": 0.025, "Mid-storey": 0.028, "Canopy": 0.035 },
   },
 
   gecko: {
@@ -2628,7 +2781,8 @@ const encounters = {
       ecology: "A nocturnal insectivore of bark and crevice microhabitats, controlling bark-dwelling arthropod populations. It occupies surfaces most other lizards cannot access.",
       gameplayInsight: "Catchable at rest during daylight hours when thermoregulation has slowed it. A reliable small protein source in bark-rich environments.",
       scienceNote: "Gekkota have a fossil record extending to the mid-Jurassic, with Eocene geckos known from Baltic amber and compression fossils. Adhesive toe pad morphology appears in some Eocene specimens, confirming the mechanism is ancient within the clade."
-    }
+    },
+    layers: { "Undergrowth": 0.025, "Mid-storey": 0.03, "Canopy": 0.032 },
   },
 
   eurheloderma: {
@@ -2645,7 +2799,8 @@ const encounters = {
       ecology: "An ambush predator of eggs, small mammals, and invertebrates on the forest floor. Its venom persistence makes it a low-risk forager \u2014 few animals learn to attack it twice.",
       gameplayInsight: "Venom causes slow, escalating damage after the bite \u2014 disengage immediately and allow the effect to run its course before resuming activity.",
       scienceNote: "Eurheloderma is an Eocene helodermatid lizard known from European fossil sites. Its presence confirms that venomous lizard lineages had dispersed widely by the mid-Eocene. Modern Heloderma (Gila monster, beaded lizard) are its living relatives."
-    }
+    },
+    layers: { "Ground": 0.006, "Undergrowth": 0.006 },
   },
 
   bergisuchus: {
@@ -2662,7 +2817,8 @@ const encounters = {
       ecology: "A terrestrial carnivore filling a large predator niche on land, competing with early mammalian carnivores. Its ziphodont teeth \u2014 blade-like, serrated \u2014 are adapted for flesh-cutting, not bone-crushing.",
       gameplayInsight: "It cannot follow you into the canopy. Any tree access point is an exit \u2014 reach it fast.",
       scienceNote: "Bergisuchus dietrichbergi is known from Eocene deposits of Germany. Sebecids are a clade of notosuchian crocodylomorphs with high, laterally compressed, serrated teeth convergent with theropod dinosaurs \u2014 a body plan for cursorial predation, not aquatic ambush."
-    }
+    },
+    layers: { "Ground": 0.004, "Undergrowth": 0.006 },
   },
 
   messelornis: {
@@ -2679,7 +2835,8 @@ const encounters = {
       ecology: "An omnivore of the forest floor, consuming seeds, invertebrates, and small vertebrates. Its ground-foraging disturbs leaf litter and exposes prey for secondary foragers.",
       gameplayInsight: "Slow enough to catch in confined ground-level spaces. The floor-level foraging location makes it a ground encounter \u2014 be aware of other ground predators in the same area.",
       scienceNote: "Messelornis cristata is one of the best-preserved Eocene birds from the Messel Pit, with soft tissue outlines preserved. It was a gruiform (crane-relative) with a crest and rail-like proportions, abundant in Messel assemblages."
-    }
+    },
+    layers: { "Ground": 0.018, "Mid-storey": 0.012 },
   },
 
   cariamiform: {
@@ -2696,7 +2853,8 @@ const encounters = {
       ecology: "A ground predator of insects, small reptiles, and mammals. It competes with early carnivorans and creates a persistent predation pressure at ground level.",
       gameplayInsight: "Primarily a ground threat. Climbing removes you from its effective range, though it will wait below if it has detected you.",
       scienceNote: "Cariamiformes were globally diverse in the Eocene, with European forms like Elaphrocnemus known from the Messel and other sites. Modern seriemas in South America are their closest living relatives."
-    }
+    },
+    layers: { "Ground": 0.007, "Undergrowth": 0.008 },
   },
 
   heterohyus: {
@@ -2713,7 +2871,8 @@ const encounters = {
       ecology: "A bark insectivore and occasional glider occupying the vertical trunk niche. Its gliding reduces the energy cost of inter-tree movement in fragmented canopy.",
       gameplayInsight: "Its gliding behaviour reveals inter-tree distances that are navigable \u2014 watch its launch and landing points to identify safe canopy crossing routes.",
       scienceNote: "Heterohyus is an apatemyid from the Messel Pit. Apatemyids are an enigmatic extinct order with no clear modern relatives. Their elongated third and fourth digits are convergent with the aye-aye's bark-probing finger, suggesting similar ecology."
-    }
+    },
+    layers: { "Mid-storey": 0.018, "Canopy": 0.022 },
   },
 
   kopidodon: {
@@ -2730,7 +2889,8 @@ const encounters = {
       ecology: "An arboreal frugivore competing directly with early primates for canopy fruit resources. Its large body relative to other arboreal mammals gives it competitive priority at food patches.",
       gameplayInsight: "Territorial around productive fruit sources \u2014 avoid or displace it rather than trying to feed simultaneously at the same patch.",
       scienceNote: "Kopidodon macrognathus is known from the Messel Pit. It was a large, squirrel-like cimolestan with strong curved claws for arboreal locomotion and high-crowned teeth for processing hard fruit. It represents a convergent evolution of the arboreal frugivore body plan."
-    }
+    },
+    layers: { "Mid-storey": 0.014, "Canopy": 0.016 },
   },
 
   amphiperatherium: {
@@ -2747,7 +2907,8 @@ const encounters = {
       ecology: "An omnivorous generalist eating insects, fruit, and small vertebrates. It competes directly with early primates for many of the same food resources.",
       gameplayInsight: "Slow enough to catch in confined spaces but rarely worth the effort \u2014 its caloric value is modest and it will bite when cornered.",
       scienceNote: "Amphiperatherium is a genus of didelphid-like marsupials known from Eocene and Oligocene European fossil sites. European marsupial diversity collapsed during the Grande Coupure faunal turnover at the Eocene-Oligocene boundary."
-    }
+    },
+    layers: { "Ground": 0.018, "Undergrowth": 0.02 },
   },
 
   lesmesodon: {
@@ -2776,7 +2937,8 @@ const encounters = {
       ecology: "A mid-level ground predator competing with other carnivorans and creodonts of similar size. It fills a role between apex predators and opportunistic feeders — fast enough to take prey but not dominant enough to displace larger animals from kills.",
       gameplayInsight: "Smell is your liability near this animal. Moving downwind, staying in the branches, and not lingering on the ground are your primary defences.",
       scienceNote: "Creodonts were an order of carnivorous placental mammals that were dominant predators through much of the Palaeogene. Once thought to be direct ancestors of modern Carnivora, they are now considered an independent lineage that went extinct by the late Miocene, outcompeted by modern carnivore families."
-    }
+    },
+    layers: { "Ground": 0.008, "Undergrowth": 0.012 },
   },
 
   darwinius: {
@@ -2806,7 +2968,8 @@ const encounters = {
       ecology: "A small arboreal primate of the Eocene, feeding on fruit, insects, and small animals. It shares habitat with you and competes for some of the same food sources.",
       gameplayInsight: "Not a direct threat unless provoked. It can become a rival for food in the same patch and may attract predators with its own movement and calls.",
       scienceNote: "Darwinius masillae, known as 'Ida', is one of the most complete Eocene primate fossils, found at the Messel Pit in Germany. It was briefly and controversially claimed as a direct human ancestor; the scientific consensus places it in the strepsirrhine lineage (lemur relatives) rather than the haplorhine lineage that leads to monkeys, apes, and humans."
-    }
+    },
+    layers: { "Mid-storey": 0.012, "Canopy": 0.014 },
   },
 
   europolemur: {
@@ -2823,7 +2986,8 @@ const encounters = {
       ecology: "A frugivore and insectivore of the mid-to-upper canopy. Social structure provides predator vigilance \u2014 one alarm call mobilises the group.",
       gameplayInsight: "Competition for fruit patches is real \u2014 approach their feeding trees quietly or wait for the group to move on before foraging.",
       scienceNote: "Europolemur is an adapiform primate from the Messel Pit, related to the lineage that includes modern lemurs. European Eocene adapiforms were diverse and filled ecological roles similar to small monkeys today."
-    }
+    },
+    layers: { "Mid-storey": 0.01, "Canopy": 0.012 },
   },
 
   godinotia: {
@@ -2852,7 +3016,8 @@ const encounters = {
       ecology: "An Eocene primate related to the adapid group. Feeds primarily on fruit and insects. Its foraging range overlaps with yours and with other primate relatives.",
       gameplayInsight: "Not aggressive unless cornered. Its presence near fruit is a useful signal that the food is safe. Its sudden departure from an area is worth noticing.",
       scienceNote: "Godinotia is an Eocene adapid primate from the Messel deposits. Adapids were a diverse group of early primates that have sometimes been considered lemur ancestors, though their exact phylogenetic position is still discussed. They were ecologically important herbivores and insectivores of the European Eocene."
-    }
+    },
+    layers: { "Undergrowth": 0.012, "Mid-storey": 0.052, "Canopy": 0.054 },
   },
 
   woodpeckerBird: {
@@ -2874,7 +3039,8 @@ const encounters = {
       ecology: "A primary cavity excavator \u2014 its nest holes, once abandoned, become critical habitat for secondary cavity nesters including other birds and small mammals.",
       gameplayInsight: "Drumming activity marks dead wood with active insect larvae beneath \u2014 these locations are secondary foraging opportunities after the bird moves on.",
       scienceNote: "Piciformes (woodpeckers) appear in the Eocene fossil record. Zygodactyl feet (two toes forward, two back) for vertical trunk clinging are preserved in Eocene specimens. The specific hyoid shock-absorber anatomy is confirmed in modern species by high-speed X-ray imaging."
-    }
+    },
+    layers: { "Undergrowth": 0.012, "Mid-storey": 0.04, "Canopy": 0.052 },
   },
 
   hummingbird: {
@@ -2896,7 +3062,8 @@ const encounters = {
       ecology: "A pollinator linking flowering plants across the canopy. Its presence indicates active nectar production and reliably marks high-quality flower resources.",
       gameplayInsight: "Track its foraging route to identify multiple flowering food sources \u2014 it covers a territory efficiently and visits resources in rotation.",
       scienceNote: "True hummingbirds (Trochilidae) are a New World family. Eocene needle-billed nectar-feeders in Old World contexts are likely stem-group forms such as Eurotrochilus, known from Oligocene Germany, or unnamed Eocene relatives. Coevolved bill-flower morphology appears early in the fossil record."
-    }
+    },
+    layers: { "Mid-storey": 0.036, "Canopy": 0.049 },
   },
 
   orchidBee: {
@@ -2918,7 +3085,8 @@ const encounters = {
       ecology: "A specialist pollinator in coevolved relationships with specific orchid species. Its foraging routes connect isolated orchid patches that cannot self-pollinate.",
       gameplayInsight: "Sting is minor \u2014 manageable if disturbed briefly. Their routes reliably mark orchid flower locations, which are nectar sources.",
       scienceNote: "Eulaema and related orchid bee genera (Euglossini) are a neotropical bee tribe. Eocene orchid pollen is known from Baltic amber attached to bee specimens, confirming the orchid-bee pollination relationship existed by this period, though geographic range interpretation is complex."
-    }
+    },
+    layers: { "Undergrowth": 0.018, "Mid-storey": 0.02, "Canopy": 0.018 },
   },
 
   stranglerFigFruit: {
@@ -2939,7 +3107,8 @@ const encounters = {
       ecology: "A community resource attracting primates, birds, bats, and frugivorous mammals simultaneously. Fig-fruiting events are among the most intense concentrated feeding observations in tropical ecology.",
       gameplayInsight: "The most reliable high-density food resource in the canopy. Competition is intense and territorial \u2014 assess the dominance hierarchy at the tree before committing to feeding position.",
       scienceNote: "Ficus (Moraceae) is known from Eocene fossil deposits. Fig-wasp coevolution \u2014 the obligate pollination mutualism between fig wasps and Ficus \u2014 has been dated to the Cretaceous. Eocene amber preserves fig wasp specimens confirming the mutualism was established before the Eocene."
-    }
+    },
+    layers: { "Undergrowth": 0.024, "Mid-storey": 0.03, "Canopy": 0.034 },
   },
 
   bromeliadPool: {
@@ -2960,7 +3129,8 @@ const encounters = {
       ecology: "A freshwater microhabitat in the arboreal zone. Tank bromeliads are keystone structures for canopy-dependent amphibians and insects that require standing water for reproduction.",
       gameplayInsight: "Reliable water source in the canopy without descending to ground level \u2014 a significant safety advantage when ground predators are active.",
       scienceNote: "Bromeliaceae are a New World family with no confirmed Eocene fossil record outside the Americas. Old World equivalents in arboreal water-holding capacity are found in other plant families. This encounter type represents the ecological function \u2014 water in canopy cavities \u2014 which is globally distributed."
-    }
+    },
+    layers: { "Undergrowth": 0.014, "Mid-storey": 0.018, "Canopy": 0.02 },
   },
 
   treeCrab: {
@@ -2982,7 +3152,8 @@ const encounters = {
       ecology: "A scavenger and herbivore in tree cavity and bark microhabitats, contributing to nutrient recycling in dead wood. It bridges aquatic and arboreal trophic pathways.",
       gameplayInsight: "Edible and catchable in tree cavities. The claws cause minor damage if handled carelessly but the protein return is reliable.",
       scienceNote: "Terrestrial and semi-arboreal crabs appear in the Eocene with the diversification of Brachyura. Freshwater and terrestrial crab transitions are documented across multiple crab clades, each involving independent modifications to gill chamber humidity regulation."
-    }
+    },
+    layers: { "Undergrowth": 0.008, "Mid-storey": 0.01, "Canopy": 0.01 },
   },
 
   birdNest: {
@@ -2997,7 +3168,8 @@ const encounters = {
       ecology: "A resource concentration point at the intersection of adult foraging range and protected nesting site. Successful nest sites are often reused across seasons \u2014 locations with previous evidence of nesting are productive search targets.",
       gameplayInsight: "Eggs represent concentrated protein and lipid. Assess whether a parent is present and attending before approaching \u2014 unattended nests are significantly safer to exploit.",
       scienceNote: "Avian nest construction leaving physical traces in the fossil record is rare. Nesting behaviour is inferred from bone assemblages and egg fragments at Eocene sites. Eocene bird eggshell from multiple sites shows modern-grade crystalline structure, confirming hard-shelled eggs were established across all major bird lineages."
-    }
+    },
+    layers: { "Mid-storey": 0.035, "Canopy": 0.042 },
   },
 
   largeGroundNest: {
@@ -3018,7 +3190,8 @@ const encounters = {
       ecology: "A concentrated energy resource \u2014 large eggs represent significant investment by the parent and equivalent caloric value for a successful raider. Ground nest locations reflect species-specific habitat requirements.",
       gameplayInsight: "The defender will not be displaced by threat displays. A successful raid requires speed \u2014 reach an egg and retreat before physical contact, not after.",
       scienceNote: "Large Eocene ground-nesting animals include crocodilians and large flightless birds such as Gastornis. Crocodilian nest structure and temperature-based sex determination is considered ancient within the lineage. Gastornis egg fragments are known from European Eocene deposits."
-    }
+    },
+    layers: { "Ground": 0.018 },
   },
   termiteMound: {
     kind: "nest", name: "termite mound", icon: "🟤", className: "food",
@@ -3039,7 +3212,8 @@ const encounters = {
       ecology: "A decomposition hub processing dead wood and plant material at a scale that makes termites among the most significant contributors to soil carbon cycling in tropical forests. Mounds persist for decades and their locations become fixed landscape features.",
       gameplayInsight: "Workers and soldiers are both edible \u2014 worker density is highest in upper galleries, soldiers concentrate near breach points. Plan extraction speed around soldier mobilisation time.",
       scienceNote: "Termite (Isoptera) mound-building appears in the fossil record in the Eocene. Fossil termite mound structures with preserved ventilation shaft architecture are known from Eocene deposits in Africa. Baltic amber preserves termite workers and soldiers with intact mandibular structure."
-    }
+    },
+    layers: { "Ground": 0.028, "Undergrowth": 0.018 },
   },
 
 
@@ -3057,7 +3231,8 @@ const encounters = {
       ecology: "The soldier caste exists purely to protect the colony. The colony itself is a major ecosystem engineer, decomposing wood and cycling nutrients at a scale that shapes forest structure.",
       gameplayInsight: "Soldier response time after nest disturbance is near-instant. If raiding a termite mound, have an extraction route planned before making first contact.",
       scienceNote: "Termite soldiers with fontanellar spray glands are known from Eocene amber, including specimens from Baltic and Burmese deposits that preserve the gland structure. Termites (Blattodea: Isoptera) have complex soldier caste morphology established well before the Eocene."
-    }
+    },
+    layers: {},
   },
 
   smallCarcass: {
@@ -3073,7 +3248,8 @@ const encounters = {
       ecology: "A minor but frequent nutrient pulse recycling small vertebrate biomass back to the soil. Collectively, small carcasses in the forest sustain a significant component of the detritivore community.",
       gameplayInsight: "Time-sensitive \u2014 exploit quickly before invertebrate activity degrades the nutritional quality. A fresh small carcass is worth a brief ground-level exposure.",
       scienceNote: "Forensic entomology studies of carcass decomposition sequences in tropical forest conditions show blow fly (Calliphoridae) colonisation beginning within 10 minutes of death. Calliphorid fossils are known from Eocene amber, confirming this rapid decomposition pathway was operational."
-    }
+    },
+    layers: { "Ground": 0.02 },
   },
   largeCarcass: {
     kind: "carcass", name: "large carcass", icon: "☠️", className: "food",
@@ -3088,7 +3264,8 @@ const encounters = {
       ecology: "A temporary but massive nutrient pulse feeding carrion beetles, blow flies, vulture-analogue birds, and opportunistic carnivores simultaneously. It accelerates nutrient cycling back to the soil.",
       gameplayInsight: "High caloric return but the predator monitoring the site is a serious risk. Assess the surroundings before approaching and plan an exit route before starting to feed.",
       scienceNote: "Carrion ecology \u2014 the succession of scavenger species through predictable phases \u2014 is well-studied in modern systems. Eocene carrion beetles (Silphidae) are known from Baltic amber, confirming the beetle-mediated decomposition pipeline was already operating in this period."
-    }
+    },
+    layers: { "Ground": 0.01 },
   },
 
   // extra rainforest life
@@ -3106,7 +3283,8 @@ const encounters = {
       ecology: "An insectivore of the mid-canopy, controlling small arthropod populations. Its dewlap display makes it conspicuous to aerial and arboreal predators.",
       gameplayInsight: "The display cycle makes it predictable \u2014 approach from below or behind during the extension phase when its attention is outward.",
       scienceNote: "Crown-group anoles have a fossil record extending into the Eocene. Their dewlap musculature and display behaviour are considered ancient within the lineage, suggesting sexual selection by colour signalling predates the Eocene."
-    }
+    },
+    layers: { "Undergrowth": 0.032, "Mid-storey": 0.04, "Canopy": 0.038 },
   },
   cockroach: {
     kind: "animal", name: "large cockroach", icon: "🪳", className: "food",
@@ -3122,7 +3300,8 @@ const encounters = {
       ecology: "A decomposer and scavenger cycling nutrients through dead wood and leaf litter. It serves as a calorie-dense prey item for almost every insectivore in the forest.",
       gameplayInsight: "Easy to catch in enclosed spaces and reliably edible \u2014 a low-effort protein source when nothing better is available.",
       scienceNote: "True cockroaches (Blattodea) appear in the Carboniferous and their morphology has remained conserved. Eocene amber from the Baltic and Burmese deposits preserves cockroach specimens essentially identical to modern forest species."
-    }
+    },
+    layers: { "Ground": 0.045, "Undergrowth": 0.04, "Mid-storey": 0.018 },
   },
   treeFrog: {
     kind: "animal", name: "tree frog", icon: "🐸", className: "food",
@@ -3138,7 +3317,8 @@ const encounters = {
       ecology: "A nocturnal insectivore controlling flying and resting insect populations in the mid-canopy. Its calling position exposes it to owl predation \u2014 a cost balanced against reproductive necessity.",
       gameplayInsight: "Locate by night call during calling season. Catchable at rest during the day on leaf undersides \u2014 detection requires close search of leaf surfaces.",
       scienceNote: "Hylidae (tree frogs) have an Eocene fossil record in North America and Europe. The adhesive toe pad morphology is preserved in some Eocene specimens from European fossil sites. Capillary adhesion mechanics have been studied extensively in living hylids."
-    }
+    },
+    layers: { "Undergrowth": 0.032, "Mid-storey": 0.038, "Canopy": 0.032 },
   },
   slug: {
     kind: "forage", name: "large slug", icon: "🐌", className: "food",
@@ -3158,7 +3338,14 @@ const encounters = {
       ecology: "A decomposer and herbivore recycling plant and fungal material. Its mucus trail marks movement paths detectable by chemosensory predators \u2014 ground beetles and some vertebrates track it actively.",
       gameplayInsight: "Edible but the mucus is difficult to remove \u2014 rolling in leaf material before consumption reduces handling difficulty. High water content reduces caloric density but hydration value is secondary.",
       scienceNote: "Pulmonata (slugs and snails) are known from Carboniferous deposits. Eocene slugs and snails are preserved in Baltic amber and compression fossils. Slug mucus chemistry \u2014 the polymerised glycoprotein structure \u2014 is studied for biomedical applications given its unique mechanical properties."
-    }
+    },
+    layers: { "Ground": 0.032, "Undergrowth": 0.04 },
+    subtypes: [
+      {"label":"edible large slug","weight":45,"poison":null,"energy":8},
+      {"label":"foul-tasting slug","weight":25,"poison":{"severity":"mild","rank":1,"toxinType":"irritant","lethal":false,"turns":3,"damage":2,"warning":"Irritating mucus"},"energy":6},
+      {"label":"poisonous slug","weight":22,"poison":{"severity":"moderate","rank":2,"toxinType":"irritant","lethal":false,"turns":5,"damage":4,"warning":"Poisonous slug mucus"},"energy":6},
+      {"label":"dangerously poisonous slug","weight":8,"poison":{"severity":"severe","rank":4,"toxinType":"irritant","lethal":true,"criticalTimer":7,"turns":6,"damage":7,"warning":"Severe slug toxin"},"energy":6}
+    ]
   },
   pitviper: {
     kind: "animal", name: "pitviper", icon: "🐍", className: "threat",
@@ -3174,7 +3361,8 @@ const encounters = {
       ecology: "An ambush predator of small mammals and birds at the forest floor and low vegetation. Its presence along travel corridors creates a persistent, invisible threat at commonly used routes.",
       gameplayInsight: "Strike comes from a coiled, stationary animal you may not see. Scan the full ground surface before committing to a descent or landing.",
       scienceNote: "Crotalinae (pit vipers) appear in the fossil record in the Oligocene, but viperid snakes are known from the Eocene. The heat-sensing pit organ is an evolutionary novelty within the viperid lineage, allowing exploitation of warm-blooded prey in low-light conditions."
-    }
+    },
+    layers: { "Ground": 0.014, "Undergrowth": 0.018, "Mid-storey": 0.012, "Canopy": 0.006 },
   },
   smallSnake: {
     kind: "animal", name: "small snake", icon: "🐍", className: "prey",
@@ -3195,7 +3383,8 @@ const encounters = {
       ecology: "A predator of frogs, small lizards, and large invertebrates. Its slender body allows access to microhabitat prey refugia, creating predation pressure in spaces most predators cannot enter.",
       gameplayInsight: "Edible and catchable. Grasp behind the head and the threat is minimal \u2014 the bite is negligible and it is a reliable protein source.",
       scienceNote: "Colubroid snakes diversified rapidly through the Eocene. Small colubrid-grade snakes in Eocene fossil assemblages show the full range of head shape specialisations associated with different prey types \u2014 egg-eaters, frog-specialists, and invertebrate hunters are all represented."
-    }
+    },
+    layers: { "Ground": 0.018, "Undergrowth": 0.02, "Mid-storey": 0.018, "Canopy": 0.012 },
   },
   defensiveSnake: {
     kind: "animal", name: "defensive small snake", icon: "🐍", className: "minor",
@@ -3216,7 +3405,8 @@ const encounters = {
       ecology: "A predator of insects, small frogs, and lizards in the leaf litter and low shrub layer. Its defensive display deters predators that rely on visual threat assessment.",
       gameplayInsight: "The strike causes minimal damage \u2014 don't disengage purely from the visual threat. It can be killed or bypassed safely with brief exposure.",
       scienceNote: "Colubroid snakes diversified rapidly through the Eocene and Oligocene. Non-venomous defensive mimicry of venomous species is considered ancient within some lineages, though the specific evolutionary timing is difficult to establish from fossil evidence."
-    }
+    },
+    layers: { "Ground": 0.01, "Undergrowth": 0.014, "Mid-storey": 0.012 },
   },
   smallConstrictor: {
     kind: "animal", name: "small constrictor", icon: "🐍", className: "minor",
@@ -3237,7 +3427,8 @@ const encounters = {
       ecology: "A mid-level predator of small vertebrates in both arboreal and ground-level habitats. Its climbing ability makes it a threat across vertical ranges occupied by small mammals.",
       gameplayInsight: "Constriction requires contact \u2014 it cannot threaten at range. Keep distance and it cannot engage. Small enough to fight off if caught early.",
       scienceNote: "Booid constrictors were widespread in the Eocene, with giant forms like Titanoboa known from the Paleocene and smaller booid relatives abundant in Eocene tropical assemblages. Messel preserves several snake species including early boids with preserved body outline."
-    }
+    },
+    layers: { "Ground": 0.008, "Undergrowth": 0.012, "Mid-storey": 0.012, "Canopy": 0.008 },
   },
   hyracotherium: {
     kind: "animal", name: "Hyracotherium-like browser", icon: "🐴", className: "prey",
@@ -3253,7 +3444,8 @@ const encounters = {
       ecology: "A browser and frugivore of closed forest understorey. Its multi-toed feet and low-crowned teeth place it firmly in soft vegetation, not open grassland.",
       gameplayInsight: "Fast in a straight line but poor at tight turns through canopy. If you need to cross ground it occupies, move slowly \u2014 sudden movement triggers the flight response.",
       scienceNote: "Hyracotherium is an early equid from the Early Eocene of North America and Europe. It had four toes on the forefoot and three on the hind, low-crowned teeth, and inhabited dense forests \u2014 very different from modern open-country horses."
-    }
+    },
+    layers: { "Ground": 0.012 },
   },
 
 
@@ -3276,7 +3468,8 @@ const encounters = {
       ecology: "A megaherbivore of swamp margins and lowland forest, consuming aquatic vegetation and terrestrial browse. Its wallowing behaviour modifies water margins and creates habitat for other species.",
       gameplayInsight: "Give it wide clearance near water. It charges without warning and does not abandon a threat response quickly.",
       scienceNote: "Coryphodon is the most geographically widespread Eocene mammal, found across North America, Europe, and Asia. It was a pantodont \u2014 a group with no living descendants. Brain-to-body ratio estimates suggest it had one of the smallest relative brain sizes of any known mammal."
-    }
+    },
+    layers: { "Ground": 0.007, "Undergrowth": 0.004 },
   },
 
   // vertebrate animals
@@ -3301,7 +3494,8 @@ const encounters = {
       ecology: "An insectivore and small animal predator of the forest floor. Its spines make it largely immune to small predators, limiting its main threat to large carnivores.",
       gameplayInsight: "Rolled form is invulnerable. Wait for it to unroll before attempting predation \u2014 or ignore it entirely as the cost-benefit is poor.",
       scienceNote: "Erinaceidae (hedgehogs and gymnures) have a fossil record extending to the Paleocene. Eocene erinaceid relatives are known from European fossil sites, including spiny forms from the Messel. Modern hedgehog spine morphology is largely unchanged from early Eocene representatives."
-    }
+    },
+    layers: { "Ground": 0.018, "Undergrowth": 0.014 },
   },
   smallMammal: {
     kind: "animal", name: "small multituberculate", icon: "🐀", className: "prey",
@@ -3316,7 +3510,8 @@ const encounters = {
       ecology: "A seed, nut, and plant material specialist in the forest floor and low understorey. Despite their eventual extinction, multituberculates competed successfully with early placental rodents for tens of millions of years.",
       gameplayInsight: "Cache return behaviour makes it predictable \u2014 identify a cached food site and wait for the animal to return rather than pursuing it actively.",
       scienceNote: "Multituberculates (Multituberculata) persisted into the Eocene but declined rapidly following rodent diversification. Their multi-cusped teeth were highly efficient for processing hard plant material \u2014 a specialisation that nonetheless became evolutionarily outcompeted."
-    }
+    },
+    layers: { "Ground": 0.035, "Undergrowth": 0.07, "Mid-storey": 0.03 },
   },
   smallBird: {
     kind: "animal", name: "small bird", icon: "🐦", className: "prey",
@@ -3331,7 +3526,8 @@ const encounters = {
       ecology: "An insectivore and occasional frugivore creating significant predation pressure on canopy invertebrates. Its density and mobility distribute seed dispersal across wide areas.",
       gameplayInsight: "Fast flush reaction makes direct approach ineffective. Wait at cover near a known feeding perch and intercept rather than pursue.",
       scienceNote: "Passeriform birds radiated explosively in the Eocene-Oligocene. Messel preserves numerous small bird species including early relatives of rollers, kingfishers, and parrots, though true passerines appear to diversify later. Small bird faunas were highly diverse by the mid-Eocene."
-    }
+    },
+    layers: { "Mid-storey": 0.04, "Canopy": 0.055 },
   },
   rivalPrimate: {
     kind: "animal", name: "rival tree-climber", icon: "🐒", className: "primate",
@@ -3346,7 +3542,8 @@ const encounters = {
       ecology: "An arboreal frugivore and insectivore directly competing for identical resources. Its territory excludes you from its best food patches unless you can displace it.",
       gameplayInsight: "Displacement is possible through direct confrontation, but injury risk is real. Stealth entry into its territory during its absence is safer for resource access.",
       scienceNote: "Primate territoriality and resource competition are among the most studied aspects of primate ecology. Eocene adapiforms and omomyiforms both show evidence of social grouping and intraspecific competition from dental wear patterns and body size sexual dimorphism in fossil specimens."
-    }
+    },
+    layers: {},
   },
   constrictor: {
     kind: "animal", name: "large constrictor", icon: "🐍", className: "threat",
@@ -3373,7 +3570,8 @@ const encounters = {
       ecology: "A top arboreal ambush predator. Large enough to take significant prey. Its presence drives smaller animals to change feeding routes and resting choices within its territory.",
       gameplayInsight: "Distance and route choice are your defences. The constrictor cannot sprint, but it does not need to. Multiple investigations of the same individual dramatically increase reaction risk.",
       scienceNote: "Large non-venomous constrictors have existed since the Cretaceous. Eocene giant snakes included relatives of modern boas and pythons. Titanoboa, the largest snake ever recorded, lived in the Palaeocene of South America — a world with different constraints than the Eocene Messel forests."
-    }
+    },
+    layers: { "Ground": 0.016, "Undergrowth": 0.02, "Mid-storey": 0.014 },
   },
   groundCarnivore: {
     kind: "animal", name: "mesonychid-like ground predator", icon: "🐺", className: "predator",
@@ -3395,7 +3593,8 @@ const encounters = {
       ecology: "A dominant carnivore of the Eocene forest floor. It competes with other large predators and will displace smaller hunters from kills. Its presence on the ground reshapes where other animals feed and move.",
       gameplayInsight: "There is no winning in direct encounter. Your survival depends entirely on being where it cannot follow: branches, canopy, vertical distance. If it has already closed, options are gone.",
       scienceNote: "Mesonychids were hoofed, wolf-sized carnivores that were apex predators of the Eocene. They were once thought to be ancestors of whales; molecular evidence has since clarified the lineage. Their teeth were adapted for crushing bone and flesh, unlike any modern carnivore."
-    }
+    },
+    layers: { "Ground": 0.008 },
   },
   climbingHunter: {
     kind: "animal", name: "miacid-like climbing hunter", icon: "🐈", className: "predator",
@@ -3422,102 +3621,14 @@ const encounters = {
       ecology: "An apex predator of the mid-canopy. It can move through all arboreal layers and will follow prey from undergrowth to emergent canopy. Ground pursuit is slower, but it does not easily abandon a chase.",
       gameplayInsight: "Distance and vertical movement buy time, not safety. Moving to higher layers gives more options, but this animal can follow. Your best survival window is the moment before it commits.",
       scienceNote: "Miacids were small carnivoraforms of the Eocene, among the earliest mammals with the body plan that would lead to modern carnivores. Whether they were primarily arboreal is debated, but their retractile-adjacent claws and flexible limbs suggest significant climbing ability."
-    }
+    },
+    layers: { "Undergrowth": 0.008, "Mid-storey": 0.01, "Canopy": 0.001 },
   }
 };
 
 // NOTE: A previous build kept an unused extraInverts object here.
 // Those species now live directly in encounters{} above, so spawn-table
 // validation has a single source of truth.
-
-
-
-/* ===== data-spawn.js ===== */
-// [DATA-SPAWN] SPAWN TABLES
-// ---------------------------------------------------------------------------
-// Layer-specific spawn tables. Each entry is [encounterKey, chance].
-// Keys must exist in encounters{}.
-// Actual probability is also affected by distance, weather, and water checks.
-const encounterTables = {
-  "Ground": [
-    ["largeInsect", 0.045], ["cockroach", 0.045], ["woodGrub", 0.035],
-    ["shieldBug", 0.025], ["plantHopper", 0.025], ["grasshopper", 0.025], ["cricket", 0.024], ["cicada", 0.012],
-    ["titanomyrma", 0.025], ["antSwarm", 0.006], ["titanomyrmaSwarm", 0.004], ["wasp", 0.02],
-    ["scorpion", 0.022], ["snail", 0.032], ["slug", 0.032],
-    ["centipede", 0.028], ["millipede", 0.032], ["frog", 0.03],
-    ["toad", 0.024], ["turtle", 0.014], ["messelornis", 0.018],
-    ["redBerries", 0.030], ["purpleBerries", 0.028], ["bitterLeaves", 0.030], ["fallenFruit", 0.030], ["laurelDrupe", 0.018], ["palmFruit", 0.016], ["nypaFruit", 0.010], ["vitisBerries", 0.014], ["menispermBerry", 0.010], ["resinousFruit", 0.010], ["podFruit", 0.010], ["rainPuddle", 0.030],
-    ["magnoliaFlowers", 0.018], ["hibiscusFlowers", 0.016], ["roseFamilyBlossoms", 0.024], ["citrusBlossoms", 0.012], ["bananaTypeFlowers", 0.010], ["palmFlowers", 0.014],
-    ["largeGroundNest", 0.018], ["termiteMound", 0.028], ["nuts", 0.035], ["paleMushroom", 0.028], ["brownMushroom", 0.03],
-    ["cycadSeeds", 0.012], ["spurgeCapsules", 0.010], ["aroidShoots", 0.018], ["gingerRhizomes", 0.016], ["treeFernFiddleheads", 0.014], ["waterLilySeedPods", 0.008],
-    ["smallCarcass", 0.02], ["largeCarcass", 0.01], ["smallMammal", 0.035], ["hedgehogLikeInsectivore", 0.018],
-    ["leptictidium", 0.023], ["amphiperatherium", 0.018], ["hyracotherium", 0.012], ["coryphodon", 0.007],
-    ["eomanis", 0.012], ["smallSnake", 0.018], ["defensiveSnake", 0.010], ["smallConstrictor", 0.008], ["constrictor", 0.016], ["pitviper", 0.014],
-    ["eurheloderma", 0.006], ["cariamiform", 0.007], ["bergisuchus", 0.004],
-    ["lesmesodon", 0.008], ["crocodile", 0.005], ["pakicetus", 0.004],
-    ["gastornis", 0.014], ["groundCarnivore", 0.008]
-  ],
-  "Undergrowth": [
-    ["largeInsect", 0.055], ["mantis", 0.032], ["cockroach", 0.04],
-    ["orbWeaver", 0.025], ["shieldBug", 0.03], ["plantHopper", 0.035],
-    ["katydid", 0.03], ["grasshopper", 0.028], ["cricket", 0.026], ["cicada", 0.016], ["leafInsect", 0.025],
-    ["stickInsect", 0.025], ["titanomyrma", 0.022], ["titanomyrmaSwarm", 0.006],
-    ["woodGrub", 0.04], ["termiteMound", 0.018], ["woodpeckerBird", 0.012], ["orchidBee", 0.018], ["wasp", 0.028], ["waspNest", 0.012],
-    ["beehive", 0.01], ["tarantula", 0.02], ["caterpillar", 0.04],
-    ["snail", 0.035], ["slug", 0.04], ["centipede", 0.032],
-    ["millipede", 0.038], ["frog", 0.035], ["toad", 0.03],
-    ["treeFrog", 0.032], ["poisonDartFrog", 0.008], ["bromeliadPool", 0.014], ["treeCrab", 0.008], ["gecko", 0.025],
-    ["anoleLizard", 0.032], ["iguana", 0.012], ["bitterLeaves", 0.04], ["redBerries", 0.04],
-    ["purpleBerries", 0.030], ["stranglerFigFruit", 0.024], ["fallenFruit", 0.026], ["laurelDrupe", 0.020], ["vitisBerries", 0.018], ["menispermBerry", 0.012], ["resinousFruit", 0.012], ["soapberryFruit", 0.010], ["podFruit", 0.010], ["pandanusFruit", 0.010], ["rainPuddle", 0.026], ["nuts", 0.03],
-    ["magnoliaFlowers", 0.020], ["hibiscusFlowers", 0.020], ["roseFamilyBlossoms", 0.030], ["citrusBlossoms", 0.016], ["bananaTypeFlowers", 0.014], ["palmFlowers", 0.018],
-    ["paleMushroom", 0.025], ["brownMushroom", 0.035],
-    ["spurgeCapsules", 0.012], ["hollyBerries", 0.014], ["aroidShoots", 0.022], ["treeFernFiddleheads", 0.018],
-    ["smallMammal", 0.045], ["hedgehogLikeInsectivore", 0.014], ["leptictidium", 0.022], ["amphiperatherium", 0.02], ["coryphodon", 0.004],
-    ["smallMammal", 0.025], ["godinotia", 0.012], ["eomanis", 0.01],
-    ["eurotamandua", 0.012], ["monitorLizard", 0.01], ["eurheloderma", 0.006],
-    ["smallSnake", 0.020], ["defensiveSnake", 0.014], ["smallConstrictor", 0.012], ["constrictor", 0.020], ["pitviper", 0.018], ["cariamiform", 0.008],
-    ["bergisuchus", 0.006], ["lesmesodon", 0.012], ["gastornis", 0.010],
-    ["climbingHunter", 0.008]
-  ],
-  "Mid-storey": [
-    ["largeInsect", 0.045], ["mantis", 0.032], ["dragonfly", 0.035],
-    ["moth", 0.03], ["butterfly", 0.028], ["hummingbird", 0.018], ["orchidBee", 0.02], ["orbWeaver", 0.028],
-    ["shieldBug", 0.025], ["plantHopper", 0.035], ["katydid", 0.035], ["cicada", 0.018],
-    ["leafInsect", 0.035], ["stickInsect", 0.028], ["wasp", 0.032],
-    ["waspNest", 0.014], ["beehive", 0.012], ["tarantula", 0.018],
-    ["caterpillar", 0.04], ["woodGrub", 0.022], ["woodpeckerBird", 0.018], ["bromeliadPool", 0.018], ["treeCrab", 0.01], ["gecko", 0.03],
-    ["anoleLizard", 0.04], ["iguana", 0.018], ["cockroach", 0.018],
-    ["treeFrog", 0.038], ["frog", 0.018], ["poisonDartFrog", 0.006],
-    ["redBerries", 0.026], ["purpleBerries", 0.032], ["stranglerFigFruit", 0.030], ["laurelDrupe", 0.024], ["palmFruit", 0.022], ["vitisBerries", 0.022], ["arilFruit", 0.014], ["custardAppleFruit", 0.014], ["resinousFruit", 0.012], ["soapberryFruit", 0.010], ["rainPuddle", 0.014], ["canopyFruit", 0.032],
-    ["magnoliaFlowers", 0.024], ["hibiscusFlowers", 0.024], ["roseFamilyBlossoms", 0.026], ["citrusBlossoms", 0.020], ["bananaTypeFlowers", 0.018], ["palmFlowers", 0.022],
-    ["hollyBerries", 0.010], ["milkweedFruit", 0.014],
-    ["nuts", 0.025], ["birdNest", 0.035], ["smallBird", 0.04], ["woodpeckerBird", 0.022], ["hummingbird", 0.018],
-    ["messelornis", 0.012], ["ramphastos", 0.02], ["fruitBat", 0.018],
-    ["heterohyus", 0.018], ["kopidodon", 0.014], ["darwinius", 0.012],
-    ["europolemur", 0.01], ["godinotia", 0.012], ["smallMammal", 0.03],
-    ["godinotia", 0.04], ["eurotamandua", 0.012], ["monitorLizard", 0.012],
-    ["smallSnake", 0.018], ["defensiveSnake", 0.012], ["smallConstrictor", 0.012], ["constrictor", 0.014], ["pitviper", 0.012], ["owl", 0.008],
-    ["masillaraptor", 0.008], ["climbingHunter", 0.01]
-  ],
-  "Canopy": [
-    ["largeInsect", 0.04], ["mantis", 0.028], ["dragonfly", 0.038],
-    ["moth", 0.035], ["butterfly", 0.035], ["hummingbird", 0.025], ["orchidBee", 0.018], ["orbWeaver", 0.03],
-    ["shieldBug", 0.022], ["plantHopper", 0.035], ["katydid", 0.035], ["cicada", 0.02],
-    ["leafInsect", 0.04], ["stickInsect", 0.035], ["wasp", 0.032],
-    ["waspNest", 0.014], ["beehive", 0.012], ["caterpillar", 0.038],
-    ["gecko", 0.032], ["woodpeckerBird", 0.026], ["bromeliadPool", 0.02], ["treeCrab", 0.01], ["anoleLizard", 0.038], ["iguana", 0.02],
-    ["treeFrog", 0.032], ["poisonDartFrog", 0.004], ["purpleBerries", 0.032],
-    ["stranglerFigFruit", 0.034], ["canopyFruit", 0.036], ["laurelDrupe", 0.026], ["palmFruit", 0.026], ["vitisBerries", 0.024], ["arilFruit", 0.016], ["custardAppleFruit", 0.018], ["resinousFruit", 0.012], ["soapberryFruit", 0.010], ["pandanusFruit", 0.012], ["nuts", 0.02], ["birdNest", 0.042],
-    ["magnoliaFlowers", 0.026], ["hibiscusFlowers", 0.026], ["roseFamilyBlossoms", 0.020], ["citrusBlossoms", 0.022], ["bananaTypeFlowers", 0.020], ["palmFlowers", 0.026],
-    ["milkweedFruit", 0.010],
-    ["smallBird", 0.055], ["woodpeckerBird", 0.026], ["hummingbird", 0.024], ["ramphastos", 0.025], ["fruitBat", 0.025],
-    ["heterohyus", 0.022], ["kopidodon", 0.016], ["darwinius", 0.014],
-    ["europolemur", 0.012], ["godinotia", 0.014], ["godinotia", 0.04],
-    ["eomanis", 0.006], ["eurotamandua", 0.012], ["owl", 0.008],
-    ["eagle", 0.004], ["masillaraptor", 0.01], ["smallSnake", 0.012], ["smallConstrictor", 0.008], ["pitviper", 0.006],
-    ["monitorLizard", 0.006], ["climbingHunter", 0.001]
-  ]
-};
 // END GENERATED JS: src/data/encounter-data.js [1/2]
 
 
@@ -5830,6 +5941,22 @@ function getEncounterTemplate(key) {
 // @target [STATE] Validate Encounter Data
 function validateEncounterData() {
   const problems = [];
+  const VALID_LAYERS = new Set(["Ground", "Undergrowth", "Mid-storey", "Canopy"]);
+
+  for (const [key, enc] of Object.entries(encounters)) {
+    if (!enc.layers || typeof enc.layers !== "object") {
+      problems.push(`${key}: missing or invalid layers field`);
+    } else {
+      for (const [layerName, chance] of Object.entries(enc.layers)) {
+        if (!VALID_LAYERS.has(layerName)) {
+          problems.push(`${key}: unknown layer "${layerName}" in layers`);
+        }
+        if (typeof chance !== "number" || chance <= 0 || chance > 1) {
+          problems.push(`${key}: invalid spawn chance ${chance} for layer ${layerName}`);
+        }
+      }
+    }
+  }
 
   for (const layerName of Object.keys(encounterTables)) {
     const table = encounterTables[layerName];
@@ -5901,6 +6028,22 @@ function normaliseEncounter(e, key = "unknown") {
   return e;
 }
 // END GENERATED JS: src/engine/encounter-helpers.js
+
+// BEGIN GENERATED JS: src/engine/encounter-table-builder.js
+// @target [DATA-SPAWN] Build Encounter Tables
+function buildEncounterTables() {
+  const tables = {};
+  for (const [key, enc] of Object.entries(encounters)) {
+    if (!enc.layers || typeof enc.layers !== "object") continue;
+    for (const [layerName, chance] of Object.entries(enc.layers)) {
+      if (!tables[layerName]) tables[layerName] = [];
+      tables[layerName].push([key, chance]);
+    }
+  }
+  return tables;
+}
+// END GENERATED JS: src/engine/encounter-table-builder.js
+const encounterTables = buildEncounterTables();
 
 // ---------------------------------------------------------------------------
 // [UTILS] CORE HELPERS / LOGGING / CLONING
@@ -6122,90 +6265,14 @@ function setSmell(text) {
 let nextInstanceId = 1;
 
 // BEGIN GENERATED JS: src/data/encounter-data.js [2/2]
-const hiddenSubtypePools = {
-  redBerries: [
-    {label: "mildly poisonous red berries", weight: 55, poison: {severity: "mild", rank: 1, toxinType: "plant", lethal: false, turns: 4, damage: 2, warning: "Mildly poisonous berries"}, energy: 14},
-    {label: "edible red berries", weight: 25, poison: null, energy: 14},
-    {label: "inedible red berries", weight: 15, poison: {severity: "mild", rank: 1, toxinType: "plant", lethal: false, turns: 2, damage: 1, warning: "Stomach upset"}, energy: 8},
-    {label: "dangerous red berries", weight: 5, poison: {severity: "moderate", rank: 2, toxinType: "plant", lethal: false, turns: 5, damage: 4, warning: "Strongly poisonous berries"}, energy: 14}
-  ],
-  purpleBerries: [
-    {label: "edible purple berries", weight: 65, poison: null, energy: 16},
-    {label: "mildly poisonous purple berries", weight: 20, poison: {severity: "mild", rank: 1, toxinType: "plant", lethal: false, turns: 4, damage: 2, warning: "Mildly poisonous berries"}, energy: 16},
-    {label: "inedible purple berries", weight: 10, poison: {severity: "mild", rank: 1, toxinType: "plant", lethal: false, turns: 2, damage: 1, warning: "Stomach upset"}, energy: 8},
-    {label: "dangerous purple berries", weight: 5, poison: {severity: "moderate", rank: 2, toxinType: "plant", lethal: false, turns: 5, damage: 4, warning: "Strongly poisonous berries"}, energy: 16}
-  ],
-  fallenFruit: [
-    {label: "fresh fallen fruit", weight: 70, poison: null, energy: 18, alcohol: null},
-    {label: "slightly fermented fallen fruit", weight: 22, poison: null, energy: 20, alcohol: {rank: 1, turns: 4, label: "mild intoxication"}},
-    {label: "strongly fermented fallen fruit", weight: 8, poison: null, energy: 22, alcohol: {rank: 2, turns: 5, label: "strong intoxication"}}
-  ],
-  paleMushroom: [
-    {label: "severely poisonous pale mushrooms", weight: 55, poison: {severity: "severe", rank: 4, toxinType: "fungal", lethal: true, criticalTimer: 7, turns: 7, damage: 7, warning: "Severely poisonous fungus"}, energy: 8},
-    {label: "inedible pale mushrooms", weight: 25, poison: {severity: "moderate", rank: 2, toxinType: "fungal", lethal: false, turns: 4, damage: 3, warning: "Sickening fungus"}, energy: 6},
-    {label: "edible pale mushrooms", weight: 15, poison: null, energy: 8},
-    {label: "deadly pale mushrooms", weight: 5, poison: {severity: "deadly", rank: 5, toxinType: "fungal", lethal: true, criticalTimer: 5, turns: 6, damage: 10, warning: "Deadly fungus"}, energy: 8}
-  ],
-  brownMushroom: [
-    {label: "edible brown mushrooms", weight: 65, poison: null, energy: 10},
-    {label: "inedible brown mushrooms", weight: 20, poison: {severity: "mild", rank: 1, toxinType: "fungal", lethal: false, turns: 3, damage: 2, warning: "Sickening fungus"}, energy: 7},
-    {label: "poisonous brown mushrooms", weight: 12, poison: {severity: "moderate", rank: 2, toxinType: "fungal", lethal: false, turns: 5, damage: 4, warning: "Poisonous fungus"}, energy: 8},
-    {label: "deadly brown mushrooms", weight: 3, poison: {severity: "deadly", rank: 5, toxinType: "fungal", lethal: true, criticalTimer: 5, turns: 6, damage: 10, warning: "Deadly fungus"}, energy: 8}
-  ],
-  caterpillar: [
-    {label: "irritating hairy caterpillar", weight: 50, poison: {severity: "mild", rank: 1, toxinType: "irritant", lethal: false, turns: 3, damage: 2, warning: "Irritating hairs / possible toxin"}},
-    {label: "edible hairy caterpillar", weight: 20, poison: null},
-    {label: "toxic hairy caterpillar", weight: 25, poison: {severity: "moderate", rank: 2, toxinType: "irritant", lethal: false, turns: 4, damage: 4, warning: "Toxic hairs"}},
-    {label: "dangerous hairy caterpillar", weight: 5, poison: {severity: "severe", rank: 4, toxinType: "irritant", lethal: true, criticalTimer: 7, turns: 7, damage: 7, warning: "Severe caterpillar toxin"}}
-  ],
-  millipede: [
-    {label: "chemically defended millipede", weight: 45, poison: {severity: "moderate", rank: 2, toxinType: "irritant", lethal: false, turns: 4, damage: 3, warning: "Chemical defence"}, energy: 6},
-    {label: "harmless millipede mimic", weight: 25, poison: null, energy: 6},
-    {label: "mildly irritating millipede", weight: 20, poison: {severity: "mild", rank: 1, toxinType: "irritant", lethal: false, turns: 3, damage: 2, warning: "Bitter defensive fluid"}, energy: 6},
-    {label: "dangerously toxic millipede", weight: 10, poison: {severity: "severe", rank: 4, toxinType: "irritant", lethal: true, criticalTimer: 7, turns: 6, damage: 7, warning: "Strong chemical toxin"}, energy: 6}
-  ],
-  slug: [
-    {label: "edible large slug", weight: 45, poison: null, energy: 8},
-    {label: "foul-tasting slug", weight: 25, poison: {severity: "mild", rank: 1, toxinType: "irritant", lethal: false, turns: 3, damage: 2, warning: "Irritating mucus"}, energy: 6},
-    {label: "poisonous slug", weight: 22, poison: {severity: "moderate", rank: 2, toxinType: "irritant", lethal: false, turns: 5, damage: 4, warning: "Poisonous slug mucus"}, energy: 6},
-    {label: "dangerously poisonous slug", weight: 8, poison: {severity: "severe", rank: 4, toxinType: "irritant", lethal: true, criticalTimer: 7, turns: 6, damage: 7, warning: "Severe slug toxin"}, energy: 6}
-  ],
-  largeInsect: [
-    {label: "edible hard-shelled beetle", weight: 45, poison: null, energy: 10},
-    {label: "bitter chemical beetle", weight: 25, poison: {severity: "mild", rank: 1, toxinType: "irritant", lethal: false, turns: 3, damage: 2, warning: "Bitter chemical defence"}, energy: 8},
-    {label: "biting ground beetle", weight: 20, poison: null, energy: 9, aggression: 35, dangerProfile: "bite"},
-    {label: "toxic beetle mimic", weight: 10, poison: {severity: "moderate", rank: 2, toxinType: "irritant", lethal: false, turns: 4, damage: 4, warning: "Caustic beetle chemicals"}, energy: 8}
-  ],
-  butterfly: [
-    {label: "harmless bright butterfly", weight: 30, poison: null, energy: 5},
-    {label: "mildly toxic butterfly", weight: 35, poison: {severity: "mild", rank: 1, toxinType: "plant", lethal: false, turns: 3, damage: 2, warning: "Toxic wing scales / stored plant toxin"}, energy: 5},
-    {label: "strongly toxic butterfly", weight: 20, poison: {severity: "moderate", rank: 2, toxinType: "plant", lethal: false, turns: 5, damage: 4, warning: "Stored plant toxin"}, energy: 5},
-    {label: "warning-colour mimic butterfly", weight: 15, poison: null, energy: 5}
-  ],
-  moth: [
-    {label: "edible soft moth", weight: 55, poison: null, energy: 6},
-    {label: "bitter moth", weight: 20, poison: {severity: "mild", rank: 1, toxinType: "plant", lethal: false, turns: 3, damage: 2, warning: "Bitter wing scales"}, energy: 6},
-    {label: "toxic moth", weight: 15, poison: {severity: "moderate", rank: 2, toxinType: "plant", lethal: false, turns: 4, damage: 4, warning: "Stored plant toxin"}, energy: 6},
-    {label: "plain-looking toxic moth", weight: 10, poison: {severity: "moderate", rank: 2, toxinType: "plant", lethal: false, turns: 5, damage: 4, warning: "Hidden plant toxin"}, energy: 6}
-  ],
-  hollyBerries: [
-    {label: "edible holly-like berries", weight: 20, poison: null, energy: 8},
-    {label: "mildly toxic holly-like berries", weight: 55, poison: {severity: "mild", rank: 1, toxinType: "ilicin", lethal: false, turns: 3, damage: 2, warning: "Mild ilicin — dry mouth and nausea."}, energy: 8},
-    {label: "toxic holly-like berries", weight: 25, poison: {severity: "moderate", rank: 2, toxinType: "ilicin", lethal: false, turns: 4, damage: 3, warning: "Ilicin and saponins — vomiting and cramping."}, energy: 8}
-  ],
-  aroidShoots: [
-    {label: "edible aroid shoots", weight: 30, poison: null, energy: 7},
-    {label: "mildly irritant aroid shoots", weight: 50, poison: {severity: "mild", rank: 1, toxinType: "oxalate", lethal: false, turns: 3, damage: 2, warning: "Raphide crystals — burning in mouth and throat."}, energy: 6},
-    {label: "severely irritant aroid shoots", weight: 20, poison: {severity: "moderate", rank: 2, toxinType: "oxalate", lethal: false, turns: 5, damage: 4, warning: "Dense raphide load — severe mucosal inflammation."}, energy: 5}
-  ]
-};
+
 // END GENERATED JS: src/data/encounter-data.js [2/2]
 
 // @target [UTILS] Apply Hidden Subtype
 function applyHiddenSubtype(e) {
-  if (!e || !hiddenSubtypePools[e.key] || e.hiddenSubtype) return e;
+  if (!e || !e.subtypes || !e.subtypes.length || e.hiddenSubtype) return e;
 
-  const subtype = chooseWeighted(hiddenSubtypePools[e.key]);
+  const subtype = chooseWeighted(e.subtypes);
   e.hiddenSubtype = clonePlain(subtype);
   e.trueLabel = subtype.label;
   e.genericName = e.name;
