@@ -356,6 +356,27 @@ All rendering is done by a single `render()` call that redraws the map, UI panel
 
 ---
 
+## Planned: creature modularity (layers + subtypes)
+
+The next architectural change to encounter data will embed per-creature spawn weights and hidden-subtype pools directly into each creature definition in `src/data/encounter-data.js`, removing the separate `encounterTables` and `hiddenSubtypePools` globals.
+
+**Two new fields on every creature definition:**
+
+- `layers: { layerName: chance, ... }` — replaces the separate `encounterTables` dict. Maps each spawn layer (`Ground`, `Undergrowth`, `Mid-storey`, `Canopy`) to a base probability. Creatures that only spawn via triggers (guardians, same-species encounters) use `layers: {}`.
+- `subtypes: [{ label, weight[, poison][, energy][, alcohol] }, ...]` — replaces the global `hiddenSubtypePools` entry for this creature. Present only on creatures with subtype variation (mushrooms, berries, slugs, insects, etc.).
+
+**New source file:** `src/engine/encounter-table-builder.js` exports `buildEncounterTables()`, which regenerates the `encounterTables` variable from per-creature `layers` data after `encounters` is defined. This keeps the rest of the codebase reading `encounterTables` with its existing structure unchanged.
+
+**Updated functions:**
+- `applyHiddenSubtype()` will read from `encounter.subtypes` instead of the global `hiddenSubtypePools`. Applied to clones only — the base `encounters` object is never mutated.
+- `validateEncounterData()` will be strengthened to check `layers` and `subtypes` consistency in addition to table validity.
+
+**Behavioural note:** Creatures that currently appear multiple times in the same layer in `encounterTables` (e.g. `godinotia` at 0.012 and 0.04 in Mid-storey) will have their probabilities summed into a single `layers` entry (0.052). This produces a combined probability within 3% of the two-independent-roll model and is negligible for gameplay.
+
+Until this branch is merged, the existing `encounterTables` and `hiddenSubtypePools` structures remain authoritative. Schema documentation is in `docs/creature-fields.csv`, `docs/creature-values.csv`, `docs/creature-stats.csv`, and `docs/spawn-layers.csv`.
+
+---
+
 ## Do not touch without checking
 
 - The encounter resolution logic (~11328–12523) — tightly coupled, easy to break survival balance

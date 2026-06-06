@@ -1,3 +1,14 @@
+[2026-06-06 creatures-encounters-modularity-schema-docs | Claude]
+Creature schema CSV documentation added; layers+subtypes modularity approach documented.
+
+- docs/creature-fields.csv: created — documents all fields a creature definition may contain, including the new layers and subtypes fields planned for the code migration PR.
+- docs/creature-values.csv: created — documents valid values for all enumerated and constrained fields (kind, className, dangerProfile, temperament, pursuitType, poison fields, remedy fields, etc.).
+- docs/creature-stats.csv: created — documents the meaning and observed range of every numeric stat (fitness, size, speed, agility, aggression, food, portions, energy, hydration, eggs, attraction, rotRisk, guardianChance, spawn-chance, poison stats, subtype weight).
+- docs/spawn-layers.csv: created — documents the four spawn layers (Ground, Undergrowth, Mid-storey, Canopy) with z-index, environment description, typical encounters, threat profile, and notes.
+- docs/current-game-structure.md: added "Creature schema reference" section listing the four new CSV files; noted layers+subtypes as planned on this branch; updated last-modified date.
+- docs/architecture-notes.md: added "Planned: creature modularity (layers + subtypes)" section describing the layers/subtypes approach, buildEncounterTables() plan, triggered-only creatures (layers: {}), subtype migration, and duplicate-probability summing decision.
+- No gameplay logic, stat values, spawn tables, encounter data, or game files changed.
+
 [2026-06-05 scene-text-bugs | Claude]
 Four scene/investigation text bugs fixed in game/play.html.
 

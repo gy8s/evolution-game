@@ -2,7 +2,7 @@
 
 This document describes what the game is, how it works, and what lives where in the codebase. It is the primary reference for understanding the current build before any architectural changes are made.
 
-Last updated: 2026-06-05 (Phase 1 complete — 24 source extractions done; build scaffold and architecture flowcharts added to README.md; Phase 2 candidates listed in docs/project-plan.md).
+Last updated: 2026-06-06 (Phase 1 complete — 24 source extractions done; build scaffold and architecture flowcharts added to README.md; Phase 2 candidates listed in docs/project-plan.md; creature schema CSV docs added; layers+subtypes modularity approach documented).
 
 ---
 
@@ -403,3 +403,18 @@ The rebuild plan (see `docs/project-plan.md`) targets extraction in this rough o
 The source file `src/data/encounter-data.js` contains a `// << SPLIT: hiddenSubtypePools >>` line dividing part 1 from part 2. `src/state/profile-run-lifecycle.js` contains two split lines (`// << SPLIT: profileOnRunEnd >>` and `// << SPLIT: profileStartNewRun >>`) dividing it into three parts. `src/state/achievement-persistence.js` contains two split lines (`// << SPLIT: awardAchievement >>` and `// << SPLIT: checkAchievements >>`) dividing it into three parts. `src/ui/achievement-ui.js` contains two split lines (`// << SPLIT: toastHelpers >>` and `// << SPLIT: renderAchievements >>`) dividing it into three parts, because the achievement-persistence [2/3] and [3/3] generated regions sit between the target groups in `play.html`. `src/ui/profile-ui.js` contains one split line (`// << SPLIT: profileUpdatePanelUI >>`) dividing it into two parts, because the `// ===== PROFILE PANEL UI =====` banner comment sits between the two groups in `play.html`. `src/state/game-state-globals.js` contains one split line (`// << SPLIT: environmentState >>`) dividing it into two parts, because debug/QA function declarations sit between the two declaration clusters in `play.html`. All other source files — including `src/ui/field-journal-ui.js`, `src/state/fossil-record-state.js`, `src/ui/fossil-record-ui.js`, `src/state/profile-delete.js`, `src/ui/profile-startup-modal.js`, `src/bootstrap/game-init.js`, `src/qa/debug-helpers.js`, and `src/engine/encounter-helpers.js` — have no split marker and each maps to one contiguous region.
 
 Run `node scripts/build_play_html.mjs` after editing any source file. Do not hand-edit generated regions in `game/play.html`. This document will be updated as each further extraction completes.
+
+---
+
+## Creature schema reference
+
+Four CSV files in `docs/` document the encounter-data schema. These are the authoritative reference for what fields creature definitions may contain, their valid values, stat meanings, and spawn layer characteristics.
+
+| File | Contents |
+|------|----------|
+| `docs/creature-fields.csv` | Every field a creature definition can contain, with type, whether it is required, and a description |
+| `docs/creature-values.csv` | Valid values for each enumerated or constrained field |
+| `docs/creature-stats.csv` | Meaning and observed range for every numeric stat |
+| `docs/spawn-layers.csv` | The four spawn layers (Ground, Undergrowth, Mid-storey, Canopy), their z-index, environment, and typical encounter mix |
+
+The `layers` and `subtypes` fields documented in these CSVs are planned additions (branch: `claude/creatures-encounters-modularity`). Until that branch is merged, creature definitions in `src/data/encounter-data.js` use the current separate `encounterTables` and `hiddenSubtypePools` structures, which will be removed once all creature definitions carry their own `layers` and `subtypes` data.
