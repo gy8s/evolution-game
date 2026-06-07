@@ -7,8 +7,8 @@
 // Currently inlines:
 //   1. src/styles/game.css        → the <style> block (CSS)
 //   2. src/data/encounter-data.js → two JS regions:
-//        [1/2] encounters + encounterTables  (~line 1040)
-//        [2/2] hiddenSubtypePools            (~line 6037)
+//        [1/2] encounters (with layers + subtypes)  (~line 1040)
+//        [2/2] empty (hiddenSubtypePools removed)   (~line 6037)
 //   3. src/utils/core-utils.js    → one JS region (~line 5833)
 //   4. src/data/achievement-data.js → one JS region (~line 4800)
 //   5. src/state/run-tracking.js   → one JS region (~line 4763)
@@ -48,6 +48,8 @@
 //        addDebugFlag, scanForSuspiciousState
 //  24. src/engine/encounter-helpers.js → one JS region (~line 5792)
 //        getEncounterTemplate, validateEncounterData, normaliseEncounter
+//  25. src/engine/encounter-table-builder.js → one JS region (~line 5915)
+//        buildEncounterTables
 //
 // Why inline (not external files): game/play.html must open straight from
 // disk — or via the GitHub Pages link — with no build step and no runtime
@@ -87,9 +89,10 @@ const PROFDELETE_SOURCE  = resolve(repoRoot, 'src/state/profile-delete.js');
 const PROFSM_SOURCE      = resolve(repoRoot, 'src/ui/profile-startup-modal.js');
 const GAMEINIT_SOURCE    = resolve(repoRoot, 'src/bootstrap/game-init.js');
 const GAMESTATEGLOBALS_SOURCE = resolve(repoRoot, 'src/state/game-state-globals.js');
-const DEBUGHELPERS_SOURCE     = resolve(repoRoot, 'src/qa/debug-helpers.js');
-const ENCOUNTERHELPERS_SOURCE = resolve(repoRoot, 'src/engine/encounter-helpers.js');
-const PLAY_HTML               = resolve(repoRoot, 'game/play.html');
+const DEBUGHELPERS_SOURCE          = resolve(repoRoot, 'src/qa/debug-helpers.js');
+const ENCOUNTERHELPERS_SOURCE      = resolve(repoRoot, 'src/engine/encounter-helpers.js');
+const ENCOUNTERTABLEBUILDER_SOURCE = resolve(repoRoot, 'src/engine/encounter-table-builder.js');
+const PLAY_HTML                    = resolve(repoRoot, 'game/play.html');
 
 // CSS markers (CSS comment style, inside <style>)
 const CSS_BEGIN = '/* BEGIN GENERATED CSS: src/styles/game.css */';
@@ -232,6 +235,10 @@ const JS_END_DEBUGHELPERS   = '// END GENERATED JS: src/qa/debug-helpers.js';
 const JS_BEGIN_ENCOUNTERHELPERS = '// BEGIN GENERATED JS: src/engine/encounter-helpers.js';
 const JS_END_ENCOUNTERHELPERS   = '// END GENERATED JS: src/engine/encounter-helpers.js';
 
+// Encounter-table-builder markers (JS comment style, inside <script>)
+const JS_BEGIN_ENCOUNTERTABLEBUILDER = '// BEGIN GENERATED JS: src/engine/encounter-table-builder.js';
+const JS_END_ENCOUNTERTABLEBUILDER   = '// END GENERATED JS: src/engine/encounter-table-builder.js';
+
 function fail(msg) {
   console.error(`build_play_html: ERROR: ${msg}`);
   process.exit(1);
@@ -274,9 +281,10 @@ if (!existsSync(PROFDELETE_SOURCE))  fail('cannot find src/state/profile-delete.
 if (!existsSync(PROFSM_SOURCE))      fail('cannot find src/ui/profile-startup-modal.js');
 if (!existsSync(GAMEINIT_SOURCE))         fail('cannot find src/bootstrap/game-init.js');
 if (!existsSync(GAMESTATEGLOBALS_SOURCE)) fail('cannot find src/state/game-state-globals.js');
-if (!existsSync(DEBUGHELPERS_SOURCE))     fail('cannot find src/qa/debug-helpers.js');
-if (!existsSync(ENCOUNTERHELPERS_SOURCE)) fail('cannot find src/engine/encounter-helpers.js');
-if (!existsSync(PLAY_HTML))               fail('cannot find game/play.html');
+if (!existsSync(DEBUGHELPERS_SOURCE))          fail('cannot find src/qa/debug-helpers.js');
+if (!existsSync(ENCOUNTERHELPERS_SOURCE))      fail('cannot find src/engine/encounter-helpers.js');
+if (!existsSync(ENCOUNTERTABLEBUILDER_SOURCE)) fail('cannot find src/engine/encounter-table-builder.js');
+if (!existsSync(PLAY_HTML))                    fail('cannot find game/play.html');
 
 const css          = readFileSync(CSS_SOURCE,       'utf8');
 const jsData       = readFileSync(DATA_SOURCE,      'utf8');
@@ -300,9 +308,10 @@ const jsProfDelete = readFileSync(PROFDELETE_SOURCE,  'utf8');
 const jsProfSM     = readFileSync(PROFSM_SOURCE,      'utf8');
 const jsGameInit          = readFileSync(GAMEINIT_SOURCE,          'utf8');
 const jsGameStateGlobals  = readFileSync(GAMESTATEGLOBALS_SOURCE,  'utf8');
-const jsDebugHelpers      = readFileSync(DEBUGHELPERS_SOURCE,      'utf8');
-const jsEncounterHelpers  = readFileSync(ENCOUNTERHELPERS_SOURCE,  'utf8');
-let   html                = readFileSync(PLAY_HTML,                'utf8');
+const jsDebugHelpers           = readFileSync(DEBUGHELPERS_SOURCE,           'utf8');
+const jsEncounterHelpers       = readFileSync(ENCOUNTERHELPERS_SOURCE,       'utf8');
+const jsEncounterTableBuilder  = readFileSync(ENCOUNTERTABLEBUILDER_SOURCE,  'utf8');
+let   html                     = readFileSync(PLAY_HTML,                     'utf8');
 
 // --- Split encounter-data into two parts at the SPLIT marker ---
 const splitIdx = jsData.indexOf(JS_SPLIT);
@@ -386,7 +395,8 @@ html = inlineRegion(html, JS_BEGIN_GAMEINIT, JS_END_GAMEINIT, jsGameInit.replace
 html = inlineRegion(html, JS_BEGIN_GAMESTATEGLOBALS1, JS_END_GAMESTATEGLOBALS1, jsGameStateGlobals1, 'game-state-globals [1/2]');
 html = inlineRegion(html, JS_BEGIN_DEBUGHELPERS,      JS_END_DEBUGHELPERS,      jsDebugHelpers.replace(/\s+$/, ''), 'debug-helpers');
 html = inlineRegion(html, JS_BEGIN_GAMESTATEGLOBALS2,   JS_END_GAMESTATEGLOBALS2,   jsGameStateGlobals2,                          'game-state-globals [2/2]');
-html = inlineRegion(html, JS_BEGIN_ENCOUNTERHELPERS,    JS_END_ENCOUNTERHELPERS,    jsEncounterHelpers.replace(/\s+$/, ''),        'encounter-helpers');
+html = inlineRegion(html, JS_BEGIN_ENCOUNTERHELPERS,       JS_END_ENCOUNTERHELPERS,       jsEncounterHelpers.replace(/\s+$/, ''),            'encounter-helpers');
+html = inlineRegion(html, JS_BEGIN_ENCOUNTERTABLEBUILDER,  JS_END_ENCOUNTERTABLEBUILDER,  jsEncounterTableBuilder.replace(/\s+$/, ''),       'encounter-table-builder');
 
 if (html === original) {
   console.log('build_play_html: no change — game/play.html already matches all source files.');

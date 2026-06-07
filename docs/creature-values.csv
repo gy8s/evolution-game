@@ -1,0 +1,14 @@
+field,valid_values,notes
+kind,animal | forage | carcass | nest | remedy,
+className,food | threat | predator | prey | poison | minor | primate,"primate is used for same-species rival encounters"
+dangerProfile,minor | bite | sting | tail | spines | claw | kick | pinch | predator | fatal | grapple | venomous_ambush | toxic_food | rival | fight,animal only
+temperament,skittish | defensive | still | ambush | dominant | hunter | territorial | swarm,animal only
+pursuitType,ground | air | wateredge | climber,"present only on predators that actively pursue; absent on non-predators"
+layers (dict keys),Ground | Undergrowth | Mid-storey | Canopy,"values are base probabilities 0–1 per layer; {} means trigger-only"
+poison.severity,mild | moderate | high | severe | deadly,"determines display colour and urgency messaging"
+poison.rank,1 | 2 | 3 | 4 | 5,"1 = mild through 5 = deadly; must be consistent with severity"
+poison.toxinType,irritant | venom | plant | fungal | alkaloid | seed | resin | saponin | latex | ilicin | oxalate | cycasin | cardiac_glycoside,"used to match remedy.cures entries"
+poison.lethal,true | false,"if true then criticalTimer must be present in the poison object"
+subtypes[].alcohol.label,mild intoxication | strong intoxication,"matches the in-game intoxication message"
+remedy.type,clay,"currently only clay deposit is implemented"
+remedy.cures (array elements),plant | fungal | alkaloid | irritant,"must be valid toxinType values; clay counteracts these four"

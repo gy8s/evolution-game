@@ -18,6 +18,22 @@ function getEncounterTemplate(key) {
 // @target [STATE] Validate Encounter Data
 function validateEncounterData() {
   const problems = [];
+  const VALID_LAYERS = new Set(["Ground", "Undergrowth", "Mid-storey", "Canopy"]);
+
+  for (const [key, enc] of Object.entries(encounters)) {
+    if (!enc.layers || typeof enc.layers !== "object") {
+      problems.push(`${key}: missing or invalid layers field`);
+    } else {
+      for (const [layerName, chance] of Object.entries(enc.layers)) {
+        if (!VALID_LAYERS.has(layerName)) {
+          problems.push(`${key}: unknown layer "${layerName}" in layers`);
+        }
+        if (typeof chance !== "number" || chance <= 0 || chance > 1) {
+          problems.push(`${key}: invalid spawn chance ${chance} for layer ${layerName}`);
+        }
+      }
+    }
+  }
 
   for (const layerName of Object.keys(encounterTables)) {
     const table = encounterTables[layerName];

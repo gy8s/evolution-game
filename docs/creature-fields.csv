@@ -1,0 +1,36 @@
+field,applies_to,required,type,description
+kind,all,yes,string,"Creature category: animal | forage | carcass | nest | remedy"
+name,all,yes,string,Display name shown in the UI and narration
+icon,all,yes,string,Emoji icon displayed on the encounter card
+className,all,yes,string,"Card CSS class controlling visual styling: food | threat | predator | prey | poison | minor | primate"
+canInvestigate,all,yes,boolean,Whether the player can investigate this encounter to gain Field Journal knowledge
+seen,all,yes,string,Narration text shown when the encounter first appears this turn
+investigated,all,no,string,"Text shown after the player investigates (normaliseEncounter provides a generic default if absent)"
+investigationDetails,all,no,string[],"Up to 3 progressive investigation hints shown at knowledge tiers 1–3 (tier index = array index)"
+cardDetail,all,no,string,Extra flavour line shown on the encounter card below the main seen text
+naturalHistory,all,no,object,"Structured natural-history block: { title, fieldNote, behaviour, ecology, gameplayInsight, scienceNote }"
+poison,all,no,object|null,"Poison payload applied on contact or consumption; null if none. Fields: { severity, rank, toxinType, lethal, turns, damage, warning[, criticalTimer] }"
+layers,all,yes,object,"Spawn-weight dict mapping layer names to base probabilities: { layerName: chance, ... }. Use empty object {} for trigger-spawned creatures (guardians, same-species spawns) that never appear via random roll. Valid keys: Ground | Undergrowth | Mid-storey | Canopy"
+subtypes,all,no,object[],"Hidden-subtype pool replacing the global hiddenSubtypePools entry for this creature. Array of { label: string, weight: number[, poison: object|null][, energy: number][, alcohol: object] }. Absent if this creature has no subtype variation."
+knowledgeTierText,animal,no,string[],"Five-element array of progressive knowledge descriptions shown at tiers 1–5 (displayed in the Field Journal for notable creatures)"
+dangerProfile,animal,yes,string,"Combat type determining resolution logic: minor | bite | sting | tail | spines | claw | kick | pinch | predator | fatal | grapple | venomous_ambush | toxic_food | rival | fight"
+temperament,animal,yes,string,"Behaviour archetype controlling AI responses: skittish | defensive | still | ambush | dominant | hunter | territorial | swarm"
+fitness,animal,yes,number,"Combat hit-points for this creature (higher = harder to kill or subdue)"
+size,animal,yes,number,"Relative body mass (dimensionless); feeds food-yield and combat calculations"
+speed,animal,yes,number,"Movement speed 0–100; affects whether the player can flee or catch this creature"
+agility,animal,yes,number,"Evasion 0–100; affects whether attack rolls land"
+aggression,animal,yes,number,"Attack drive 0–100; determines pursuit rate and unprovoked attack frequency"
+food,animal,yes,number,"Energy granted when this animal is killed and eaten"
+pursuitType,animal,no,string,"Active pursuit mode for predators: ground | air | wateredge | climber (absent on non-pursuing creatures)"
+sex,animal,no,string,"Runtime-assigned sex: male | female. Set by normaliseEncounter; deliberately absent on invertebrates."
+portions,forage|carcass|remedy,yes,number,Number of times this resource can be consumed before exhaustion
+energy,forage|carcass|remedy,yes,number,"Energy granted per portion consumed (0 on non-food resources such as water or clay)"
+energy,nest,no,number,"Energy granted from nest contents when raided (absent on some nest types)"
+hydration,forage,no,number,"Hydration restored per portion (default 0 when the field is absent)"
+alcohol,forage,no,object,"Alcohol effect on fermented items: { rank: number, turns: number, label: string }"
+attraction,carcass,no,number,"Scavenger-draw intensity; higher values increase the risk of predator attention while the player feeds"
+rotRisk,carcass,no,number,"Per-visit chance 0–100 that the carcass degrades to inedible"
+eggs,nest,yes,number,Number of egg portions obtainable from this nest
+guardianKey,nest,no,string,"Encounter key of the guardian creature that may defend the nest when disturbed"
+guardianChance,nest,no,number,"Probability 0–100 that the guardian spawns when the nest is disturbed (required if guardianKey is present)"
+remedy,remedy,yes,object,"Remedy specification: { type: string, cures: string[] } — lists the toxin types this resource can counteract"
