@@ -303,7 +303,11 @@ Notes:
 - Some temporal flexibility is acceptable for gameplay, but later animals should be saved for later time progression where possible.
 - Avoid adding too many later predators too early if they belong better in a future phase.
 
-Status: Long-term.
+Progress:
+- A concrete lineage progression **framework** is now implemented (`src/state/lineage.js`): Purgatorius → Teilhardina → Notharctus → Eosimias, presented as representative lineage stages rather than a guaranteed direct ancestor chain. Each stage unlocks the next when the player reaches the adult life stage and mates successfully 3 times; evolution is offered (never forced) from the lineage panel or, after death, from the death screen. Current stage and completed stages persist per profile.
+- Deliberately deferred to a later task: stage-specific encounter tables and world generation so each taxon has a geologically accurate ecosystem; the next lineage stage (likely Aegyptopithecus) is left as a TODO; the internal `player.species` label and encounter narration are unchanged for now.
+
+Status: Long-term (progression framework landed; geologically accurate per-stage ecosystems still pending).
 
 ---
 

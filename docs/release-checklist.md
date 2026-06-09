@@ -26,6 +26,7 @@ Run through this every time a new version becomes the stable build.
 - [ ] If `src/state/profile-run-lifecycle.js` was changed, `node scripts/build_play_html.mjs` was run to inline the profile run lifecycle helpers into `game/play.html`
 - [ ] If `src/state/achievement-persistence.js` was changed, `node scripts/build_play_html.mjs` was run to inline the achievement persistence helpers into `game/play.html`
 - [ ] If `src/state/field-journal-state.js` was changed, `node scripts/build_play_html.mjs` was run to inline the Field Journal state helpers into `game/play.html`
+- [ ] If `src/state/lineage.js` was changed, `node scripts/build_play_html.mjs` was run to inline the lineage progression helpers into `game/play.html`
 - [ ] If `src/ui/achievement-ui.js` was changed, `node scripts/build_play_html.mjs` was run to inline the achievement UI/support into `game/play.html`
 - [ ] If `src/state/run-tracking-update.js` was changed, `node scripts/build_play_html.mjs` was run to inline the run-tracking update function into `game/play.html`
 - [ ] If `src/ui/profile-ui.js` was changed, `node scripts/build_play_html.mjs` was run to inline the profile UI helpers into `game/play.html`

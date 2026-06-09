@@ -67,6 +67,7 @@ The prototype currently centres on:
 - Weather and habitat-driven encounter variation.
 - Short ecological cycles such as fruiting pulses, insect blooms, dry spells, wet spells, scavenger pulses, predator lulls, and predator spikes.
 - Group/social behaviour in early form.
+- Lineage progression along a concrete taxon route (Purgatorius → Teilhardina → Notharctus → Eosimias): the player starts as Purgatorius and unlocks the next representative lineage stage by reaching adulthood and mating 3 times, then chooses whether to evolve now, keep exploring, or evolve on death. Encounter tables and world generation are not yet stage-specific.
 - Debug tools and bot testing tools for QA.
 
 These systems are still evolving. Many are deliberately lightweight at this stage so they can be tested and expanded without making the codebase unmanageable.
