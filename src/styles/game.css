@@ -219,6 +219,19 @@ h1 { margin: 0 0 12px 0; color: #9bea72; letter-spacing: 0.5px; font-size: 24px 
 .hudGrid { display: grid; gap: 10px !important; grid-auto-rows: auto !important; grid-template-columns: minmax(0, .96fr) minmax(300px, .86fr) !important; align-items: start !important; }
 .groupPanel { background: #07120a; border: 1px solid var(--border); border-radius: 6px; padding: 10px; margin-top: 8px; grid-column: 1 !important; grid-row: 3 !important; width: 100% !important; max-width: 460px !important; justify-self: center !important; align-self: start !important; margin: 8px auto 0 auto !important; box-sizing: border-box !important; }
 .groupPanelBody { display: flex; flex-direction: column; color: var(--muted); font-size: 13px; line-height: 1.35; gap: 0 !important; }
+.lineagePanel { background: #07120a; border: 1px solid var(--border); border-radius: 6px; padding: 10px; grid-column: 1 !important; grid-row: auto !important; width: 100% !important; max-width: 460px !important; justify-self: center !important; align-self: start !important; margin: 8px auto 0 auto !important; box-sizing: border-box !important; }
+.lineagePanelTitle { color: #9bea72; font-size: 12px; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; }
+.lineageStage { color: #e8ffe0; font-size: 14px; margin-bottom: 2px; }
+.lineageMeta { color: var(--muted); font-size: 12px; margin-bottom: 4px; }
+.lineageDesc { color: var(--muted); font-size: 12px; line-height: 1.35; margin-bottom: 8px; }
+.lineageProgress { display: flex; flex-direction: column; gap: 2px; color: #d8f5cf; font-size: 13px; margin-bottom: 8px; }
+.lineageEvoLocked { color: #8fae84; font-size: 12px; font-style: italic; }
+.lineageEvoAvailable { color: #9bea72; font-size: 13px; font-weight: bold; margin-bottom: 4px; }
+.lineageUnlockText { color: var(--muted); font-size: 12px; line-height: 1.35; margin-bottom: 8px; }
+.lineageActions { display: flex; flex-wrap: wrap; gap: 8px; }
+.lineageActions button { flex: 1 1 auto; min-height: 38px; font-size: 13px; font-weight: bold; }
+#lineageEvolveBtn { background: #1f4d1f; border-color: #7fd07f; color: #eaffea; }
+#lineageContinueBtn { background: #122312; border-color: #4a8b4a; color: #cfeac8; }
 .groupSummaryLine { color: var(--muted); font-size: 12px; border-bottom: 1px solid #244722; padding-bottom: 6px; margin-bottom: 6px; }
 .groupMemberScroll { display: flex; flex-direction: column; gap: 6px; max-height: 192px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-right: 2px; }
 .groupMemberScroll::-webkit-scrollbar { width: 4px; }
@@ -360,6 +373,7 @@ button { background: #153d1b; color: #e7f1d2; border: 1px solid #4a8741; border-
 .deathModalActions button { height: 42px; font-size: 14px; font-weight: bold; }
 #deathModalRestart { background: #7b2424; border-color: #ff8f8f; color: #fff3ee; }
 #deathModalStay { background: #251313; border-color: #8b4a4a; color: #f3c8c0; }
+#deathModalEvolve { grid-column: 1 / -1; background: #1f4d1f; border-color: #7fd07f; color: #eaffea; }
 .achievement { color: #ffd700; font-weight: bold; }
 .achievementGroup { margin-bottom: 10px; }
 .achievementGroupHeader { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.06em; color: #6db87a; margin-bottom: 4px; padding: 0 14px; }

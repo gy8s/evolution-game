@@ -25,6 +25,7 @@
 //        [2/3] awardAchievement                   (~line 4901)
 //        [3/3] checkAchievements                  (~line 4944)
 //  12. src/state/field-journal-state.js → one JS region (~line 5107)
+//      src/state/lineage.js → one JS region (~line 5298)
 //  13. src/ui/achievement-ui.js → three JS regions:
 //        [1/3] getProfileAchievements             (~line 4896)
 //        [2/3] toast queue/helpers                (~line 4919)
@@ -79,6 +80,7 @@ const PROFSNAP_SOURCE    = resolve(repoRoot, 'src/state/profile-state-snapshot.j
 const PROFLIFE_SOURCE    = resolve(repoRoot, 'src/state/profile-run-lifecycle.js');
 const ACHPERS_SOURCE     = resolve(repoRoot, 'src/state/achievement-persistence.js');
 const FJSTATE_SOURCE     = resolve(repoRoot, 'src/state/field-journal-state.js');
+const LINEAGE_SOURCE     = resolve(repoRoot, 'src/state/lineage.js');
 const ACHIEVUI_SOURCE    = resolve(repoRoot, 'src/ui/achievement-ui.js');
 const RUNTRUPDATE_SOURCE = resolve(repoRoot, 'src/state/run-tracking-update.js');
 const PROFUI_SOURCE      = resolve(repoRoot, 'src/ui/profile-ui.js');
@@ -143,6 +145,10 @@ const JS_END_PROFLIFE3   = '// END GENERATED JS: src/state/profile-run-lifecycle
 // Field-journal-state markers (JS comment style, inside <script>)
 const JS_BEGIN_FJSTATE = '// BEGIN GENERATED JS: src/state/field-journal-state.js';
 const JS_END_FJSTATE   = '// END GENERATED JS: src/state/field-journal-state.js';
+
+// Lineage markers (JS comment style, inside <script>)
+const JS_BEGIN_LINEAGE = '// BEGIN GENERATED JS: src/state/lineage.js';
+const JS_END_LINEAGE   = '// END GENERATED JS: src/state/lineage.js';
 
 // Achievement-ui markers (JS comment style, inside <script>) — three parts
 const JS_BEGIN_ACHIEVUI1 = '// BEGIN GENERATED JS: src/ui/achievement-ui.js [1/3]';
@@ -271,6 +277,7 @@ if (!existsSync(PROFSNAP_SOURCE))  fail('cannot find src/state/profile-state-sna
 if (!existsSync(PROFLIFE_SOURCE))  fail('cannot find src/state/profile-run-lifecycle.js');
 if (!existsSync(ACHPERS_SOURCE))   fail('cannot find src/state/achievement-persistence.js');
 if (!existsSync(FJSTATE_SOURCE))     fail('cannot find src/state/field-journal-state.js');
+if (!existsSync(LINEAGE_SOURCE))     fail('cannot find src/state/lineage.js');
 if (!existsSync(ACHIEVUI_SOURCE))    fail('cannot find src/ui/achievement-ui.js');
 if (!existsSync(RUNTRUPDATE_SOURCE)) fail('cannot find src/state/run-tracking-update.js');
 if (!existsSync(PROFUI_SOURCE))      fail('cannot find src/ui/profile-ui.js');
@@ -298,6 +305,7 @@ const jsProfSnap   = readFileSync(PROFSNAP_SOURCE,  'utf8');
 const jsProfLife   = readFileSync(PROFLIFE_SOURCE,  'utf8');
 const jsAchPers    = readFileSync(ACHPERS_SOURCE,   'utf8');
 const jsFJState    = readFileSync(FJSTATE_SOURCE,    'utf8');
+const jsLineage    = readFileSync(LINEAGE_SOURCE,    'utf8');
 const jsAchievUI   = readFileSync(ACHIEVUI_SOURCE,   'utf8');
 const jsRunTrUpdate = readFileSync(RUNTRUPDATE_SOURCE, 'utf8');
 const jsProfUI     = readFileSync(PROFUI_SOURCE,      'utf8');
@@ -380,6 +388,7 @@ html = inlineRegion(html, JS_BEGIN_ACHPERS1, JS_END_ACHPERS1, jsAchPers1, 'achie
 html = inlineRegion(html, JS_BEGIN_ACHPERS2, JS_END_ACHPERS2, jsAchPers2, 'achievement-persistence [2/3]');
 html = inlineRegion(html, JS_BEGIN_ACHPERS3, JS_END_ACHPERS3, jsAchPers3, 'achievement-persistence [3/3]');
 html = inlineRegion(html, JS_BEGIN_FJSTATE,    JS_END_FJSTATE,    jsFJState.replace(/\s+$/, ''),       'field-journal-state');
+html = inlineRegion(html, JS_BEGIN_LINEAGE,    JS_END_LINEAGE,    jsLineage.replace(/\s+$/, ''),       'lineage');
 html = inlineRegion(html, JS_BEGIN_ACHIEVUI1,  JS_END_ACHIEVUI1,  jsAchievUI1,                         'achievement-ui [1/3]');
 html = inlineRegion(html, JS_BEGIN_ACHIEVUI2,  JS_END_ACHIEVUI2,  jsAchievUI2,                         'achievement-ui [2/3]');
 html = inlineRegion(html, JS_BEGIN_ACHIEVUI3,  JS_END_ACHIEVUI3,  jsAchievUI3,                         'achievement-ui [3/3]');
